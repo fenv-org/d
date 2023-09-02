@@ -3,6 +3,7 @@ version: v0
 name: fpm_sample_app
 
 packages:
+  main: .
   include:
     - ../packages/**
     - packages/**

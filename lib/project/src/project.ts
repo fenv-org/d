@@ -1,6 +1,7 @@
 import { FpmContext } from '../../context/mod.ts'
 import { std_fs, std_path } from '../../deps.ts'
 import { FpmError } from '../../error/mod.ts'
+import { parseProjectYaml } from './project_yaml.ts'
 
 /**
  * A class that represents the main project managed by `fpm`.
@@ -44,6 +45,8 @@ export class FpmProject {
     }
 
     context.logger.verbose(`Found project file: ${projectFilepath}`)
+    const projectYaml = parseProjectYaml(projectFilepath)
+    context.logger.debug('projectYaml=', projectYaml)
 
     throw new Error('Not implemented yet')
   }
