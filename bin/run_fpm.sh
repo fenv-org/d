@@ -4,6 +4,7 @@
 
 set -euox pipefail
 
+dvm use
 deno run \
   --allow-read \
   --allow-write \
