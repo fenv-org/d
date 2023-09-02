@@ -7,7 +7,7 @@ const DEBUG_FLAG = '--debug'
 async function main() {
   const debug = Deno.args.includes(DEBUG_FLAG)
   if (debug) {
-    console.error(`Running in "release" mode`)
+    console.error(`Running in "develop" mode`)
   }
 
   const libPath: string = getLibPath()
@@ -19,8 +19,7 @@ async function main() {
 }
 
 function getLibPath(): string {
-  const version = 'main'
-  return `https://raw.githubusercontent.com/fenv-org/fpm/${version}/lib/fpm.ts`
+  return '../lib/fpm.ts'
 }
 
 main()
