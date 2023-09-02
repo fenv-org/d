@@ -39,7 +39,12 @@
       "scope": "workspace"
     }
   },
-  "cSpell.ignorePaths": [".vscode/**", ".cspell/**", "deno.jsonc"],
+  "cSpell.ignorePaths": [
+    ".vscode/**",
+    ".cspell/**",
+    "deno.jsonc",
+    "test-sample/**"
+  ],
   "plantuml.render": "PlantUMLServer",
   "plantuml.server": "https://www.plantuml.com/plantuml",
   "plantuml.exportOutDir": ".",
