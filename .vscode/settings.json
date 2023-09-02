@@ -52,5 +52,6 @@
   "deno.lint": true,
   "deno.unstable": false,
   "dart.promptToGetPackages": false,
-  "dart.runPubGetOnPubspecChanges": "never"
+  "dart.runPubGetOnPubspecChanges": "never",
+  "dart.analysisExcludedFolders": ["test-sample"]
 }
