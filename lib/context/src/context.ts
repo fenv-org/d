@@ -5,7 +5,7 @@ import { FpmLogger, Logger } from '../../logger/mod.ts'
  * A class that represents the context of the application.
  */
 export class FpmContext {
-  private constructor(
+  constructor(
     public readonly pwd: string,
     public readonly verbose: boolean,
     public readonly debug: boolean,

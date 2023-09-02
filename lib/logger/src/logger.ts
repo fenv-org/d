@@ -121,7 +121,7 @@ class VerboseLogger implements Logger {
   }
 
   public trace(message: string): void {
-    console.log(this._createPrefix() + cliffy_ansi.colors.gray(message))
+    console.trace(this._createPrefix() + cliffy_ansi.colors.gray(message))
   }
 
   public write(message: string): void {
@@ -213,6 +213,12 @@ export class FpmLogger extends DelegateLogger {
 
   private readonly _indentation: string
   private readonly _childIndentation: string
+
+  public verbose(message: string): void {
+    if (this.isVerbose) {
+      this.success(message, { dryRun: true })
+    }
+  }
 
   public log(message: string): void {
     this.stdout(message)

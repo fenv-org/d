@@ -2,7 +2,6 @@ name: fpm_sample_app
 
 packages:
   include:
-    - .
     - ../packages/**
     - packages/**
   exclude:

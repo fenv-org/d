@@ -1,6 +1,4 @@
-type FPM = {
-  fpm: (args: string[]) => void | Promise<void>
-}
+import { run } from './run.ts'
 
 const DEBUG_FLAG = '--debug'
 
@@ -11,11 +9,7 @@ async function main() {
   }
 
   const libPath: string = getLibPath()
-  const { fpm }: FPM = await import(libPath)
-  const voidOrPromise = fpm(Deno.args)
-  if (voidOrPromise instanceof Promise) {
-    await voidOrPromise
-  }
+  await run({ libPath, args: Deno.args, debug })
 }
 
 function getLibPath(): string {
