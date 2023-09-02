@@ -1,0 +1,13 @@
+{
+  "fmt": {
+    "options": {
+      "indentWidth": 2,
+      "singleQuote": true,
+      "semiColons": false
+    }
+  },
+  "test": {
+    "include": ["tools/**/*_test.ts"]
+  },
+  "lock": false
+}

@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "yzhang.markdown-all-in-one",
+    "jebbs.plantuml",
+    "esbenp.prettier-vscode",
+    "denoland.vscode-deno",
+    "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+    "bierner.markdown-mermaid",
+    "github.vscode-github-actions"
+  ]
+}

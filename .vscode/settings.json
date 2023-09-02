@@ -1,0 +1,49 @@
+{
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "editor.formatOnSave": true,
+  "editor.rulers": [80, 120],
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    },
+    "html": {
+      "name": "html",
+      "path": "${workspaceFolder}/.cspell/html.txt",
+      "addWords": false,
+      "scope": "workspace"
+    },
+    "bash-words": {
+      "name": "bash-words",
+      "path": "${workspaceFolder}/.cspell/bash-words.txt",
+      "addWords": false,
+      "scope": "workspace"
+    }
+  },
+  "cSpell.ignorePaths": [".vscode/**", ".cspell/**", "deno.jsonc"],
+  "plantuml.render": "PlantUMLServer",
+  "plantuml.server": "https://www.plantuml.com/plantuml",
+  "plantuml.exportOutDir": ".",
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": false
+}
