@@ -27,7 +27,6 @@ export function fpm(args: string[]) {
   })
 
   const context = FpmContext.fromFlags(flags)
-  if (context.debug) {
-    console.log(context)
-  }
+  const { logger } = context
+  logger.debug('flags=', flags)
 }
