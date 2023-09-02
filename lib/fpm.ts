@@ -12,8 +12,8 @@ import { std_flags } from './deps.ts'
  * - `--allow-env`
  * - `--allow-net`
  */
-export function main() {
-  const flags = std_flags.parse(Deno.args, {
+export function fpm(args: string[]) {
+  const flags = std_flags.parse(args, {
     stopEarly: true,
     string: ['pwd'],
     boolean: ['verbose', 'debug'],
@@ -31,5 +31,3 @@ export function main() {
     console.log(context)
   }
 }
-
-main()

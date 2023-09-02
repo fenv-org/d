@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
-# This is a script that runs `lib/fpm.ts` on the `test-sample/app` directory.
+# This is a script that compiles `driver/main.ts`
 
 set -euox pipefail
 
-deno run \
+deno compile \
   --allow-read \
   --allow-write \
   --allow-env \
   --allow-net \
   --allow-run \
+  --no-prompt \
+  --output build/fpm \
   driver/main.ts \
-  --pwd test-sample/app \
-  $@
+  -- --release
