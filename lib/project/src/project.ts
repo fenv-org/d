@@ -1,6 +1,8 @@
 import { FpmContext } from '../../context/mod.ts'
 import { std_fs, std_path } from '../../deps.ts'
 import { FpmError } from '../../error/mod.ts'
+import { asArray } from '../../util/mod.ts'
+import { DartProject } from './dart_project.ts'
 import { parseProjectYaml } from './project_yaml.ts'
 
 /**
@@ -11,25 +13,28 @@ import { parseProjectYaml } from './project_yaml.ts'
 export class FpmProject {
   constructor(
     /**
-     * The absolute path of the main project.
-     */
-    public path: string,
-    /**
-     * The absolute path of the `pubspec.yaml` file of the main project.
-     */
-    public pubspecFilepath: string,
-    /**
      * The absolute path of the `fpm.yaml` file of the main project.
      */
     public projectFilepath: string,
+    /**
+     * The main dart project.
+     */
+    public readonly mainProject: DartProject,
+    /**
+     * The extra dart projects.
+     *
+     * This does not include the main project.
+     */
+    public readonly extraProjects: DartProject[],
   ) {
   }
 
   static async fromContext(context: FpmContext): Promise<FpmProject> {
+    const { logger } = context
     const DEFAULT_PROJECT_FILENAME = 'fpm.yaml'
 
-    function findProjectFile(path: string): string | undefined {
-      if (std_fs.existsSync(std_path.join(path, DEFAULT_PROJECT_FILENAME))) {
+    async function findProjectFile(path: string): Promise<string | undefined> {
+      if (await std_fs.exists(std_path.join(path, DEFAULT_PROJECT_FILENAME))) {
         return std_path.join(path, DEFAULT_PROJECT_FILENAME)
       }
       const parent = std_path.dirname(path)
@@ -39,14 +44,54 @@ export class FpmProject {
       return findProjectFile(parent)
     }
 
-    const projectFilepath = findProjectFile(context.pwd)
+    async function* findDartProjects(
+      pwd: string,
+      glob: string,
+    ): AsyncGenerator<DartProject> {
+      const joinedGlob = std_path.join(pwd, glob, 'pubspec.yaml')
+      logger.debug(`Searching dart projects: ${joinedGlob}`)
+      const walkEntries = std_fs.expandGlob(joinedGlob)
+      for await (const walkEntry of walkEntries) {
+        yield DartProject.fromPubspecFilepath(walkEntry.path)
+      }
+    }
+
+    function shouldExclude(
+      dartProject: DartProject,
+      excludeGlobs: string[],
+    ): boolean {
+      return false
+    }
+
+    const projectFilepath = await findProjectFile(context.cwd)
     if (!projectFilepath) {
       throw new FpmError(`No \`${DEFAULT_PROJECT_FILENAME}\` file found`)
     }
+    logger.verbose(`Found project file: ${projectFilepath}`)
 
-    context.logger.verbose(`Found project file: ${projectFilepath}`)
     const projectYaml = parseProjectYaml(projectFilepath)
-    context.logger.debug('projectYaml=', projectYaml)
+    logger.debug('projectYaml=', projectYaml)
+
+    const projectDir = std_path.dirname(projectFilepath)
+    const mainProject = DartProject.fromDirectoryPath(
+      std_path.join(projectDir, projectYaml.packages.main),
+    )
+    logger.verbose(`Found main project: ${mainProject.path}`)
+
+    const extraProjects: DartProject[] = []
+    const excludeGlobs = asArray(projectYaml.packages.exclude)
+    for (const glob of asArray(projectYaml.packages.include)) {
+      for await (const dartProject of findDartProjects(projectDir, glob)) {
+        if (!shouldExclude(dartProject, excludeGlobs)) {
+          extraProjects.push(dartProject)
+          logger.verbose(`Found dart project: ${dartProject.path}`)
+        } else {
+          logger.debug(`Found but excluded dart project: ${dartProject.path}`)
+        }
+      }
+    }
+
+    logger.debug('extraProjects=', extraProjects)
 
     throw new Error('Not implemented yet')
   }
