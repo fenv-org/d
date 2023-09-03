@@ -12,5 +12,5 @@ deno run \
   --allow-net \
   --allow-run \
   driver/main-dev.ts \
-  --pwd test-sample/app \
+  --cwd test-sample/app \
   $@

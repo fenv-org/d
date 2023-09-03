@@ -6,7 +6,7 @@ import { FpmLogger, Logger } from '../../logger/mod.ts'
  */
 export class FpmContext {
   constructor(
-    public readonly pwd: string,
+    public readonly cwd: string,
     public readonly verbose: boolean,
     public readonly debug: boolean,
     public readonly logger: FpmLogger,
@@ -15,12 +15,12 @@ export class FpmContext {
   }
 
   static fromFlags(flags: {
-    pwd: string
+    cwd: string
     verbose: boolean
     debug: boolean
   }): FpmContext {
     return new FpmContext(
-      std_path.resolve(flags.pwd),
+      std_path.resolve(flags.cwd),
       flags.verbose,
       flags.debug,
       new FpmLogger(

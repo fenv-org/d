@@ -14,16 +14,16 @@ import { FpmProject } from './project/mod.ts'
  * - `--allow-env`
  * - `--allow-net`
  */
-export async function fpm(args: string[]) {
+export async function fpm(cwd: string, args: string[]) {
   const { args: normalizedArgs, verbose, debug } = parseGlobalArgs(args)
   const flags = {
     ...std_flags.parse(normalizedArgs, {
       stopEarly: true,
-      string: ['pwd'],
-      alias: { pwd: 'c' },
+      string: ['cwd'],
+      alias: { cwd: 'c' },
       '--': true,
       default: {
-        pwd: Deno.cwd(),
+        cwd: cwd,
         verbose: false,
         debug: false,
       },
