@@ -58,9 +58,9 @@ export class FpmProject {
 
     function shouldExclude(
       dartProject: DartProject,
-      excludeGlobs: string[],
+      excludeRegExps: RegExp[],
     ): boolean {
-      return false
+      return excludeRegExps.some((exclude) => exclude.test(dartProject.path))
     }
 
     const projectFilepath = await findProjectFile(context.cwd)
@@ -79,10 +79,14 @@ export class FpmProject {
     logger.verbose(`Found main project: ${mainProject.path}`)
 
     const extraProjects: DartProject[] = []
-    const excludeGlobs = asArray(projectYaml.packages.exclude)
+    const excludeRegExps = asArray(projectYaml.packages.exclude).map((glob) =>
+      glob.includes('**')
+        ? std_path.globToRegExp(glob)
+        : std_path.globToRegExp(std_path.join('**', glob))
+    )
     for (const glob of asArray(projectYaml.packages.include)) {
       for await (const dartProject of findDartProjects(projectDir, glob)) {
-        if (!shouldExclude(dartProject, excludeGlobs)) {
+        if (!shouldExclude(dartProject, excludeRegExps)) {
           extraProjects.push(dartProject)
           logger.verbose(`Found dart project: ${dartProject.path}`)
         } else {
@@ -92,7 +96,6 @@ export class FpmProject {
     }
 
     logger.debug('extraProjects=', extraProjects)
-
-    throw new Error('Not implemented yet')
+    return new FpmProject(projectFilepath, mainProject, extraProjects)
   }
 }
