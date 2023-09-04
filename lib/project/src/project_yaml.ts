@@ -14,7 +14,7 @@ export interface ProjectYaml {
   }
 }
 
-export function parseProjectYaml(filepath: string): ProjectYaml {
+export function loadProjectYaml(filepath: string): ProjectYaml {
   const text = Deno.readTextFileSync(filepath)
   const parsedText = std_yaml.parse(text)
   if (typeof parsedText !== 'object' || parsedText === null) {

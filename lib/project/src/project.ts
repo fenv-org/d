@@ -3,7 +3,7 @@ import { std_fs, std_path } from '../../deps.ts'
 import { FpmError } from '../../error/mod.ts'
 import { asArray } from '../../util/mod.ts'
 import { DartProject } from './dart_project.ts'
-import { parseProjectYaml } from './project_yaml.ts'
+import { loadProjectYaml } from './project_yaml.ts'
 
 /**
  * A class that represents the main project managed by `fpm`.
@@ -63,7 +63,7 @@ export class FpmProject {
     }
     logger.verbose(`Found project file: ${projectFilepath}`)
 
-    const projectYaml = parseProjectYaml(projectFilepath)
+    const projectYaml = loadProjectYaml(projectFilepath)
     logger.debug('projectYaml=', projectYaml)
 
     const projectDir = std_path.dirname(projectFilepath)
