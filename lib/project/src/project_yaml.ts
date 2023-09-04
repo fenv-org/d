@@ -9,8 +9,7 @@ export interface ProjectYaml {
   version: string
   name: string
   packages: {
-    main: string
-    include?: string | string[]
+    include: string | string[]
     exclude?: string | string[]
   }
 }
@@ -47,18 +46,16 @@ export function parseProjectYaml(filepath: string): ProjectYaml {
   if (typeof yaml.packages !== 'object' || yaml.packages === null) {
     throw new FpmError('`packages` field must be an object')
   }
-  if (!('main' in yaml.packages) || typeof yaml.packages.main !== 'string') {
-    throw new FpmError('`packages.main` must be provided as the main package')
+  if (!('include' in yaml.packages)) {
+    throw new FpmError('`packages.include` field is required')
   }
-  if ('include' in yaml.packages) {
-    if (
-      typeof yaml.packages.include !== 'string' &&
-      !Array.isArray(yaml.packages.include)
-    ) {
-      throw new FpmError(
-        '`packages.include` must consist of at least one glob pattern',
-      )
-    }
+  if (
+    typeof yaml.packages.include !== 'string' &&
+    !Array.isArray(yaml.packages.include)
+  ) {
+    throw new FpmError(
+      '`packages.include` must consist of at least one glob pattern',
+    )
   }
   if ('exclude' in yaml.packages) {
     if (

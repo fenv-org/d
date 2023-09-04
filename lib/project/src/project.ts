@@ -17,15 +17,9 @@ export class FpmProject {
      */
     public projectFilepath: string,
     /**
-     * The main dart project.
+     * The found dart projects.
      */
-    public readonly mainProject: DartProject,
-    /**
-     * The extra dart projects.
-     *
-     * This does not include the main project.
-     */
-    public readonly extraProjects: DartProject[],
+    public readonly dartProjects: DartProject[],
   ) {
   }
 
@@ -73,12 +67,7 @@ export class FpmProject {
     logger.debug('projectYaml=', projectYaml)
 
     const projectDir = std_path.dirname(projectFilepath)
-    const mainProject = DartProject.fromDirectoryPath(
-      std_path.join(projectDir, projectYaml.packages.main),
-    )
-    logger.verbose(`Found main project: ${mainProject.path}`)
-
-    const extraProjects: DartProject[] = []
+    const dartProjects: DartProject[] = []
     const excludeRegExps = asArray(projectYaml.packages.exclude).map((glob) =>
       glob.includes('**')
         ? std_path.globToRegExp(glob)
@@ -87,7 +76,7 @@ export class FpmProject {
     for (const glob of asArray(projectYaml.packages.include)) {
       for await (const dartProject of findDartProjects(projectDir, glob)) {
         if (!shouldExclude(dartProject, excludeRegExps)) {
-          extraProjects.push(dartProject)
+          dartProjects.push(dartProject)
           logger.verbose(`Found dart project: ${dartProject.path}`)
         } else {
           logger.debug(`Found but excluded dart project: ${dartProject.path}`)
@@ -95,7 +84,7 @@ export class FpmProject {
       }
     }
 
-    logger.debug('extraProjects=', extraProjects)
-    return new FpmProject(projectFilepath, mainProject, extraProjects)
+    logger.debug('dartProjects=', dartProjects)
+    return new FpmProject(projectFilepath, dartProjects)
   }
 }

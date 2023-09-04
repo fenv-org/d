@@ -17,27 +17,6 @@ export class DartProject {
   ) {}
 
   /**
-   * Returns a new `DartProject` instance from the given directory path.
-   *
-   * @throws {Deno.errors.NotFound} If the directory does not exist or if
-   * `pubspec.yaml` file does not exist in the directory.
-   */
-  static fromDirectoryPath(path: string): DartProject {
-    if (!std_fs.existsSync(path)) {
-      throw new Deno.errors.NotFound(`Directory not found: ${path}`)
-    }
-    if (!std_fs.existsSync(std_path.join(path, 'pubspec.yaml'))) {
-      throw new Deno.errors.NotFound(
-        `pubspec.yaml not found in directory: ${path}`,
-      )
-    }
-    return new DartProject(
-      std_path.resolve(path),
-      std_path.resolve(path, 'pubspec.yaml'),
-    )
-  }
-
-  /**
    * Returns a new `DartProject` instance from the given `pubspec.yaml` file
    * path.
    *
