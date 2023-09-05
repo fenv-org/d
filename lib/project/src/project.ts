@@ -2,9 +2,12 @@ import { FpmContext } from '../../context/mod.ts'
 import { std_fs, std_path } from '../../deps.ts'
 import { FpmError } from '../../error/mod.ts'
 import { FpmLogger } from '../../logger/mod.ts'
-import { asArray, collectAsArray } from '../../util/mod.ts'
+import * as util from '../../util/mod.ts'
 import { DartProject } from './dart_project.ts'
 import { loadProjectYaml } from './project_yaml.ts'
+
+const { exists, expandGlob } = std_fs
+const { join, dirname, globToRegExp } = std_path
 
 /**
  * A class that represents the main project managed by `fpm`.
@@ -24,6 +27,9 @@ export class FpmProject {
   ) {
   }
 
+  /**
+   * Constructs a new `FpmProject` instance from the given {@link FpmContext}.
+   */
   static async fromContext(context: FpmContext): Promise<FpmProject> {
     const { logger } = context
     const projectFilepath = await FpmProject.#findProjectFile(context.cwd)
@@ -35,34 +41,37 @@ export class FpmProject {
     const projectYaml = loadProjectYaml(projectFilepath)
     logger.debug('projectYaml=', projectYaml)
 
-    const projectDir = std_path.dirname(projectFilepath)
-    const excludeRegExps = asArray(projectYaml.packages.exclude).map((glob) =>
-      glob.includes('**')
-        ? std_path.globToRegExp(glob)
-        : std_path.globToRegExp(std_path.join('**', glob))
-    )
+    const projectDir = dirname(projectFilepath)
+    const excludeRegExps = util
+      .asArray(projectYaml.packages.exclude)
+      .map((glob) =>
+        glob.includes('**')
+          ? globToRegExp(glob)
+          : globToRegExp(join('**', glob))
+      )
 
     const dartProjects = (await Promise.all(
-      asArray(projectYaml.packages.include).map((glob) =>
-        collectAsArray(
+      util
+        .asArray(projectYaml.packages.include)
+        .map((glob) =>
           FpmProject.#findDartProjects({
             pwd: projectDir,
             glob,
             excludeRegExps,
             logger,
-          }),
+          })
         )
-      ),
+        .map(util.collectAsArray),
     )).flat()
 
     return new FpmProject(projectFilepath, dartProjects)
   }
 
   static async #findProjectFile(path: string): Promise<string | undefined> {
-    if (await std_fs.exists(std_path.join(path, DEFAULT_PROJECT_FILENAME))) {
-      return std_path.join(path, DEFAULT_PROJECT_FILENAME)
+    if (await exists(join(path, DEFAULT_PROJECT_FILENAME))) {
+      return join(path, DEFAULT_PROJECT_FILENAME)
     }
-    const parent = std_path.dirname(path)
+    const parent = dirname(path)
     if (parent === path) {
       return undefined
     }
@@ -76,9 +85,9 @@ export class FpmProject {
     logger: FpmLogger
   }): AsyncGenerator<DartProject> {
     const { logger, pwd, glob, excludeRegExps } = options
-    const joinedGlob = std_path.join(pwd, glob, 'pubspec.yaml')
+    const joinedGlob = join(pwd, glob, 'pubspec.yaml')
     logger.debug(`Searching dart projects: ${joinedGlob}`)
-    const walkEntries = std_fs.expandGlob(joinedGlob)
+    const walkEntries = expandGlob(joinedGlob)
     for await (const walkEntry of walkEntries) {
       const dartProject = await DartProject.fromPubspecFilepath(
         walkEntry.path,
