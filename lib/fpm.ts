@@ -47,9 +47,7 @@ export async function fpm(cwd: string, args: string[]) {
   }
 
   const project = await FpmProject.fromContext(context)
-  // console.dir(project)
   const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
-  console.dir(dependencyGraph)
 
   const subcommand = flags._[0]
   const subcommandArgs = flags._.slice(1)
