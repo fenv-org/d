@@ -1,5 +1,5 @@
 import { FpmContext } from './context/mod.ts'
-import { std_flags } from './deps.ts'
+import { cliffy_table, std_flags } from './deps.ts'
 import { FpmError } from './error/src/fpm_error.ts'
 import { FpmProject } from './project/mod.ts'
 import { DependencyGraph } from './project/src/dependency_graph.ts'
@@ -50,20 +50,21 @@ export async function fpm(cwd: string, args: string[]) {
   const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
 
   if (context.debug) {
-    logger.debug(logger.ansi.style.success('Analyzed dependency graph:'))
-    for (const node of dependencyGraph.allNodes) {
-      logger.debug('node.name=', node.name)
-      logger.debug('    .path=', node.path)
-      logger.debug(
-        '    .dependencies=',
-        node.dependencies.map((dep) => dep.name),
-      )
-      logger.debug(
-        '    .reverseDependencies=',
-        node.reverseDependencies.map((dep) => dep.name),
-      )
-      logger.debug()
-    }
+    logger.debug(
+      logger.ansi.style.success('Analyzed dependency graph:') +
+        `\n` +
+        cliffy_table.Table.from(
+          dependencyGraph.allNodes.map((node) => [
+            node.name,
+            node.path,
+            node.dependencies.map((dep) => dep.name).join('\n'),
+            node.reverseDependencies.map((dep) => dep.name).join('\n'),
+          ]),
+        )
+          .header(['name', 'path', 'dependencies', 'reverse dependencies'])
+          .border(true)
+          .toString(),
+    )
   }
 
   const subcommand = flags._[0]
