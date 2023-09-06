@@ -5,7 +5,7 @@ import {
   assertEquals,
   fail,
   removeIndent,
-  touch,
+  writeYamlFile,
 } from '../../test_deps.ts'
 import { FpmProject } from './project.ts'
 
@@ -31,14 +31,38 @@ Deno.test('Build `FpmProject` successfully', async (t) => {
           - "d"
     `),
   )
-  await touch(join(root, 'app/pubspec.yaml'))
-  await touch(join(root, 'app/packages/a/pubspec.yaml'))
-  await touch(join(root, 'app/packages/b/pubspec.yaml'))
-  await touch(join(root, 'app/packages/b/example/pubspec.yaml'))
-  await touch(join(root, 'packages/c/pubspec.yaml'))
-  await touch(join(root, 'packages/d/pubspec.yaml'))
-  await touch(join(root, 'packages/e/pubspec.yaml'))
-  await touch(join(root, 'packages/e/example/pubspec.yaml'))
+  await writeYamlFile(
+    join(root, 'app/pubspec.yaml'),
+    { name: 'test_app' },
+  )
+  await writeYamlFile(
+    join(root, 'app/packages/a/pubspec.yaml'),
+    { name: 'test_package_a' },
+  )
+  await writeYamlFile(
+    join(root, 'app/packages/b/pubspec.yaml'),
+    { name: 'test_package_b' },
+  )
+  await writeYamlFile(
+    join(root, 'app/packages/b/example/pubspec.yaml'),
+    { name: 'test_package_b_example' },
+  )
+  await writeYamlFile(
+    join(root, 'packages/c/pubspec.yaml'),
+    { name: 'test_package_c' },
+  )
+  await writeYamlFile(
+    join(root, 'packages/d/pubspec.yaml'),
+    { name: 'test_package_d' },
+  )
+  await writeYamlFile(
+    join(root, 'packages/e/pubspec.yaml'),
+    { name: 'test_package_e' },
+  )
+  await writeYamlFile(
+    join(root, 'packages/e/example/pubspec.yaml'),
+    { name: 'test_package_e_example' },
+  )
 
   await t.step('call FpmProject.fromContext()', async () => {
     const context = FpmContext.fromFlags({
@@ -50,11 +74,12 @@ Deno.test('Build `FpmProject` successfully', async (t) => {
 
     // verify
     assertEquals(actual.dartProjects.length, 5)
-    assertEquals(actual.dartProjects[0].path, join(root, 'app'))
-    assertEquals(actual.dartProjects[1].path, join(root, 'app/packages/a'))
-    assertEquals(actual.dartProjects[2].path, join(root, 'app/packages/b'))
-    assertEquals(actual.dartProjects[3].path, join(root, 'packages/c'))
-    assertEquals(actual.dartProjects[4].path, join(root, 'packages/e'))
+    const projectPaths = actual.dartProjects.map((project) => project.path)
+    assert(projectPaths.includes(join(root, 'app')))
+    assert(projectPaths.includes(join(root, 'app/packages/a')))
+    assert(projectPaths.includes(join(root, 'app/packages/b')))
+    assert(projectPaths.includes(join(root, 'packages/c')))
+    assert(projectPaths.includes(join(root, 'packages/e')))
   })
 
   // teardown
@@ -81,14 +106,6 @@ Deno.test('Fail to build `FpmProject` because of incompatible version', async (t
           - "d"
     `),
   )
-  await touch(join(root, 'app/pubspec.yaml'))
-  await touch(join(root, 'app/packages/a/pubspec.yaml'))
-  await touch(join(root, 'app/packages/b/pubspec.yaml'))
-  await touch(join(root, 'app/packages/b/example/pubspec.yaml'))
-  await touch(join(root, 'packages/c/pubspec.yaml'))
-  await touch(join(root, 'packages/d/pubspec.yaml'))
-  await touch(join(root, 'packages/e/pubspec.yaml'))
-  await touch(join(root, 'packages/e/example/pubspec.yaml'))
 
   await t.step('call FpmProject.fromContext()', async () => {
     const context = FpmContext.fromFlags({

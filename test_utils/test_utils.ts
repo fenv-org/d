@@ -1,4 +1,4 @@
-import { std_fs, std_path } from '../lib/deps.ts'
+import { std_fs, std_path, std_yaml } from '../lib/deps.ts'
 
 export async function writeTextFile(path: string, text: string): Promise<void> {
   await std_fs.ensureDir(std_path.dirname(path))
@@ -7,6 +7,13 @@ export async function writeTextFile(path: string, text: string): Promise<void> {
 
 export function touch(path: string): Promise<void> {
   return writeTextFile(path, '')
+}
+
+export function writeYamlFile(
+  path: string,
+  data: Record<string, unknown>,
+): Promise<void> {
+  return writeTextFile(path, std_yaml.stringify(data))
 }
 
 export function removeIndent(s: string): string {
