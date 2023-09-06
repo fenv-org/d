@@ -1,0 +1,85 @@
+name: validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        deno:
+          - v1.x
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ matrix.deno }}
+
+      - name: Deno fmt
+        run: deno fmt --ignore='test-sample/**'
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Format code with `deno fmt`"
+
+      - name: Deno lint on non-windows
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: deno lint lib/**/*.ts driver/*.ts
+
+      - name: Deno lint on windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          Get-ChildItem -Path 'lib' -Filter '*.ts' -File -Recurse | ForEach-Object {
+            deno lint $_.FullName
+          }
+
+      - name: Deno check on non-windows
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: deno check lib/**/*.ts driver/*.ts
+
+      - name: Deno check on windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          Get-ChildItem -Path 'lib' -Filter '*.ts' -File -Recurse | ForEach-Object {
+            deno check $_.FullName
+          }
+
+      - name: Run tests
+        run: deno test --allow-all --coverage=cov_profile
+
+      - name: Make coverage report
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          deno coverage \
+            --lcov \
+            --output=cov_profile.lcov \
+            --exclude='test_utils\/.*' \
+            --exclude='test_deps\.ts' \
+            cov_profile
+
+      - name: "Upload coverage report"
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: codecov/codecov-action@v3
+        with:
+          file: cov_profile.lcov
