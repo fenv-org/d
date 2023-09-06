@@ -11,20 +11,30 @@ import { DartProject } from './dart_project.ts'
 export class DependencyGraph {
   constructor(
     /**
-     * The root nodes of the dependency graph.
-     *
-     * These are the dart projects that are not dependencies of other dart and
-     * these can be one or more.
+     * All the nodes of the dependency graph.
      */
-    public readonly rootNodes: DependencyGraphNode[],
-    /**
-     * The leaf nodes of the dependency graph.
-     *
-     * These are the dart projects that do not depend on other dart projects and
-     * these can be one or more.
-     */
-    public readonly leafNodes: DependencyGraphNode[],
+    public readonly allNodes: DependencyGraphNode[],
   ) {}
+
+  /**
+   * The root nodes of the dependency graph.
+   *
+   * These are the dart projects that are not dependencies of other dart and
+   * these can be one or more.
+   */
+  get rootNodes(): DependencyGraphNode[] {
+    return this.allNodes.filter((node) => node.reverseDependencies.length === 0)
+  }
+
+  /**
+   * The leaf nodes of the dependency graph.
+   *
+   * These are the dart projects that do not depend on other dart projects and
+   * these can be one or more.
+   */
+  get leafNodes(): DependencyGraphNode[] {
+    return this.allNodes.filter((node) => node.dependencies.length === 0)
+  }
 
   /**
    * Returns a new `DependencyGraph` instance from the given
@@ -66,20 +76,7 @@ export class DependencyGraph {
         currentNode.addDependency(nodeMap[dependencyName])
       }
     }
-
-    // Collect the root nodes and the leaf nodes.
-    const rootNodes: DependencyGraphNode[] = []
-    const leafNodes: DependencyGraphNode[] = []
-    for (const node of Object.values(nodeMap)) {
-      if (node.reverseDependencies.length === 0) {
-        rootNodes.push(node)
-      }
-      if (node.dependencies.length === 0) {
-        leafNodes.push(node)
-      }
-    }
-
-    return new DependencyGraph(rootNodes, leafNodes)
+    return new DependencyGraph(Object.values(nodeMap))
   }
 }
 

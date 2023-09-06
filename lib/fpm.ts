@@ -49,6 +49,23 @@ export async function fpm(cwd: string, args: string[]) {
   const project = await FpmProject.fromContext(context)
   const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
 
+  if (context.debug) {
+    logger.debug(logger.ansi.style.success('Analyzed dependency graph:'))
+    for (const node of dependencyGraph.allNodes) {
+      logger.debug('node.name=', node.name)
+      logger.debug('    .path=', node.path)
+      logger.debug(
+        '    .dependencies=',
+        node.dependencies.map((dep) => dep.name),
+      )
+      logger.debug(
+        '    .reverseDependencies=',
+        node.reverseDependencies.map((dep) => dep.name),
+      )
+      logger.debug()
+    }
+  }
+
   const subcommand = flags._[0]
   const subcommandArgs = flags._.slice(1)
   const otherFlags = flags['--']
