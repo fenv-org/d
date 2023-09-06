@@ -6,9 +6,22 @@ on:
       - main
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        deno:
+          - v1.x
+
+    runs-on: ${{ matrix.os }}
 
     permissions:
       contents: write
@@ -20,7 +33,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.x
+          deno-version: ${{ matrix.deno }}
 
       - name: Deno fmt
         run: deno fmt --ignore='test-sample/**'
@@ -40,6 +53,7 @@ jobs:
         run: deno test --allow-all --coverage=cov_profile
 
       - name: Make coverage report
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           deno coverage \
             --lcov \
@@ -48,8 +62,9 @@ jobs:
             --exclude='test_deps\.ts' \
             cov_profile
 
-      - name: Cleanup
-        run: rm -rf cov_profile
-
       - name: "[Temp] show coverage report"
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: cat cov_profile.lcov
+
+      - name: Cleanup
+        run: rm -rf cov_profile cov_profile.lcov
