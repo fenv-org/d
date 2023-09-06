@@ -43,11 +43,27 @@ jobs:
         with:
           commit_message: "Format code with `deno fmt`"
 
-      - name: Deno lint
+      - name: Deno lint on non-windows
+        if: ${{ matrix.os != 'windows-latest' }}
         run: deno lint lib/**/*.ts driver/*.ts
 
-      - name: Deno check
+      - name: Deno lint on windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          Get-ChildItem -Path 'lib' -Filter '*.ts' -File -Recurse | ForEach-Object {
+            deno lint $_.FullName
+          }
+
+      - name: Deno check on non-windows
+        if: ${{ matrix.os != 'windows-latest' }}
         run: deno check lib/**/*.ts driver/*.ts
+
+      - name: Deno check on windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          Get-ChildItem -Path 'lib' -Filter '*.ts' -File -Recurse | ForEach-Object {
+            deno check $_.FullName
+          }
 
       - name: Run tests
         run: deno test --allow-all --coverage=cov_profile
