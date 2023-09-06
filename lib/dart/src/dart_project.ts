@@ -1,11 +1,10 @@
-import {
-  loadProjectYaml,
-  loadPubspecOverridesYaml,
-  PubspecOverridesYaml,
-  PubspecYamlSchema,
-} from '../../dart/mod.ts'
 import { std_fs, std_path } from '../../deps.ts'
 import { FpmError } from '../../error/mod.ts'
+import {
+  loadPubspecOverridesYaml,
+  PubspecOverridesYaml,
+} from './pubspec_overrides_yaml.ts'
+import { loadProjectYaml, PubspecYamlSchema } from './pubspec_yaml.ts'
 
 const { existsSync } = std_fs
 const { resolve, dirname } = std_path

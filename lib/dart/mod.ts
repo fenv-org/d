@@ -1,3 +1,5 @@
+export * from './src/dart_project.ts'
+export * from './src/dependency_graph.ts'
 export * from './src/pub_dependency.ts'
 export * from './src/pubspec_overrides_yaml.ts'
 export * from './src/pubspec_yaml.ts'

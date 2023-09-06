@@ -1,8 +1,8 @@
 import { FpmContext } from './context/mod.ts'
+import { DependencyGraph } from './dart/mod.ts'
 import { cliffy_table, std_flags } from './deps.ts'
 import { FpmError } from './error/src/fpm_error.ts'
 import { FpmProject } from './project/mod.ts'
-import { DependencyGraph } from './project/src/dependency_graph.ts'
 
 /**
  * The entry point of the `fpm` CLI application.
@@ -54,7 +54,7 @@ export async function fpm(cwd: string, args: string[]) {
       logger.ansi.style.success('Analyzed dependency graph:') +
         `\n` +
         cliffy_table.Table.from(
-          dependencyGraph.allNodes.map((node) => [
+          dependencyGraph.nodes.map((node) => [
             node.name,
             node.path,
             node.dependencies.map((dep) => dep.name).join('\n'),

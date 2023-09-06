@@ -1,9 +1,7 @@
-import {
-  PubDependency,
-  PubspecOverridesYaml,
-  PubspecYamlSchema,
-} from '../../dart/mod.ts'
 import { DartProject } from './dart_project.ts'
+import { PubDependency } from './pub_dependency.ts'
+import { PubspecOverridesYaml } from './pubspec_overrides_yaml.ts'
+import { PubspecYamlSchema } from './pubspec_yaml.ts'
 
 /**
  * Represents a dependency graph of dart projects.
@@ -13,7 +11,7 @@ export class DependencyGraph {
     /**
      * All the nodes of the dependency graph.
      */
-    public readonly allNodes: DependencyGraphNode[],
+    public readonly nodes: DependencyGraphNode[],
   ) {}
 
   /**
@@ -23,7 +21,7 @@ export class DependencyGraph {
    * these can be one or more.
    */
   get rootNodes(): DependencyGraphNode[] {
-    return this.allNodes.filter((node) => node.reverseDependencies.length === 0)
+    return this.nodes.filter((node) => node.reverseDependencies.length === 0)
   }
 
   /**
@@ -33,7 +31,7 @@ export class DependencyGraph {
    * these can be one or more.
    */
   get leafNodes(): DependencyGraphNode[] {
-    return this.allNodes.filter((node) => node.dependencies.length === 0)
+    return this.nodes.filter((node) => node.dependencies.length === 0)
   }
 
   /**

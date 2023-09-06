@@ -1,9 +1,9 @@
 import { FpmContext } from '../../context/mod.ts'
+import { DartProject } from '../../dart/mod.ts'
 import { std_fs, std_path } from '../../deps.ts'
 import { FpmError } from '../../error/mod.ts'
 import { FpmLogger } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'
-import { DartProject } from './dart_project.ts'
 import { loadProjectYaml } from './project_yaml.ts'
 
 const { exists, expandGlob } = std_fs
