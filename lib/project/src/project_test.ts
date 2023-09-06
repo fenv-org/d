@@ -1,12 +1,6 @@
 import { FpmContext } from '../../context/mod.ts'
 import { std_path } from '../../deps.ts'
-import {
-  assert,
-  assertEquals,
-  fail,
-  removeIndent,
-  writeYamlFile,
-} from '../../test_deps.ts'
+import { assert, assertEquals, fail, writeYamlFile } from '../../test_deps.ts'
 import { FpmProject } from './project.ts'
 
 const { join } = std_path
@@ -14,22 +8,23 @@ const { join } = std_path
 Deno.test('Build `FpmProject` successfully', async (t) => {
   // setup
   const root = await Deno.makeTempDir()
-  await Deno.writeTextFile(
+  await writeYamlFile(
     join(root, 'fpm.yaml'),
-    removeIndent(`
-      version: v0
-
-      name: test_app
-
-      packages:
-        include:
-          - app
-          - app/packages/**
-          - packages/**
-        exclude:
-          - "*example*"
-          - "d"
-    `),
+    {
+      version: 'v0',
+      name: 'test_app',
+      packages: {
+        include: [
+          'app',
+          'app/packages/**',
+          'packages/**',
+        ],
+        exclude: [
+          '*example*',
+          'd',
+        ],
+      },
+    },
   )
   await writeYamlFile(
     join(root, 'app/pubspec.yaml'),
@@ -89,22 +84,23 @@ Deno.test('Build `FpmProject` successfully', async (t) => {
 Deno.test('Fail to build `FpmProject` because of incompatible version', async (t) => {
   // setup
   const root = await Deno.makeTempDir()
-  await Deno.writeTextFile(
+  await writeYamlFile(
     join(root, 'fpm.yaml'),
-    removeIndent(`
-      version: v1
-
-      name: test_app
-
-      packages:
-        include:
-          - app
-          - app/packages/**
-          - packages/**
-        exclude:
-          - "*example*"
-          - "d"
-    `),
+    {
+      version: 'v1',
+      name: 'test_app',
+      packages: {
+        include: [
+          'app',
+          'app/packages/**',
+          'packages/**',
+        ],
+        exclude: [
+          '*example*',
+          'd',
+        ],
+      },
+    },
   )
 
   await t.step('call FpmProject.fromContext()', async () => {
