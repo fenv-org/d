@@ -54,11 +54,15 @@ export async function fpm(cwd: string, args: string[]) {
       logger.ansi.style.success('Analyzed dependency graph:') +
         `\n` +
         cliffy_table.Table.from(
-          dependencyGraph.nodes.map((node) => [
+          dependencyGraph.projects.map((node) => [
             node.name,
             node.path,
-            node.dependencies.map((dep) => dep.name).join('\n'),
-            node.reverseDependencies.map((dep) => dep.name).join('\n'),
+            dependencyGraph.dependenciesOf(node).map((dep) => dep.name).join(
+              '\n',
+            ),
+            dependencyGraph.dependentsOf(node).map((dep) => dep.name).join(
+              '\n',
+            ),
           ]),
         )
           .header(['name', 'path', 'dependencies', 'reverse dependencies'])

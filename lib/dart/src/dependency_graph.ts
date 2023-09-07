@@ -1,7 +1,5 @@
 import { DartProject } from './dart_project.ts'
 import { PubDependency } from './pub_dependency.ts'
-import { PubspecOverridesYaml } from './pubspec_overrides_yaml.ts'
-import { PubspecYamlSchema } from './pubspec_yaml.ts'
 
 /**
  * Represents a dependency graph of dart projects.
@@ -11,7 +9,15 @@ export class DependencyGraph {
     /**
      * All the nodes of the dependency graph.
      */
-    public readonly nodes: DependencyGraphNode[],
+    public readonly projects: DartProject[],
+    /**
+     * A map of project names to their dependencies.
+     */
+    public readonly edges: DependencyEdges,
+    /**
+     * A map of project names to their reversed-direction dependencies.
+     */
+    public readonly reverseEdges: DependencyEdges,
   ) {}
 
   /**
@@ -20,8 +26,8 @@ export class DependencyGraph {
    * These are the dart projects that are not dependencies of other dart and
    * these can be one or more.
    */
-  get rootNodes(): DependencyGraphNode[] {
-    return this.nodes.filter((node) => node.reverseDependencies.length === 0)
+  get roots(): DartProject[] {
+    return this.projects.filter((node) => !(node.name in this.reverseEdges))
   }
 
   /**
@@ -30,8 +36,22 @@ export class DependencyGraph {
    * These are the dart projects that do not depend on other dart projects and
    * these can be one or more.
    */
-  get leafNodes(): DependencyGraphNode[] {
-    return this.nodes.filter((node) => node.dependencies.length === 0)
+  get leaves(): DartProject[] {
+    return this.projects.filter((node) => !(node.name in this.edges))
+  }
+
+  /**
+   * Returns the dependencies of the given {@link DartProject}.
+   */
+  dependenciesOf(project: DartProject): readonly DartProject[] {
+    return this.edges[project.name] ?? []
+  }
+
+  /**
+   * Returns the dependents of the given {@link DartProject}.
+   */
+  dependentsOf(project: DartProject): readonly DartProject[] {
+    return this.reverseEdges[project.name] ?? []
   }
 
   /**
@@ -39,10 +59,9 @@ export class DependencyGraph {
    * {@link DartProject}.
    */
   static fromDartProjects(dartProjects: DartProject[]): DependencyGraph {
-    const nodeMap: Record<string, DependencyGraphNode> = {}
+    const nodeMap: Record<string, DartProject> = {}
     for (const dartProject of dartProjects) {
-      const node = DependencyGraphNode.fromDartProject(dartProject)
-      nodeMap[node.name] = node
+      nodeMap[dartProject.name] = dartProject
     }
     const allManagedDependencyNames = new Set(Object.keys(nodeMap))
 
@@ -61,6 +80,8 @@ export class DependencyGraph {
     }
 
     // Create the dependency graph.
+    const edges: Record<string, DartProject[]> = {}
+    const reverseEdges: Record<string, DartProject[]> = {}
     for (const dartProject of dartProjects) {
       const managedDirectDependencyNames = collectDistinctDependencyNames(
         dartProject.pubspec.dependencies ?? {},
@@ -69,66 +90,30 @@ export class DependencyGraph {
         dartProject.pubspecOverrides?.dependency_overrides ?? {},
       )
 
-      const currentNode = nodeMap[dartProject.name]
       for (const dependencyName of managedDirectDependencyNames) {
-        currentNode.addDependency(nodeMap[dependencyName])
+        const dependencyNode = nodeMap[dependencyName]
+        if (!(dartProject.name in edges)) {
+          edges[dartProject.name] = []
+        }
+        if (!(dependencyNode.name in reverseEdges)) {
+          reverseEdges[dependencyNode.name] = []
+        }
+        edges[dartProject.name].push(dependencyNode)
+        reverseEdges[dependencyNode.name].push(dartProject)
       }
     }
-    return new DependencyGraph(Object.values(nodeMap))
+
+    return new DependencyGraph(
+      [...dartProjects],
+      { ...edges },
+      { ...reverseEdges },
+    )
   }
 }
 
 /**
- * Represents a node in a dependency graph of dart projects.
- *
- * This class extends `DartProject` to add a list of dependencies.
+ * Mappings of project names to their dependencies.
  */
-export class DependencyGraphNode extends DartProject {
-  constructor(options: {
-    path: string
-    pubspecFilepath: string
-    pubspecOverridesFilepath?: string
-    pubspec: PubspecYamlSchema
-    pubspecOverrides?: PubspecOverridesYaml
-  }) {
-    super(options)
-    this.dependencies = []
-    this.reverseDependencies = []
-  }
-
-  /**
-   * The backing field for {@link dependencies}.
-   */
-  dependencies: DependencyGraphNode[]
-
-  /**
-   * The backing field for {@link reverseDependencies}.
-   */
-  reverseDependencies: DependencyGraphNode[]
-
-  /**
-   * Adds the given node as a dependency of this node.
-   */
-  addDependency(node: DependencyGraphNode): void {
-    if (!this.dependencies.includes(node)) {
-      this.dependencies.push(node)
-    }
-    if (!node.reverseDependencies.includes(this)) {
-      node.reverseDependencies.push(this)
-    }
-  }
-
-  /**
-   * Constructs a new `DependencyGraphNode` instance from the given
-   * {@link DartProject}.
-   */
-  static fromDartProject(dartProject: DartProject): DependencyGraphNode {
-    return new DependencyGraphNode({
-      path: dartProject.path,
-      pubspecFilepath: dartProject.pubspecFilepath,
-      pubspecOverridesFilepath: dartProject.pubspecOverridesFilepath,
-      pubspec: { ...dartProject.pubspec },
-      pubspecOverrides: { ...dartProject.pubspecOverrides },
-    })
-  }
+export interface DependencyEdges {
+  readonly [projectName: string]: readonly DartProject[]
 }
