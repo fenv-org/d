@@ -130,6 +130,18 @@ Deno.test('Acyclic dependency graph', async (t) => {
     const graph = DependencyGraph.fromDartProjects(projects)
     assertEquals(graph.hasCycle(), false)
   })
+
+  await t.step('verify roots', () => {
+    const graph = DependencyGraph.fromDartProjects(projects)
+    assertEquals(graph.roots.length, 2)
+    assertContents(graph.roots, [projects[4], projects[5]])
+  })
+
+  await t.step('verify leaves', () => {
+    const graph = DependencyGraph.fromDartProjects(projects)
+    assertEquals(graph.leaves.length, 2)
+    assertContents(graph.leaves, [projects[0], projects[1]])
+  })
 })
 
 Deno.test('Cyclic dependency graph', async (t) => {
