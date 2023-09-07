@@ -1,4 +1,3 @@
-import { FpmError } from '../../error/mod.ts'
 import { DartProject } from './dart_project.ts'
 import { PubDependency } from './pub_dependency.ts'
 
@@ -62,7 +61,7 @@ export class DependencyGraph {
     const visited = new Set<string>()
     const recursiveStack = new Set<string>()
     const orderedProjects: DartProject[] = []
-    return this.roots.some((node) =>
+    return this.projects.some((node) =>
       !this.#visitInDfs({ node, visited, recursiveStack, orderedProjects })
     )
   }
@@ -131,8 +130,8 @@ export class DependencyGraph {
       const managedDirectDependencyNames = collectDistinctDependencyNames(
         dartProject.pubspec.dependencies ?? {},
         dartProject.pubspec.dev_dependencies ?? {},
-        dartProject.pubspec.dependency_overrides ?? {},
-        dartProject.pubspecOverrides?.dependency_overrides ?? {},
+        dartProject.pubspecOverrides?.dependency_overrides ??
+          dartProject.pubspec.dependency_overrides ?? {},
       )
 
       for (const dependencyName of managedDirectDependencyNames) {
@@ -142,21 +141,6 @@ export class DependencyGraph {
         }
         if (!(dependencyNode.name in reverseEdges)) {
           reverseEdges[dependencyNode.name] = []
-        }
-
-        // Check if there is a cycle.
-        // TODO: This is a naive implementation. We should use DFS or BFS to
-        // detect non-intuitive cycles.
-        if (
-          (dependencyNode.name in edges &&
-            edges[dependencyNode.name].includes(dartProject)) ||
-          (dartProject.name in reverseEdges &&
-            reverseEdges[dartProject.name].includes(dependencyNode))
-        ) {
-          throw new FpmError(
-            `Dependency cycle detected between '${dartProject.name}' ` +
-              `and '${dependencyNode.name}'`,
-          )
         }
 
         // Link the nodes.
