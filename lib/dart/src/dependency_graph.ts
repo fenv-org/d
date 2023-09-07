@@ -1,3 +1,4 @@
+import { FpmError } from '../../error/mod.ts'
 import { DartProject } from './dart_project.ts'
 import { PubDependency } from './pub_dependency.ts'
 
@@ -55,6 +56,50 @@ export class DependencyGraph {
   }
 
   /**
+   * Returns `true` if the dependency graph has a cycle.
+   */
+  hasCycle(): boolean {
+    const visited = new Set<string>()
+    const recursiveStack = new Set<string>()
+    const orderedProjects: DartProject[] = []
+    return this.roots.some((node) =>
+      !this.#visitInDfs({ node, visited, recursiveStack, orderedProjects })
+    )
+  }
+
+  /**
+   * Traverses the dependency graph in DFS and returns `true` if there's no
+   * dependency cycle in the graph.
+   */
+  #visitInDfs(options: {
+    node: DartProject
+    visited: Set<string>
+    recursiveStack: Set<string>
+    orderedProjects: DartProject[]
+  }): boolean {
+    const { node, visited, recursiveStack, orderedProjects } = options
+    if (recursiveStack.has(node.name)) {
+      return false
+    }
+    if (visited.has(node.name)) {
+      return true
+    }
+
+    visited.add(node.name)
+    recursiveStack.add(node.name)
+    const hasCycle = this
+      .dependenciesOf(node)
+      .some((dependency) => !this.#visitInDfs({ ...options, node: dependency }))
+    if (hasCycle) {
+      return false
+    } else {
+      recursiveStack.delete(node.name)
+      orderedProjects.push(node)
+      return true
+    }
+  }
+
+  /**
    * Returns a new `DependencyGraph` instance from the given
    * {@link DartProject}.
    */
@@ -98,6 +143,23 @@ export class DependencyGraph {
         if (!(dependencyNode.name in reverseEdges)) {
           reverseEdges[dependencyNode.name] = []
         }
+
+        // Check if there is a cycle.
+        // TODO: This is a naive implementation. We should use DFS or BFS to
+        // detect non-intuitive cycles.
+        if (
+          (dependencyNode.name in edges &&
+            edges[dependencyNode.name].includes(dartProject)) ||
+          (dartProject.name in reverseEdges &&
+            reverseEdges[dartProject.name].includes(dependencyNode))
+        ) {
+          throw new FpmError(
+            `Dependency cycle detected between '${dartProject.name}' ` +
+              `and '${dependencyNode.name}'`,
+          )
+        }
+
+        // Link the nodes.
         edges[dartProject.name].push(dependencyNode)
         reverseEdges[dependencyNode.name].push(dartProject)
       }
