@@ -1,6 +1,6 @@
 name: d
 description: Dart multi-package project manager
-version: 1.0.0
+version: 0.0.1
 repository: https://github.com/fenv-org/d
 
 environment:
