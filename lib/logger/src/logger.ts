@@ -201,7 +201,7 @@ class DelegateLogger implements Logger {
   }
 }
 
-export class FpmLogger extends DelegateLogger {
+export class DLogger extends DelegateLogger {
   constructor(logger: Logger, options?: {
     indentation?: string
     childIndentation?: string

@@ -1,11 +1,11 @@
 version: v0
 
-name: fpm_sample_app
+name: d_sample_app
 
 packages:
   include:
-    - .
-    - ../packages/**
+    - app
     - packages/**
+    - app/packages/**
   exclude:
     - "*example*"

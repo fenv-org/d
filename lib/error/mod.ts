@@ -1,1 +1,1 @@
-export * from './src/fpm_error.ts'
+export * from './src/error.ts'

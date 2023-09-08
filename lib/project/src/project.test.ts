@@ -1,15 +1,15 @@
-import { FpmContext } from '../../context/mod.ts'
+import { Context } from '../../context/mod.ts'
 import { std_path } from '../../deps.ts'
 import { assert, assertEquals, fail, writeYamlFile } from '../../test_deps.ts'
-import { FpmProject } from './project.ts'
+import { DProject } from './project.ts'
 
 const { join } = std_path
 
-Deno.test('Build `FpmProject` successfully', async (t) => {
+Deno.test('Build `DProject` successfully', async (t) => {
   // setup
   const root = await Deno.makeTempDir()
   await writeYamlFile(
-    join(root, 'fpm.yaml'),
+    join(root, 'd.yaml'),
     {
       version: 'v0',
       name: 'test_app',
@@ -59,13 +59,13 @@ Deno.test('Build `FpmProject` successfully', async (t) => {
     { name: 'test_package_e_example' },
   )
 
-  await t.step('call FpmProject.fromContext()', async () => {
-    const context = FpmContext.fromFlags({
+  await t.step('call DProject.fromContext()', async () => {
+    const context = Context.fromFlags({
       cwd: root,
       verbose: true,
       debug: true,
     })
-    const actual = await FpmProject.fromContext(context)
+    const actual = await DProject.fromContext(context)
 
     // verify
     assertEquals(actual.dartProjects.length, 5)
@@ -81,11 +81,11 @@ Deno.test('Build `FpmProject` successfully', async (t) => {
   await Deno.remove(root, { recursive: true })
 })
 
-Deno.test('Fail to build `FpmProject` because of incompatible version', async (t) => {
+Deno.test('Fail to build `DProject` because of incompatible version', async (t) => {
   // setup
   const root = await Deno.makeTempDir()
   await writeYamlFile(
-    join(root, 'fpm.yaml'),
+    join(root, 'd.yaml'),
     {
       version: 'v1',
       name: 'test_app',
@@ -103,15 +103,15 @@ Deno.test('Fail to build `FpmProject` because of incompatible version', async (t
     },
   )
 
-  await t.step('call FpmProject.fromContext()', async () => {
-    const context = FpmContext.fromFlags({
+  await t.step('call DProject.fromContext()', async () => {
+    const context = Context.fromFlags({
       cwd: root,
       verbose: true,
       debug: true,
     })
 
     try {
-      await FpmProject.fromContext(context)
+      await DProject.fromContext(context)
       fail('should throw an error')
     } catch (e) {
       assert(e.message.includes('Not compatible version'))
