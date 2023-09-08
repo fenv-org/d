@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,34 +37,22 @@ jobs:
           deno-version: ${{ matrix.deno }}
 
       - name: Deno fmt
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: deno fmt --ignore='test-sample/**'
 
       - name: Commit changes
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Format code with `deno fmt`"
 
-      - name: Deno lint on non-windows
-        if: ${{ matrix.os != 'windows-latest' }}
+      - name: Deno lint
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: deno lint lib/**/*.ts driver/*.ts
 
-      - name: Deno lint on windows
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
-          Get-ChildItem -Path 'lib' -Filter '*.ts' -File -Recurse | ForEach-Object {
-            deno lint $_.FullName
-          }
-
-      - name: Deno check on non-windows
-        if: ${{ matrix.os != 'windows-latest' }}
+      - name: Deno check
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: deno check lib/**/*.ts driver/*.ts
-
-      - name: Deno check on windows
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
-          Get-ChildItem -Path 'lib' -Filter '*.ts' -File -Recurse | ForEach-Object {
-            deno check $_.FullName
-          }
 
       - name: Run tests
         run: deno test --allow-all --coverage=cov_profile
