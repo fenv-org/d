@@ -1,14 +1,17 @@
 name: d
 description: Dart multi-package project manager
-version: 0.0.1
+version: 0.0.1+1
 repository: https://github.com/fenv-org/d
 
 environment:
-  sdk: ^3.0.6
+  sdk: ">=2.19.0 <4.0.0"
 
 # Add regular dependencies here.
 dependencies:
   # path: ^1.8.0
+
+executables:
+  install: install
 
 dev_dependencies:
   lints: ^2.0.0
