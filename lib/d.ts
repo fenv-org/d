@@ -15,7 +15,7 @@ import { FpmProject } from './project/mod.ts'
  * - `--allow-env`
  * - `--allow-net`
  */
-export async function fpm(cwd: string, args: string[]) {
+export async function d(cwd: string, args: string[]) {
   const { args: normalizedArgs, verbose, debug } = parseGlobalArgs(args)
   const flags = {
     ...std_flags.parse(normalizedArgs, {

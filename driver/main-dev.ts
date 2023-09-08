@@ -13,7 +13,7 @@ async function main() {
 }
 
 function getLibPath(): string {
-  return '../lib/fpm.ts'
+  return '../lib/d.ts'
 }
 
 main()

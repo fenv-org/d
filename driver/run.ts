@@ -1,7 +1,7 @@
 import { colors } from 'https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/colors.ts'
 
 type FPM = {
-  fpm: (cwd: string, args: string[]) => void | Promise<void>
+  d: (cwd: string, args: string[]) => void | Promise<void>
 }
 
 export async function run(
@@ -12,8 +12,8 @@ export async function run(
   },
 ) {
   try {
-    const { fpm }: FPM = await import(options.libPath)
-    const voidOrPromise = fpm(Deno.cwd(), options.args)
+    const { d }: FPM = await import(options.libPath)
+    const voidOrPromise = d(Deno.cwd(), options.args)
     if (voidOrPromise instanceof Promise) {
       await voidOrPromise
     }

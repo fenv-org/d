@@ -14,7 +14,7 @@ async function main() {
 
 function getLibPath(): string {
   const version = 'main'
-  return `https://raw.githubusercontent.com/fenv-org/fpm/${version}/lib/fpm.ts`
+  return `https://raw.githubusercontent.com/fenv-org/d/${version}/lib/d.ts`
 }
 
 main()
