@@ -1,11 +1,11 @@
-import { FpmContext } from './context/mod.ts'
+import { Context } from './context/mod.ts'
 import { DependencyGraph } from './dart/mod.ts'
 import { cliffy_table, std_flags } from './deps.ts'
-import { FpmError } from './error/src/fpm_error.ts'
-import { FpmProject } from './project/mod.ts'
+import { DError } from './error/mod.ts'
+import { DProject } from './project/mod.ts'
 
 /**
- * The entry point of the `fpm` CLI application.
+ * The entry point of the `d` CLI application.
  *
  * ## Required permissions
  *
@@ -15,7 +15,7 @@ import { FpmProject } from './project/mod.ts'
  * - `--allow-env`
  * - `--allow-net`
  */
-export async function d(cwd: string, args: string[]) {
+export async function dMain(cwd: string, args: string[]) {
   const { args: normalizedArgs, verbose, debug } = parseGlobalArgs(args)
   const flags = {
     ...std_flags.parse(normalizedArgs, {
@@ -30,7 +30,7 @@ export async function d(cwd: string, args: string[]) {
       },
       unknown: (arg) => {
         if (arg.startsWith('-')) {
-          throw new FpmError(`Unknown option: ${arg}`)
+          throw new DError(`Unknown option: ${arg}`)
         }
       },
     }),
@@ -38,15 +38,15 @@ export async function d(cwd: string, args: string[]) {
     debug,
   }
 
-  const context = FpmContext.fromFlags(flags)
+  const context = Context.fromFlags(flags)
   const { logger } = context
   logger.debug('flags=', flags)
 
   if (flags._.length === 0) {
-    throw new FpmError('No command specified')
+    throw new DError('No command specified')
   }
 
-  const project = await FpmProject.fromContext(context)
+  const project = await DProject.fromContext(context)
   const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
 
   if (context.debug) {

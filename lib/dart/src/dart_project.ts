@@ -1,5 +1,5 @@
 import { std_fs, std_path } from '../../deps.ts'
-import { FpmError } from '../../error/mod.ts'
+import { DError } from '../../error/mod.ts'
 import {
   loadPubspecOverridesYaml,
   PubspecOverridesYaml,
@@ -67,7 +67,7 @@ export class DartProject {
    */
   static async fromPubspecFilepath(path: string): Promise<DartProject> {
     if (!path.endsWith('pubspec.yaml')) {
-      throw new FpmError(`Not a pubspec.yaml file: ${path}`)
+      throw new DError(`Not a pubspec.yaml file: ${path}`)
     }
     if (!existsSync(path)) {
       throw new Deno.errors.NotFound(`pubspec.yaml not found: ${path}`)

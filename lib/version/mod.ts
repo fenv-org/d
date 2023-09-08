@@ -1,1 +1,1 @@
-export { fpmVersion } from './src/semver.ts'
+export { version } from './src/semver.ts'
