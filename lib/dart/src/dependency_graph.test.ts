@@ -40,7 +40,7 @@ Deno.test('Acyclic dependency graph', async (t) => {
         name: 'project2',
         version: '1.0.0',
         dependencies: {
-          project3: 'any',
+          project3: {},
         },
       },
     }),
@@ -51,7 +51,7 @@ Deno.test('Acyclic dependency graph', async (t) => {
         name: 'project3',
         version: '1.0.0',
         dev_dependencies: {
-          project1: 'any',
+          project1: {},
         },
       },
     }),
@@ -62,8 +62,11 @@ Deno.test('Acyclic dependency graph', async (t) => {
       pubspec: {
         name: 'project4',
         version: '1.0.0',
+        dependencies: {
+          project0: {},
+        },
         dev_dependencies: {
-          project1: 'any',
+          project1: {},
         },
         dependency_overrides: {
           // this should be ignored
@@ -83,10 +86,10 @@ Deno.test('Acyclic dependency graph', async (t) => {
         name: 'project5',
         version: '1.0.0',
         dependencies: {
-          project0: 'any',
+          project0: {},
         },
         dev_dependencies: {
-          project2: 'any',
+          project2: {},
         },
       },
     }),
@@ -155,7 +158,10 @@ Deno.test('Cyclic dependency graph', async (t) => {
         name: 'project0',
         version: '1.0.0',
         dependencies: {
-          project1: 'any',
+          project1: {},
+        },
+        dev_dependencies: {
+          project2: {},
         },
       },
       pubspecOverrides: {
