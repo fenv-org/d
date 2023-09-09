@@ -1,5 +1,6 @@
+import { graphCommand } from './command/graph/mod.ts'
 import { Context } from './context/mod.ts'
-import { DependencyGraph } from './dart/mod.ts'
+import { std } from './deps.ts'
 import { parseArgs } from './options/mod.ts'
 import { Workspace } from './workspace/mod.ts'
 
@@ -18,43 +19,18 @@ export async function dMain(cwd: string, args: string[]) {
   const flags = await parseArgs(cwd, args)
 
   const context = Context.fromFlags(flags)
-  const { logger } = context
-  logger.debug('flags=', flags)
+  const workspace = await Workspace.fromContext(context)
 
-  // if (flags._.length === 0) {
-  //   throw new DError('No command specified')
-  // }
+  switch (flags.name) {
+    case 'bootstrap':
+      // await workspace.bootstrap(flags.options)
+      break
 
-  const project = await Workspace.fromContext(context)
-  const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
+    case 'graph':
+      graphCommand({ context, workspace })
+      break
 
-  // if (context.debug) {
-  //   logger.debug(
-  //     logger.ansi.style.success('Analyzed dependency graph:') +
-  //       `\n` +
-  //       cliffy.table.Table.from(
-  //         dependencyGraph.projects.map((node) => [
-  //           node.name,
-  //           node.path,
-  //           dependencyGraph.dependenciesOf(node).map((dep) => dep.name).join(
-  //             '\n',
-  //           ),
-  //           dependencyGraph.dependentsOf(node).map((dep) => dep.name).join(
-  //             '\n',
-  //           ),
-  //         ]),
-  //       )
-  //         .header(['name', 'path', 'dependencies', 'reverse dependencies'])
-  //         .border(true)
-  //         .toString(),
-  //   )
-  // }
-
-  // const subcommand = flags._[0]
-  // const subcommandArgs = flags._.slice(1)
-  // const otherFlags = flags['--']
-
-  // logger.debug('subcommand=', subcommand)
-  // logger.debug('subcommandArgs=', subcommandArgs)
-  // logger.debug('otherFlags=', otherFlags)
+    default:
+      std.assert.unreachable()
+  }
 }
