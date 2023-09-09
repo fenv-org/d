@@ -1,5 +1,5 @@
 import { Context } from './context/mod.ts'
-import { parseCommand } from './parser/mod.ts'
+import { parseArgs } from './options/mod.ts'
 import { DProject } from './project/mod.ts'
 
 /**
@@ -14,7 +14,7 @@ import { DProject } from './project/mod.ts'
  * - `--allow-net`
  */
 export async function dMain(cwd: string, args: string[]) {
-  const flags = await parseCommand(cwd, args)
+  const flags = await parseArgs(cwd, args)
   console.error('flags=', flags)
 
   const context = Context.fromFlags(flags)

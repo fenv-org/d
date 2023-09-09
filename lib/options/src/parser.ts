@@ -1,22 +1,14 @@
 import { cliffy } from '../../deps.ts'
-import { DError } from '../../error/mod.ts'
 import { VERSION_STRING } from '../../version/src/version.ts'
-import { Options } from "./options.ts"
+import { fileOrGlobType } from './cliffy_types.ts'
+import { Options } from './options.ts'
 
 const { command } = cliffy
 
-function fileOrGlobType(
-  { label, name, value }: cliffy.command.ArgumentValue,
-): string {
-  if (value.endsWith('/')) {
-    throw new DError(
-      `${label} "${name}" must be a file or a glob for files: "${value}"`,
-    )
-  }
-  return value
-}
-
-export async function parseCommand(
+/**
+ * Parses the given {@link args}.
+ */
+export async function parseArgs(
   cwd: string,
   args: string[],
 ): Promise<Options> {
@@ -62,6 +54,11 @@ export async function parseCommand(
   } as unknown as Options
 }
 
+/**
+ * `bootstrap` subcommand.
+ *
+ * `bs` is one of the aliases for `bootstrap`.
+ */
 function bootstrapCommand() {
   return new command.Command()
     .description(

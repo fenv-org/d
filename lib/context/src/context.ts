@@ -1,6 +1,6 @@
 import { std } from '../../deps.ts'
 import { DLogger, Logger } from '../../logger/mod.ts'
-import { Options } from '../../parser/mod.ts'
+import { GlobalOptions } from '../../options/mod.ts'
 
 /**
  * A class that represents the context of the application.
@@ -31,7 +31,14 @@ export class Context {
   readonly config: string | undefined
   readonly dWorkspace: string | undefined
 
-  static fromFlags(flags: Options): Context {
+  /**
+   * Creates a new {@link Context} from the given {@link flags}.
+   */
+  static fromFlags(
+    flags: {
+      readonly cwd: string
+    } & GlobalOptions,
+  ): Context {
     return new Context({
       ...flags,
       cwd: std.path.resolve(flags.cwd),
