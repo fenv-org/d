@@ -1,5 +1,8 @@
 import { DependencyGraph } from '../../dart/mod.ts'
+import { std_async } from '../../deps.ts'
 import { poll, prepare, TraversalState } from './traversal_util.ts'
+
+const { deferred } = std_async
 
 /**
  * Result of visiting a node.
@@ -111,9 +114,13 @@ export class Traversal {
 
   /**
    * Start the traversal.
+   *
+   * @returns A promise that resolves when the traversal is done.
    */
-  start() {
-    this.#run()
+  start(): Promise<void> {
+    const promise = deferred<void>()
+    this.#run(promise)
+    return promise
   }
 
   /**
@@ -124,7 +131,7 @@ export class Traversal {
     this.#concurrency = 0
   }
 
-  #run(removeNode?: string) {
+  #run(promise: std_async.Deferred<void>, removeNode?: string) {
     const room = this.#concurrency -
       this.#visitingNodes.size
     if (room > 0) {
@@ -133,23 +140,36 @@ export class Traversal {
         removeNode,
         maximum: room,
       })
+      if (nodes.length === 0 && this.#state.remainingNodeCount === 0) {
+        promise.resolve()
+        return
+      }
       for (const node of nodes) {
         this.#visitingNodes.add(node)
-        this.#visit(node)
+        this.#visit(promise, node)
       }
     }
   }
 
-  async #visit(node: string): Promise<void> {
+  async #visit(promise: std_async.Deferred<void>, node: string): Promise<void> {
     const visitResult = await this.#onVisit(node)
+    this.#visitingNodes.delete(node)
     switch (visitResult) {
       case VisitResult.Continue: {
-        this.#run(node)
+        this.#run(promise, node)
+        if (this.#visitingNodes.size === 0 && this.#concurrency === 0) {
+          // The finally running node is just done.
+          promise.resolve()
+        }
         break
       }
 
       case VisitResult.Stop:
         this.#concurrency = 0
+        if (this.#visitingNodes.size === 0) {
+          // `node` is the only running node and it is just done.
+          promise.resolve()
+        }
     }
   }
 }

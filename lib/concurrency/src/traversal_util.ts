@@ -18,8 +18,10 @@ export function prepare(options: {
     outDegreeMap[node] = 0
   }
   for (const node of nodes) {
-    for (const neighbor of inboundEdges[node]) {
-      outDegreeMap[neighbor] += 1
+    if (node in inboundEdges) {
+      for (const neighbor of inboundEdges[node]) {
+        outDegreeMap[neighbor] += 1
+      }
     }
   }
   for (const node of nodes) {
@@ -43,10 +45,12 @@ export function poll(options: {
   const { state } = options
   if (options.removeNode) {
     state.remainingNodeCount -= 1
-    for (const neighbor of state.inboundEdges[options.removeNode]) {
-      state.outDegreeMap[neighbor] -= 1
-      if (state.outDegreeMap[neighbor] === 0) {
-        state.queue.push(neighbor)
+    if (options.removeNode in state.inboundEdges) {
+      for (const neighbor of state.inboundEdges[options.removeNode]) {
+        state.outDegreeMap[neighbor] -= 1
+        if (state.outDegreeMap[neighbor] === 0) {
+          state.queue.push(neighbor)
+        }
       }
     }
   }
