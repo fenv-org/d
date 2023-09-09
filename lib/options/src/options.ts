@@ -6,11 +6,16 @@ export type Options =
     readonly cwd: string
     readonly args: string[]
   }
-  & GlobalOptions
-  & ({
-    readonly name: 'bootstrap'
-    readonly options: PackageFilterOptions
-  })
+  & (
+    | {
+      readonly name: 'bootstrap'
+      readonly options: PackageFilterOptions & GlobalOptions
+    }
+    | {
+      readonly name: 'graph'
+      readonly options: GlobalOptions
+    }
+  )
 
 /**
  * The definition of `d`'s global command flags.

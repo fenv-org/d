@@ -1,4 +1,5 @@
 import { Context } from './context/mod.ts'
+import { DependencyGraph } from './dart/mod.ts'
 import { parseArgs } from './options/mod.ts'
 import { Workspace } from './workspace/mod.ts'
 
@@ -15,18 +16,17 @@ import { Workspace } from './workspace/mod.ts'
  */
 export async function dMain(cwd: string, args: string[]) {
   const flags = await parseArgs(cwd, args)
-  console.error('flags=', flags)
 
   const context = Context.fromFlags(flags)
   const { logger } = context
-  // logger.debug('flags=', flags)
+  logger.debug('flags=', flags)
 
   // if (flags._.length === 0) {
   //   throw new DError('No command specified')
   // }
 
   const project = await Workspace.fromContext(context)
-  // const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
+  const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
 
   // if (context.debug) {
   //   logger.debug(

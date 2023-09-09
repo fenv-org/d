@@ -62,8 +62,10 @@ Deno.test('Build `Workspace` successfully', async (t) => {
   await t.step('call Workspace.fromContext()', async () => {
     const context = Context.fromFlags({
       cwd: root,
-      verbose: true,
-      debug: true,
+      options: {
+        verbose: true,
+        debug: true,
+      },
     })
     const actual = await Workspace.fromContext(context)
 
@@ -106,8 +108,10 @@ Deno.test('Fail to build `Workspace` because of incompatible version', async (t)
   await t.step('call Workspace.fromContext()', async () => {
     const context = Context.fromFlags({
       cwd: root,
-      verbose: true,
-      debug: true,
+      options: {
+        verbose: true,
+        debug: true,
+      },
     })
 
     try {

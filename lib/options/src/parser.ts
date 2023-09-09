@@ -43,9 +43,9 @@ export async function parseArgs(
     .command('help', new command.HelpCommand().global())
     .command('bootstrap', bootstrapCommand())
     .command('bs', bootstrapCommand())
+    .command('graph', graphCommand())
     .parse(args)
 
-  console.error('flags=', flags)
   const commandName = flags.cmd.getName()
   return {
     cwd,
@@ -70,4 +70,9 @@ function bootstrapCommand() {
       'A glob pattern or a specific file that must exist',
       { collect: true },
     )
+}
+
+function graphCommand() {
+  return new command.Command()
+    .description('Show the dependency graph of the workspace')
 }

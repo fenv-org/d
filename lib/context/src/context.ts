@@ -37,20 +37,22 @@ export class Context {
   static fromFlags(
     flags: {
       readonly cwd: string
-    } & GlobalOptions,
+      readonly options: GlobalOptions
+    },
   ): Context {
     return new Context({
       ...flags,
+      ...flags.options,
       cwd: std.path.resolve(flags.cwd),
-      dWorkspace: flags.dWorkspace
-        ? std.path.isAbsolute(flags.dWorkspace)
-          ? flags.dWorkspace
-          : std.path.resolve(flags.cwd, flags.dWorkspace)
+      dWorkspace: flags.options.dWorkspace
+        ? std.path.isAbsolute(flags.options.dWorkspace)
+          ? flags.options.dWorkspace
+          : std.path.resolve(flags.cwd, flags.options.dWorkspace)
         : undefined,
       logger: new DLogger(
-        flags.verbose
-          ? Logger.verbose({ logTime: true, debug: flags.debug })
-          : Logger.standard({ debug: flags.debug }),
+        flags.options.verbose
+          ? Logger.verbose({ logTime: true, debug: flags.options.debug })
+          : Logger.standard({ debug: flags.options.debug }),
       ),
     })
   }

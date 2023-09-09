@@ -42,7 +42,7 @@ export class Workspace {
   static async fromContext(context: Context): Promise<Workspace> {
     const { logger } = context
     const workspaceFilepath = await Workspace.#findWorkspaceFile(context)
-    logger.verbose(`Found project file: ${workspaceFilepath}`)
+    logger.verbose(`Found workspace file: ${workspaceFilepath}`)
 
     const workspaceYaml = loadWorkspaceYaml(workspaceFilepath)
     logger.debug('workspaceYaml=', workspaceYaml)
