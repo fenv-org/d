@@ -8,7 +8,7 @@ import { assertEquals } from '../../test_deps.ts'
 import { Traversal, VisitResult } from './traversal_api.ts'
 
 Deno.test('traversal_api', async (t) => {
-  // setup
+  // setup: https://i.stack.imgur.com/zuLmn.png
   const projects = [
     dartProjectOf({ id: 0 }),
     dartProjectOf({ id: 1 }),
