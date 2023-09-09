@@ -62,6 +62,8 @@ Deno.test('Build `Workspace` successfully', async (t) => {
   await t.step('call Workspace.fromContext()', async () => {
     const context = Context.fromFlags({
       cwd: root,
+      stdout: Deno.stdout,
+      stderr: Deno.stderr,
       options: {
         verbose: true,
         debug: true,
@@ -108,6 +110,8 @@ Deno.test('Fail to build `Workspace` because of incompatible version', async (t)
   await t.step('call Workspace.fromContext()', async () => {
     const context = Context.fromFlags({
       cwd: root,
+      stdout: Deno.stdout,
+      stderr: Deno.stderr,
       options: {
         verbose: true,
         debug: true,

@@ -1,7 +1,6 @@
 import { graphCommand } from './command/graph/mod.ts'
 import { Context } from './context/mod.ts'
-import { std } from './deps.ts'
-import { parseArgs } from './options/mod.ts'
+import { buildCommand, parseArgs } from './options/mod.ts'
 import { Workspace } from './workspace/mod.ts'
 
 /**
@@ -15,10 +14,20 @@ import { Workspace } from './workspace/mod.ts'
  * - `--allow-env`
  * - `--allow-net`
  */
-export async function dMain(cwd: string, args: string[]) {
-  const flags = await parseArgs(cwd, args)
-
-  const context = Context.fromFlags(flags)
+export async function dMain(
+  args: string[],
+  options: {
+    readonly cwd: string
+    readonly stdout: Deno.Writer & Deno.WriterSync
+    readonly stderr: Deno.Writer & Deno.WriterSync
+  },
+) {
+  const flags = await parseArgs(options.cwd, args)
+  const context = Context.fromFlags({
+    ...flags,
+    stderr: options.stderr,
+    stdout: options.stdout,
+  })
   const workspace = await Workspace.fromContext(context)
 
   switch (flags.name) {
@@ -31,6 +40,6 @@ export async function dMain(cwd: string, args: string[]) {
       break
 
     default:
-      std.assert.unreachable()
+      buildCommand().showHelp()
   }
 }

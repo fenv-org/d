@@ -5,14 +5,8 @@ import { Options } from './options.ts'
 
 const { command } = cliffy
 
-/**
- * Parses the given {@link args}.
- */
-export async function parseArgs(
-  cwd: string,
-  args: string[],
-): Promise<Options> {
-  const flags = await new command.Command()
+export function buildCommand() {
+  return new command.Command()
     .name('d')
     .usage('[command] <OPTIONS>')
     .version(VERSION_STRING)
@@ -44,8 +38,16 @@ export async function parseArgs(
     .command('bootstrap', bootstrapCommand())
     .command('bs', bootstrapCommand())
     .command('graph', graphCommand())
-    .parse(args)
+}
 
+/**
+ * Parses the given {@link args}.
+ */
+export async function parseArgs(
+  cwd: string,
+  args: string[],
+): Promise<Options> {
+  const flags = await buildCommand().parse(args)
   const commandName = flags.cmd.getName()
   return {
     cwd,

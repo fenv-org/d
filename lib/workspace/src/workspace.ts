@@ -45,7 +45,9 @@ export class Workspace {
     logger.verbose(`Found workspace file: ${workspaceFilepath}`)
 
     const workspaceYaml = loadWorkspaceYaml(workspaceFilepath)
-    logger.debug('workspaceYaml=', workspaceYaml)
+    logger.debug(
+      'Loaded workspace file: ' + JSON.stringify(workspaceYaml, null, '  '),
+    )
 
     const workspaceDir = dirname(workspaceFilepath)
     const excludeRegExps = util

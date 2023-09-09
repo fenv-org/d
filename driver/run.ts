@@ -1,7 +1,14 @@
 import { colors } from 'https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/colors.ts'
 
 type dMain = {
-  dMain: (cwd: string, args: string[]) => void | Promise<void>
+  dMain: (
+    args: string[],
+    options: {
+      readonly cwd: string
+      readonly stdout: Deno.Writer & Deno.WriterSync
+      readonly stderr: Deno.Writer & Deno.WriterSync
+    },
+  ) => void | Promise<void>
 }
 
 export async function run(
@@ -13,7 +20,11 @@ export async function run(
 ) {
   try {
     const { dMain }: dMain = await import(options.libPath)
-    const voidOrPromise = dMain(Deno.cwd(), options.args)
+    const voidOrPromise = dMain(options.args, {
+      cwd: Deno.cwd(),
+      stdout: Deno.stdout,
+      stderr: Deno.stderr,
+    })
     if (voidOrPromise instanceof Promise) {
       await voidOrPromise
     }

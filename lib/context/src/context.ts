@@ -37,6 +37,8 @@ export class Context {
   static fromFlags(
     flags: {
       readonly cwd: string
+      readonly stdout: Deno.Writer & Deno.WriterSync
+      readonly stderr: Deno.Writer & Deno.WriterSync
       readonly options: GlobalOptions
     },
   ): Context {
@@ -51,8 +53,12 @@ export class Context {
         : undefined,
       logger: new DLogger(
         flags.options.verbose
-          ? Logger.verbose({ logTime: true, debug: flags.options.debug })
-          : Logger.standard({ debug: flags.options.debug }),
+          ? Logger.verbose({
+            ...flags,
+            logTime: true,
+            debug: flags.options.debug,
+          })
+          : Logger.standard({ ...flags, debug: flags.options.debug }),
       ),
     })
   }
