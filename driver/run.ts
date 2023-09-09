@@ -1,4 +1,5 @@
 import { colors } from 'https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/colors.ts'
+import { supportColorCheck } from 'https://raw.githubusercontent.com/frunkad/supports-color/24c4e4afbdccc88011d6b33d06f0056a0d889f86/mod.ts'
 
 type dMain = {
   dMain: (
@@ -7,6 +8,7 @@ type dMain = {
       readonly cwd: string
       readonly stdout: Deno.Writer & Deno.WriterSync
       readonly stderr: Deno.Writer & Deno.WriterSync
+      readonly colorSupported: boolean
     },
   ) => void | Promise<void>
 }
@@ -24,6 +26,7 @@ export async function run(
       cwd: Deno.cwd(),
       stdout: Deno.stdout,
       stderr: Deno.stderr,
+      colorSupported: supportColorCheck().stdout ? true : false,
     })
     if (voidOrPromise instanceof Promise) {
       await voidOrPromise

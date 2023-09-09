@@ -20,6 +20,7 @@ export async function dMain(
     readonly cwd: string
     readonly stdout: Deno.Writer & Deno.WriterSync
     readonly stderr: Deno.Writer & Deno.WriterSync
+    readonly colorSupported: boolean
   },
 ) {
   const flags = await parseArgs(options.cwd, args)
@@ -27,6 +28,7 @@ export async function dMain(
     ...flags,
     stderr: options.stderr,
     stdout: options.stdout,
+    colorSupported: options.colorSupported,
   })
   const workspace = await Workspace.fromContext(context)
 

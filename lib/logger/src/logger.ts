@@ -7,8 +7,12 @@ export abstract class Logger {
     stdout: Deno.Writer & Deno.WriterSync
     stderr: Deno.Writer & Deno.WriterSync
     debug: boolean
+    colorSupported?: boolean
   }): Logger {
-    return new StandardLogger(options)
+    return new StandardLogger({
+      ...options,
+      ansi: Ansi(cliffy.ansi.colors, options.colorSupported ?? false),
+    })
   }
 
   static verbose(options: {
@@ -16,9 +20,11 @@ export abstract class Logger {
     stderr: Deno.Writer & Deno.WriterSync
     logTime?: boolean
     debug: boolean
+    colorSupported?: boolean
   }): Logger {
     return new VerboseLogger({
       ...options,
+      ansi: Ansi(cliffy.ansi.colors, options.colorSupported ?? false),
       logTime: options?.logTime ?? true,
     })
   }
@@ -49,17 +55,19 @@ class StandardLogger implements Logger {
     options: {
       stdout: Deno.Writer & Deno.WriterSync
       stderr: Deno.Writer & Deno.WriterSync
+      ansi: Ansi
       debug?: boolean
     },
   ) {
     this.#stdout = options.stdout
     this.#stderr = options.stderr
     this.#debug = options?.debug ?? false
+    this.#ansi = options.ansi
   }
 
   readonly #stdout: Deno.Writer & Deno.WriterSync
   readonly #stderr: Deno.Writer & Deno.WriterSync
-  readonly #ansi = Ansi(cliffy.ansi.colors)
+  readonly #ansi: Ansi
   readonly #debug: boolean
 
   public get ansi(): Ansi {
@@ -99,11 +107,13 @@ class VerboseLogger implements Logger {
   constructor(options: {
     stdout: Deno.Writer & Deno.WriterSync
     stderr: Deno.Writer & Deno.WriterSync
+    ansi: Ansi
     logTime?: boolean
     debug: boolean
   }) {
     this.#stdout = options.stdout
     this.#stderr = options.stderr
+    this.#ansi = options.ansi
     this.#debug = options.debug
     this.#logTime = options.logTime ?? false
   }
@@ -111,7 +121,7 @@ class VerboseLogger implements Logger {
   readonly #stdout: Deno.Writer & Deno.WriterSync
   readonly #stderr: Deno.Writer & Deno.WriterSync
   readonly #startTime = new Date().getTime()
-  readonly #ansi = Ansi(cliffy.ansi.colors)
+  readonly #ansi: Ansi
   readonly #debug: boolean
   readonly #logTime: boolean
 
@@ -139,12 +149,9 @@ class VerboseLogger implements Logger {
   public stderr(message: string, options?: { prefix?: boolean }): void {
     const { prefix = true } = options ?? {}
     if (prefix) {
-      writeLine(
-        this.#stderr,
-        this._createPrefix() + cliffy.ansi.colors.red(message),
-      )
+      writeLine(this.#stderr, this._createPrefix() + message)
     } else {
-      writeLine(this.#stderr, cliffy.ansi.colors.red(message))
+      writeLine(this.#stderr, message)
     }
   }
 
@@ -332,32 +339,60 @@ export class DLogger extends DelegateLogger {
   }
 }
 
-function Ansi(colors: cliffy.ansi.Colors): Ansi {
-  const color = {
-    command: colors.yellow,
-    commandLabel: colors.brightYellow,
-    successMessage: colors.green,
-    successLabel: colors.brightGreen,
-    warningMessage: colors.yellow,
-    warningLabel: colors.brightYellow,
-    errorMessage: colors.red,
-    errorLabel: colors.brightRed,
-    hintMessage: colors.gray,
-    hintLabel: colors.gray,
-    dryRunWarningMessage: colors.magenta,
-    dryRunWarningLabel: colors.brightMagenta,
-  }
-  const style = {
-    command: colors.bold,
-    success: colors.bold,
-    label: colors.bold,
-    target: (message: string) => colors.cyan(colors.bold(message)),
-    packagePath: colors.blue,
-    packageName: colors.bold,
-    errorPackageName: (message: string) => colors.yellow(colors.bold(message)),
-    verbose: colors.gray,
-    debug: colors.blue,
-  }
+function Ansi(colors: cliffy.ansi.Colors, colorSupported: boolean): Ansi {
+  const color = colorSupported
+    ? {
+      command: colors.yellow,
+      commandLabel: colors.brightYellow,
+      successMessage: colors.green,
+      successLabel: colors.brightGreen,
+      warningMessage: colors.yellow,
+      warningLabel: colors.brightYellow,
+      errorMessage: colors.red,
+      errorLabel: colors.brightRed,
+      hintMessage: colors.gray,
+      hintLabel: colors.gray,
+      dryRunWarningMessage: colors.magenta,
+      dryRunWarningLabel: colors.brightMagenta,
+    }
+    : {
+      command: (message: string) => message,
+      commandLabel: (message: string) => message,
+      successMessage: (message: string) => message,
+      successLabel: (message: string) => message,
+      warningMessage: (message: string) => message,
+      warningLabel: (message: string) => message,
+      errorMessage: (message: string) => message,
+      errorLabel: (message: string) => message,
+      hintMessage: (message: string) => message,
+      hintLabel: (message: string) => message,
+      dryRunWarningMessage: (message: string) => message,
+      dryRunWarningLabel: (message: string) => message,
+    }
+  const style = colorSupported
+    ? {
+      command: colors.bold,
+      success: colors.bold,
+      label: colors.bold,
+      target: (message: string) => colors.cyan(colors.bold(message)),
+      packagePath: colors.blue,
+      packageName: colors.bold,
+      errorPackageName: (message: string) =>
+        colors.yellow(colors.bold(message)),
+      verbose: colors.gray,
+      debug: colors.blue,
+    }
+    : {
+      command: (message: string) => message,
+      success: (message: string) => message,
+      label: (message: string) => message,
+      target: (message: string) => message,
+      packagePath: (message: string) => message,
+      packageName: (message: string) => message,
+      errorPackageName: (message: string) => message,
+      verbose: (message: string) => message,
+      debug: (message: string) => message,
+    }
   const label = {
     success: color.successLabel(style.label('SUCCESS')),
     warning: color.warningLabel(style.label('WARNING')),

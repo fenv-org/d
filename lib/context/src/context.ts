@@ -39,6 +39,7 @@ export class Context {
       readonly cwd: string
       readonly stdout: Deno.Writer & Deno.WriterSync
       readonly stderr: Deno.Writer & Deno.WriterSync
+      readonly colorSupported?: boolean
       readonly options: GlobalOptions
     },
   ): Context {
@@ -58,7 +59,10 @@ export class Context {
             logTime: true,
             debug: flags.options.debug,
           })
-          : Logger.standard({ ...flags, debug: flags.options.debug }),
+          : Logger.standard({
+            ...flags,
+            debug: flags.options.debug,
+          }),
       ),
     })
   }
