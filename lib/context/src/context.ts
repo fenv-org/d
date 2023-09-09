@@ -42,6 +42,11 @@ export class Context {
     return new Context({
       ...flags,
       cwd: std.path.resolve(flags.cwd),
+      dWorkspace: flags.dWorkspace
+        ? std.path.isAbsolute(flags.dWorkspace)
+          ? flags.dWorkspace
+          : std.path.resolve(flags.cwd, flags.dWorkspace)
+        : undefined,
       logger: new DLogger(
         flags.verbose
           ? Logger.verbose({ logTime: true, debug: flags.debug })

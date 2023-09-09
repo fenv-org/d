@@ -4,7 +4,7 @@ import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import { DLogger } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'
-import { loadProjectYaml } from './project_yaml.ts'
+import { loadWorkspaceYaml } from './workspace_yaml.ts'
 
 const { exists, expandGlob } = std.fs
 const { join, dirname, globToRegExp } = std.path
@@ -12,16 +12,16 @@ const { join, dirname, globToRegExp } = std.path
 export const DEFAULT_PROJECT_FILENAME = 'd.yaml'
 
 /**
- * A class that represents the main project managed by `d`.
+ * A class that represents the workspace managed by `d`.
  *
- * The main project is a Flutter project that contains `d.yaml`.
+ * The workspace is a Dart/Flutter project that contains `d.yaml`.
  */
-export class DProject {
+export class Workspace {
   constructor(
     /**
      * The absolute path of the `d.yaml` file of the main project.
      */
-    public projectFilepath: string,
+    public workspaceFilepath: string,
     /**
      * The found dart projects.
      */
@@ -30,22 +30,26 @@ export class DProject {
   }
 
   /**
-   * Constructs a new `DProject` instance from the given {@link Context}.
+   * The absolute path of the workspace directory.
    */
-  static async fromContext(context: Context): Promise<DProject> {
+  get workspaceDir(): string {
+    return dirname(this.workspaceFilepath)
+  }
+
+  /**
+   * Constructs a new {@link Workspace} instance from the given {@link Context}.
+   */
+  static async fromContext(context: Context): Promise<Workspace> {
     const { logger } = context
-    const projectFilepath = await DProject.#findProjectFile(context.cwd)
-    if (!projectFilepath) {
-      throw new DError(`No \`${DEFAULT_PROJECT_FILENAME}\` file found`)
-    }
-    logger.verbose(`Found project file: ${projectFilepath}`)
+    const workspaceFilepath = await Workspace.#findWorkspaceFile(context)
+    logger.verbose(`Found project file: ${workspaceFilepath}`)
 
-    const projectYaml = loadProjectYaml(projectFilepath)
-    logger.debug('projectYaml=', projectYaml)
+    const workspaceYaml = loadWorkspaceYaml(workspaceFilepath)
+    logger.debug('workspaceYaml=', workspaceYaml)
 
-    const projectDir = dirname(projectFilepath)
+    const workspaceDir = dirname(workspaceFilepath)
     const excludeRegExps = util
-      .asArray(projectYaml.packages.exclude)
+      .asArray(workspaceYaml.packages.exclude)
       .map((glob) =>
         glob.includes('**')
           ? globToRegExp(glob)
@@ -54,10 +58,10 @@ export class DProject {
 
     const dartProjects = (await Promise.all(
       util
-        .asArray(projectYaml.packages.include)
+        .asArray(workspaceYaml.packages.include)
         .map((glob) =>
-          DProject.#findDartProjects({
-            pwd: projectDir,
+          Workspace.#findDartProjects({
+            pwd: workspaceDir,
             glob,
             excludeRegExps,
             logger,
@@ -66,18 +70,42 @@ export class DProject {
         .map(util.collectAsArray),
     )).flat()
 
-    return new DProject(projectFilepath, dartProjects)
+    return new Workspace(workspaceFilepath, dartProjects)
   }
 
-  static async #findProjectFile(path: string): Promise<string | undefined> {
+  static async #findWorkspaceFile(context: Context): Promise<string> {
+    if (context.dWorkspace) {
+      if (await exists(context.dWorkspace, { isFile: true })) {
+        return context.dWorkspace
+      }
+      if (await exists(join(context.dWorkspace, DEFAULT_PROJECT_FILENAME))) {
+        return join(context.dWorkspace, DEFAULT_PROJECT_FILENAME)
+      }
+      throw new DError(
+        `No \`${DEFAULT_PROJECT_FILENAME}\` file found in ` +
+          `\`${context.dWorkspace}\``,
+      )
+    }
+
+    if (context.config) {
+      if (await exists(context.config, { isFile: true })) {
+        return context.config
+      }
+      throw new DError(`No \`${context.config}\` file exists`)
+    }
+
+    return this.#findWorkspaceFileRecursively(context.cwd)
+  }
+
+  static async #findWorkspaceFileRecursively(path: string): Promise<string> {
     if (await exists(join(path, DEFAULT_PROJECT_FILENAME))) {
       return join(path, DEFAULT_PROJECT_FILENAME)
     }
     const parent = dirname(path)
     if (parent === path) {
-      return undefined
+      throw new DError(`No \`${DEFAULT_PROJECT_FILENAME}\` file found`)
     }
-    return DProject.#findProjectFile(parent)
+    return Workspace.#findWorkspaceFileRecursively(parent)
   }
 
   static async *#findDartProjects(options: {
@@ -94,7 +122,7 @@ export class DProject {
       const dartProject = await DartProject.fromPubspecFilepath(
         walkEntry.path,
       )
-      if (DProject.#shouldExclude(dartProject, excludeRegExps)) {
+      if (Workspace.#shouldExclude(dartProject, excludeRegExps)) {
         logger.debug(`Found but excluded dart project: ${walkEntry.path}`)
         continue
       }

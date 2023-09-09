@@ -1,6 +1,6 @@
 import { Context } from './context/mod.ts'
 import { parseArgs } from './options/mod.ts'
-import { DProject } from './project/mod.ts'
+import { Workspace } from './workspace/mod.ts'
 
 /**
  * The entry point of the `d` CLI application.
@@ -25,7 +25,7 @@ export async function dMain(cwd: string, args: string[]) {
   //   throw new DError('No command specified')
   // }
 
-  const project = await DProject.fromContext(context)
+  const project = await Workspace.fromContext(context)
   // const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
 
   // if (context.debug) {

@@ -1,11 +1,11 @@
 import { Context } from '../../context/mod.ts'
 import { std } from '../../deps.ts'
 import { assert, assertEquals, fail, writeYamlFile } from '../../test_deps.ts'
-import { DProject } from './project.ts'
+import { Workspace } from './workspace.ts'
 
 const { join } = std.path
 
-Deno.test('Build `DProject` successfully', async (t) => {
+Deno.test('Build `Workspace` successfully', async (t) => {
   // setup
   const root = await Deno.makeTempDir()
   await writeYamlFile(
@@ -59,13 +59,13 @@ Deno.test('Build `DProject` successfully', async (t) => {
     { name: 'test_package_e_example' },
   )
 
-  await t.step('call DProject.fromContext()', async () => {
+  await t.step('call Workspace.fromContext()', async () => {
     const context = Context.fromFlags({
       cwd: root,
       verbose: true,
       debug: true,
     })
-    const actual = await DProject.fromContext(context)
+    const actual = await Workspace.fromContext(context)
 
     // verify
     assertEquals(actual.dartProjects.length, 5)
@@ -81,7 +81,7 @@ Deno.test('Build `DProject` successfully', async (t) => {
   await Deno.remove(root, { recursive: true })
 })
 
-Deno.test('Fail to build `DProject` because of incompatible version', async (t) => {
+Deno.test('Fail to build `Workspace` because of incompatible version', async (t) => {
   // setup
   const root = await Deno.makeTempDir()
   await writeYamlFile(
@@ -103,7 +103,7 @@ Deno.test('Fail to build `DProject` because of incompatible version', async (t) 
     },
   )
 
-  await t.step('call DProject.fromContext()', async () => {
+  await t.step('call Workspace.fromContext()', async () => {
     const context = Context.fromFlags({
       cwd: root,
       verbose: true,
@@ -111,7 +111,7 @@ Deno.test('Fail to build `DProject` because of incompatible version', async (t) 
     })
 
     try {
-      await DProject.fromContext(context)
+      await Workspace.fromContext(context)
       fail('should throw an error')
     } catch (e) {
       assert(e.message.includes('Not compatible version'))

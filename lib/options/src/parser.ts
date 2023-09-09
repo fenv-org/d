@@ -1,6 +1,6 @@
 import { cliffy } from '../../deps.ts'
 import { VERSION_STRING } from '../../version/src/version.ts'
-import { fileOrGlobType } from './cliffy_types.ts'
+import { FileOrGlobType } from './cliffy_types.ts'
 import { Options } from './options.ts'
 
 const { command } = cliffy
@@ -17,7 +17,7 @@ export async function parseArgs(
     .usage('[command] <OPTIONS>')
     .version(VERSION_STRING)
     .description('A Dart/Flutter multi-package project manager')
-    .globalType('fileOrGlob', fileOrGlobType)
+    .globalType('fileOrGlob', new FileOrGlobType())
     .env(
       'D_WORKSPACE=<workspace:file>',
       'The path to the `d.yaml` file or the directory containing it. ' +
@@ -45,6 +45,7 @@ export async function parseArgs(
     .command('bs', bootstrapCommand())
     .parse(args)
 
+  console.error('flags=', flags)
   const commandName = flags.cmd.getName()
   return {
     cwd,
