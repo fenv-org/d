@@ -1,4 +1,4 @@
-import { std_yaml } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import { version } from '../../version/mod.ts'
 
@@ -16,7 +16,7 @@ export interface ProjectYaml {
 
 export function loadProjectYaml(filepath: string): ProjectYaml {
   const text = Deno.readTextFileSync(filepath)
-  const parsedText = std_yaml.parse(text)
+  const parsedText = std.yaml.parse(text)
   if (typeof parsedText !== 'object' || parsedText === null) {
     throw new DError(`Invalid yaml file format`)
   }

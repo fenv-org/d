@@ -1,13 +1,13 @@
 import { Context } from '../../context/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
-import { std_fs, std_path } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import { DLogger } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'
 import { loadProjectYaml } from './project_yaml.ts'
 
-const { exists, expandGlob } = std_fs
-const { join, dirname, globToRegExp } = std_path
+const { exists, expandGlob } = std.fs
+const { join, dirname, globToRegExp } = std.path
 
 export const DEFAULT_PROJECT_FILENAME = 'd.yaml'
 

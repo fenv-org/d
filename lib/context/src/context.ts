@@ -1,4 +1,4 @@
-import { std_path } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { DLogger, Logger } from '../../logger/mod.ts'
 
 /**
@@ -20,7 +20,7 @@ export class Context {
     debug: boolean
   }): Context {
     return new Context(
-      std_path.resolve(flags.cwd),
+      std.path.resolve(flags.cwd),
       flags.verbose,
       flags.debug,
       new DLogger(

@@ -1,9 +1,9 @@
 import { Context } from '../../context/mod.ts'
-import { std_path } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { assert, assertEquals, fail, writeYamlFile } from '../../test_deps.ts'
 import { DProject } from './project.ts'
 
-const { join } = std_path
+const { join } = std.path
 
 Deno.test('Build `DProject` successfully', async (t) => {
   // setup

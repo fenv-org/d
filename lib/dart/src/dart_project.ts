@@ -1,4 +1,4 @@
-import { std_fs, std_path } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import {
   loadPubspecOverridesYaml,
@@ -6,8 +6,8 @@ import {
 } from './pubspec_overrides_yaml.ts'
 import { loadProjectYaml, PubspecYamlSchema } from './pubspec_yaml.ts'
 
-const { existsSync } = std_fs
-const { resolve, dirname } = std_path
+const { existsSync } = std.fs
+const { resolve, dirname } = std.path
 
 /**
  * Represents a Dart project.

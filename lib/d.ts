@@ -1,6 +1,6 @@
 import { Context } from './context/mod.ts'
 import { DependencyGraph } from './dart/mod.ts'
-import { cliffy_table, std_flags } from './deps.ts'
+import { cliffy, std } from './deps.ts'
 import { DError } from './error/mod.ts'
 import { DProject } from './project/mod.ts'
 
@@ -18,7 +18,7 @@ import { DProject } from './project/mod.ts'
 export async function dMain(cwd: string, args: string[]) {
   const { args: normalizedArgs, verbose, debug } = parseGlobalArgs(args)
   const flags = {
-    ...std_flags.parse(normalizedArgs, {
+    ...std.flags.parse(normalizedArgs, {
       stopEarly: true,
       string: ['cwd'],
       alias: { cwd: 'c' },
@@ -53,7 +53,7 @@ export async function dMain(cwd: string, args: string[]) {
     logger.debug(
       logger.ansi.style.success('Analyzed dependency graph:') +
         `\n` +
-        cliffy_table.Table.from(
+        cliffy.table.Table.from(
           dependencyGraph.projects.map((node) => [
             node.name,
             node.path,

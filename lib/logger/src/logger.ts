@@ -1,4 +1,4 @@
-import { cliffy_ansi } from '../../deps.ts'
+import { cliffy } from '../../deps.ts'
 import { Ansi } from './ansi.ts'
 
 export abstract class Logger {
@@ -42,7 +42,7 @@ class StandardLogger implements Logger {
   }
 
   readonly #encoder = new TextEncoder()
-  readonly #ansi = Ansi(cliffy_ansi.colors)
+  readonly #ansi = Ansi(cliffy.ansi.colors)
   readonly #debug: boolean
 
   public get ansi(): Ansi {
@@ -87,7 +87,7 @@ class StandardLogger implements Logger {
 class VerboseLogger implements Logger {
   readonly #startTime = new Date().getTime()
   readonly #encoder = new TextEncoder()
-  readonly #ansi = Ansi(cliffy_ansi.colors)
+  readonly #ansi = Ansi(cliffy.ansi.colors)
   readonly #debug: boolean
 
   constructor(
@@ -110,7 +110,7 @@ class VerboseLogger implements Logger {
   }
 
   public stderr(message: string): void {
-    console.error(this._createPrefix() + cliffy_ansi.colors.red(message))
+    console.error(this._createPrefix() + cliffy.ansi.colors.red(message))
   }
 
   // deno-lint-ignore no-explicit-any
@@ -121,7 +121,7 @@ class VerboseLogger implements Logger {
   }
 
   public trace(message: string): void {
-    console.trace(this._createPrefix() + cliffy_ansi.colors.gray(message))
+    console.trace(this._createPrefix() + cliffy.ansi.colors.gray(message))
   }
 
   public write(message: string): void {
@@ -304,7 +304,7 @@ export class DLogger extends DelegateLogger {
   }
 }
 
-function Ansi(colors: cliffy_ansi.Colors): Ansi {
+function Ansi(colors: cliffy.ansi.Colors): Ansi {
   const color = {
     command: colors.yellow,
     commandLabel: colors.brightYellow,

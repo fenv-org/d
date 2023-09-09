@@ -3,7 +3,7 @@ import {
   deferred,
 } from 'https://deno.land/std@0.201.0/async/deferred.ts'
 import { DartProject, DependencyGraph, PubDependency } from '../../dart/mod.ts'
-import { cliffy_ansi, std_path } from '../../deps.ts'
+import { cliffy, std } from '../../deps.ts'
 import { assertEquals } from '../../test_deps.ts'
 import { Traversal, VisitResult } from './traversal_api.ts'
 
@@ -320,8 +320,8 @@ function dartProjectOf(option: {
 }): DartProject {
   const name = `project_${option.id}`
   return new DartProject({
-    path: std_path.join('package', name),
-    pubspecFilepath: std_path.join('package', name, 'pubspec.yaml'),
+    path: std.path.join('package', name),
+    pubspecFilepath: std.path.join('package', name, 'pubspec.yaml'),
     pubspec: {
       name,
       version: '1.0.0',
@@ -344,18 +344,18 @@ async function onVisit(option: {
   visitMap[id] = deferred<boolean>()
   waitMap[id].resolve()
   log.push(`[${projectName}]: enter`)
-  console.log(cliffy_ansi.colors.brightRed(`[${projectName}]`), 'enter')
+  console.log(cliffy.ansi.colors.brightRed(`[${projectName}]`), 'enter')
   if (await visitMap[id]) {
     log.push(`[${projectName}]: exit with continue`)
     console.log(
-      cliffy_ansi.colors.brightRed(`[${projectName}]`),
+      cliffy.ansi.colors.brightRed(`[${projectName}]`),
       'exit with continue',
     )
     return VisitResult.Continue
   } else {
     log.push(`[${projectName}]: exit with stop`)
     console.log(
-      cliffy_ansi.colors.brightRed(`[${projectName}]`),
+      cliffy.ansi.colors.brightRed(`[${projectName}]`),
       'exit with stop',
     )
     return VisitResult.Stop
@@ -371,16 +371,16 @@ async function waitAndGo(
   ...ids: number[]
 ) {
   for (const id of ids) {
-    console.log(cliffy_ansi.colors.brightCyan(`[wait]`), id)
+    console.log(cliffy.ansi.colors.brightCyan(`[wait]`), id)
     await options.waitMap[id]
-    console.log(cliffy_ansi.colors.brightCyan(`[go]`), id)
+    console.log(cliffy.ansi.colors.brightCyan(`[go]`), id)
     if (id in options.visitMap) {
       if (options.stopOn === id) {
-        console.log(cliffy_ansi.colors.brightCyan(`[stop]`), id)
+        console.log(cliffy.ansi.colors.brightCyan(`[stop]`), id)
         options.visitMap[id].resolve(false)
         break
       } else {
-        console.log(cliffy_ansi.colors.brightCyan(`[continue]`), id)
+        console.log(cliffy.ansi.colors.brightCyan(`[continue]`), id)
         options.visitMap[id].resolve(true)
       }
     }
