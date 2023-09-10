@@ -30,7 +30,9 @@ export function graphCommand(options: {
     .toString()
     .split('\n')
 
-  context.logger.success('Analyzed dependency graph:')
+  context.logger.success(
+    `Analyzed dependency graph: base dir: ${workspace.workspaceDir}`,
+  )
   for (const line of tabularGraphRepresentation) {
     context.logger.stdout(line)
   }
