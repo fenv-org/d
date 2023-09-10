@@ -49,7 +49,7 @@ jobs:
       - name: Update `.dvmrc` and `DENO_VERSION`
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
-          echo "${{ steps.sanitize_deno_version.outputs.semvar }}" > .dvmrc
+          printf "${{ steps.sanitize_deno_version.outputs.semvar }}" > .dvmrc
           echo "export const DENO_VERSION = '${{ steps.sanitize_deno_version.outputs.semvar }}'" \
             > lib/version/src/deno_version.ts
 
