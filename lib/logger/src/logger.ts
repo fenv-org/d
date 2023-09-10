@@ -1,30 +1,30 @@
 import { cliffy } from '../../deps.ts'
-import { LINE_FEED } from '../../util/mod.ts'
+import { LINE_FEED, Stderr, Stdout } from '../../util/mod.ts'
 import { Ansi } from './ansi.ts'
 
 export abstract class Logger {
   static standard(options: {
-    stdout: Deno.Writer & Deno.WriterSync
-    stderr: Deno.Writer & Deno.WriterSync
+    stdout: Stdout
+    stderr: Stderr
     debug: boolean
-    colorSupported?: boolean
+    colorSupported: boolean
   }): Logger {
     return new StandardLogger({
       ...options,
-      ansi: Ansi(cliffy.ansi.colors, options.colorSupported ?? false),
+      ansi: Ansi(cliffy.ansi.colors, options.colorSupported),
     })
   }
 
   static verbose(options: {
-    stdout: Deno.Writer & Deno.WriterSync
-    stderr: Deno.Writer & Deno.WriterSync
+    stdout: Stdout
+    stderr: Stderr
     logTime?: boolean
     debug: boolean
-    colorSupported?: boolean
+    colorSupported: boolean
   }): Logger {
     return new VerboseLogger({
       ...options,
-      ansi: Ansi(cliffy.ansi.colors, options.colorSupported ?? false),
+      ansi: Ansi(cliffy.ansi.colors, options.colorSupported),
       logTime: options?.logTime ?? true,
     })
   }
@@ -53,8 +53,8 @@ export abstract class Logger {
 class StandardLogger implements Logger {
   constructor(
     options: {
-      stdout: Deno.Writer & Deno.WriterSync
-      stderr: Deno.Writer & Deno.WriterSync
+      stdout: Deno.WriterSync
+      stderr: Deno.WriterSync
       ansi: Ansi
       debug?: boolean
     },
@@ -65,8 +65,8 @@ class StandardLogger implements Logger {
     this.#ansi = options.ansi
   }
 
-  readonly #stdout: Deno.Writer & Deno.WriterSync
-  readonly #stderr: Deno.Writer & Deno.WriterSync
+  readonly #stdout: Deno.WriterSync
+  readonly #stderr: Deno.WriterSync
   readonly #ansi: Ansi
   readonly #debug: boolean
 
@@ -105,8 +105,8 @@ class StandardLogger implements Logger {
 
 class VerboseLogger implements Logger {
   constructor(options: {
-    stdout: Deno.Writer & Deno.WriterSync
-    stderr: Deno.Writer & Deno.WriterSync
+    stdout: Deno.WriterSync
+    stderr: Deno.WriterSync
     ansi: Ansi
     logTime?: boolean
     debug: boolean
@@ -118,8 +118,8 @@ class VerboseLogger implements Logger {
     this.#logTime = options.logTime ?? false
   }
 
-  readonly #stdout: Deno.Writer & Deno.WriterSync
-  readonly #stderr: Deno.Writer & Deno.WriterSync
+  readonly #stdout: Deno.WriterSync
+  readonly #stderr: Deno.WriterSync
   readonly #startTime = new Date().getTime()
   readonly #ansi: Ansi
   readonly #debug: boolean
@@ -415,10 +415,10 @@ function consoleWidth(): number {
   }
 }
 
-function writeLine(writer: Deno.Writer & Deno.WriterSync, message: string) {
+function writeLine(writer: Deno.WriterSync, message: string) {
   write(writer, message + LINE_FEED)
 }
 
-function write(writer: Deno.Writer & Deno.WriterSync, message: string) {
+function write(writer: Deno.WriterSync, message: string) {
   writer.writeSync(encoder.encode(message))
 }

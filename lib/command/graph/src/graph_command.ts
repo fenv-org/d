@@ -16,7 +16,7 @@ export function graphCommand(options: {
     .from(
       dependencyGraph.projects.map((node) => [
         node.name,
-        std.path.relative(context.cwd, node.path),
+        std.path.relative(workspace.workspaceDir, node.path),
         dependencyGraph.dependenciesOf(node).map((dep) => dep.name).join(
           '\n',
         ),

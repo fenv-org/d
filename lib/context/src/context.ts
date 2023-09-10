@@ -1,6 +1,7 @@
 import { std } from '../../deps.ts'
 import { DLogger, Logger } from '../../logger/mod.ts'
 import { GlobalOptions } from '../../options/mod.ts'
+import { Stderr, Stdout, supportsColor } from '../../util/mod.ts'
 
 /**
  * A class that represents the context of the application.
@@ -37,8 +38,8 @@ export class Context {
   static fromFlags(
     flags: {
       readonly cwd: string
-      readonly stdout: Deno.Writer & Deno.WriterSync
-      readonly stderr: Deno.Writer & Deno.WriterSync
+      readonly stdout: Stdout
+      readonly stderr: Stderr
       readonly colorSupported?: boolean
       readonly options: GlobalOptions
     },
@@ -58,10 +59,12 @@ export class Context {
             ...flags,
             logTime: flags.options.dLogTime !== 0,
             debug: flags.options.debug,
+            colorSupported: flags.colorSupported ?? supportsColor(flags.stdout),
           })
           : Logger.standard({
             ...flags,
             debug: flags.options.debug,
+            colorSupported: flags.colorSupported ?? supportsColor(flags.stdout),
           }),
       ),
     })

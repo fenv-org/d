@@ -1,6 +1,7 @@
 import { graphCommand } from './command/graph/mod.ts'
 import { Context } from './context/mod.ts'
 import { buildCommand, parseArgs } from './options/mod.ts'
+import { Stderr, Stdout } from './util/mod.ts'
 import { Workspace } from './workspace/mod.ts'
 
 /**
@@ -18,8 +19,8 @@ export async function dMain(
   args: string[],
   options: {
     readonly cwd: string
-    readonly stdout: Deno.Writer & Deno.WriterSync
-    readonly stderr: Deno.Writer & Deno.WriterSync
+    readonly stdout: Stdout
+    readonly stderr: Stderr
     readonly colorSupported: boolean
   },
 ) {
