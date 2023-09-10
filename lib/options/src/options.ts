@@ -25,6 +25,7 @@ export type GlobalOptions = {
   readonly debug: boolean
   readonly config?: string
   readonly dWorkspace?: string
+  readonly dLogTime?: number
 }
 
 /**

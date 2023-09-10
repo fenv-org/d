@@ -24,6 +24,7 @@ export async function dMain(
   },
 ) {
   const flags = await parseArgs(options.cwd, args)
+  console.log(flags)
   const context = Context.fromFlags({
     ...flags,
     stderr: options.stderr,

@@ -18,6 +18,12 @@ export function buildCommand() {
         'This will override `--config` parameter. ',
       { global: true, required: false },
     )
+    .env(
+      'D_LOG_TIME=<0/1:number>',
+      'Enable/disable logging time for verbose outputs. ' +
+        '0: disable, 1: enable and default to 1.',
+      { global: true, required: false },
+    )
     .option('-v, --verbose', 'Enable verbose output', {
       global: true,
       default: false,

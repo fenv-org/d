@@ -1,1 +1,1 @@
-export * from './src/command_main.ts'
+export * from './src/graph_command.ts'

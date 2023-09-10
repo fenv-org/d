@@ -56,7 +56,7 @@ export class Context {
         flags.options.verbose
           ? Logger.verbose({
             ...flags,
-            logTime: true,
+            logTime: flags.options.dLogTime !== 0,
             debug: flags.options.debug,
           })
           : Logger.standard({
