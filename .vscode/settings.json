@@ -54,5 +54,11 @@
   "deno.cacheOnSave": true,
   "dart.promptToGetPackages": false,
   "dart.runPubGetOnPubspecChanges": "never",
-  "dart.analysisExcludedFolders": ["test-sample"]
+  "dart.analysisExcludedFolders": ["test-sample"],
+  "gitlens.autolinks": [
+    {
+      "prefix": "#",
+      "url": "https://github.com/fenv-org/d/pull/<num>"
+    }
+  ]
 }
