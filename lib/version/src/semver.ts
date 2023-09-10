@@ -1,7 +1,7 @@
-import { std_semvar } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { VERSION_STRING } from './version.ts'
 
 /**
  * The semantic version of `fpm`.
  */
-export const version: std_semvar.SemVer = std_semvar.parse(VERSION_STRING)
+export const version: std.semvar.SemVer = std.semvar.parse(VERSION_STRING)

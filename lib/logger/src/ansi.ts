@@ -34,5 +34,7 @@ export interface Ansi {
     readonly packagePath: Styling
     readonly packageName: Styling
     readonly errorPackageName: Styling
+    readonly verbose: Styling
+    readonly debug: Styling
   }
 }

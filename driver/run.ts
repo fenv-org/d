@@ -1,7 +1,19 @@
 import { colors } from 'https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/colors.ts'
+import { supportColorCheck } from 'https://raw.githubusercontent.com/frunkad/supports-color/24c4e4afbdccc88011d6b33d06f0056a0d889f86/mod.ts'
+
+type Stdout = Deno.Writer & Deno.WriterSync & Deno.Closer & { rid: number }
+type Stderr = Stdout
 
 type dMain = {
-  dMain: (cwd: string, args: string[]) => void | Promise<void>
+  dMain: (
+    args: string[],
+    options: {
+      readonly cwd: string
+      readonly stdout: Stdout
+      readonly stderr: Stderr
+      readonly colorSupported: boolean
+    },
+  ) => void | Promise<void>
 }
 
 export async function run(
@@ -13,7 +25,12 @@ export async function run(
 ) {
   try {
     const { dMain }: dMain = await import(options.libPath)
-    const voidOrPromise = dMain(Deno.cwd(), options.args)
+    const voidOrPromise = dMain(options.args, {
+      cwd: Deno.cwd(),
+      stdout: Deno.stdout,
+      stderr: Deno.stderr,
+      colorSupported: supportColorCheck().stdout ? true : false,
+    })
     if (voidOrPromise instanceof Promise) {
       await voidOrPromise
     }

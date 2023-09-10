@@ -130,8 +130,6 @@ export class DependencyGraph {
       const managedDirectDependencyNames = collectDistinctDependencyNames(
         dartProject.pubspec.dependencies ?? {},
         dartProject.pubspec.dev_dependencies ?? {},
-        dartProject.pubspecOverrides?.dependency_overrides ??
-          dartProject.pubspec.dependency_overrides ?? {},
       )
 
       for (const dependencyName of managedDirectDependencyNames) {

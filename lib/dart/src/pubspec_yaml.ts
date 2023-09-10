@@ -1,4 +1,4 @@
-import { std_yaml } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { PubDependency } from './pub_dependency.ts'
 
 /**
@@ -41,7 +41,7 @@ export interface PubspecYamlSchema {
 export async function loadProjectYaml(
   pubspecFilepath: string,
 ): Promise<PubspecYamlSchema> {
-  return std_yaml.parse(
+  return std.yaml.parse(
     await Deno.readTextFile(pubspecFilepath),
   ) as PubspecYamlSchema
 }

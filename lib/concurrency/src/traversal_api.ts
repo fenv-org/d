@@ -1,8 +1,8 @@
 import { DependencyGraph } from '../../dart/mod.ts'
-import { std_async } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { poll, prepare, TraversalState } from './traversal_util.ts'
 
-const { deferred } = std_async
+const { deferred } = std.async
 
 /**
  * Result of visiting a node.
@@ -131,7 +131,7 @@ export class Traversal {
     this.#concurrency = 0
   }
 
-  #run(promise: std_async.Deferred<void>, removeNode?: string) {
+  #run(promise: std.async.Deferred<void>, removeNode?: string) {
     const room = this.#concurrency -
       this.#visitingNodes.size
     if (room > 0) {
@@ -151,7 +151,7 @@ export class Traversal {
     }
   }
 
-  async #visit(promise: std_async.Deferred<void>, node: string): Promise<void> {
+  async #visit(promise: std.async.Deferred<void>, node: string): Promise<void> {
     const visitResult = await this.#onVisit(node)
     this.#visitingNodes.delete(node)
     switch (visitResult) {

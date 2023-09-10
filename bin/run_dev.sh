@@ -12,5 +12,5 @@ deno run \
   --allow-net \
   --allow-run \
   driver/main-dev.ts \
-  --cwd test-sample/app \
+  --config test-sample/d.yaml \
   $@

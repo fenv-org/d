@@ -1,0 +1,7 @@
+export * as assert from 'https://deno.land/std@0.201.0/assert/mod.ts'
+export * as async from 'https://deno.land/std@0.201.0/async/mod.ts'
+export * as flags from 'https://deno.land/std@0.201.0/flags/mod.ts'
+export * as fs from 'https://deno.land/std@0.201.0/fs/mod.ts'
+export * as path from 'https://deno.land/std@0.201.0/path/mod.ts'
+export * as semvar from 'https://deno.land/std@0.201.0/semver/mod.ts'
+export * as yaml from 'https://deno.land/std@0.201.0/yaml/mod.ts'

@@ -1,4 +1,4 @@
-import { std_yaml } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { PubDependency } from './pub_dependency.ts'
 
 /**
@@ -20,7 +20,7 @@ export interface PubspecOverridesYaml {
 export async function loadPubspecOverridesYaml(
   pubspecOverridesFilepath: string,
 ): Promise<PubspecOverridesYaml> {
-  return std_yaml.parse(
+  return std.yaml.parse(
     await Deno.readTextFile(pubspecOverridesFilepath),
   ) as PubspecOverridesYaml
 }

@@ -1,8 +1,8 @@
+import { graphCommand } from './command/graph/mod.ts'
 import { Context } from './context/mod.ts'
-import { DependencyGraph } from './dart/mod.ts'
-import { cliffy_table, std_flags } from './deps.ts'
-import { DError } from './error/mod.ts'
-import { DProject } from './project/mod.ts'
+import { buildCommand, parseArgs } from './options/mod.ts'
+import { Stderr, Stdout } from './util/mod.ts'
+import { Workspace } from './workspace/mod.ts'
 
 /**
  * The entry point of the `d` CLI application.
@@ -15,83 +15,34 @@ import { DProject } from './project/mod.ts'
  * - `--allow-env`
  * - `--allow-net`
  */
-export async function dMain(cwd: string, args: string[]) {
-  const { args: normalizedArgs, verbose, debug } = parseGlobalArgs(args)
-  const flags = {
-    ...std_flags.parse(normalizedArgs, {
-      stopEarly: true,
-      string: ['cwd'],
-      alias: { cwd: 'c' },
-      '--': true,
-      default: {
-        cwd: cwd,
-        verbose: false,
-        debug: false,
-      },
-      unknown: (arg) => {
-        if (arg.startsWith('-')) {
-          throw new DError(`Unknown option: ${arg}`)
-        }
-      },
-    }),
-    verbose,
-    debug,
-  }
+export async function dMain(
+  args: string[],
+  options: {
+    readonly cwd: string
+    readonly stdout: Stdout
+    readonly stderr: Stderr
+    readonly colorSupported: boolean
+  },
+) {
+  const flags = await parseArgs(options.cwd, args)
+  const context = Context.fromFlags({
+    ...flags,
+    stderr: options.stderr,
+    stdout: options.stdout,
+    colorSupported: options.colorSupported,
+  })
+  const workspace = await Workspace.fromContext(context)
 
-  const context = Context.fromFlags(flags)
-  const { logger } = context
-  logger.debug('flags=', flags)
+  switch (flags.name) {
+    case 'bootstrap':
+      // await workspace.bootstrap(flags.options)
+      break
 
-  if (flags._.length === 0) {
-    throw new DError('No command specified')
-  }
+    case 'graph':
+      graphCommand({ context, workspace })
+      break
 
-  const project = await DProject.fromContext(context)
-  const dependencyGraph = DependencyGraph.fromDartProjects(project.dartProjects)
-
-  if (context.debug) {
-    logger.debug(
-      logger.ansi.style.success('Analyzed dependency graph:') +
-        `\n` +
-        cliffy_table.Table.from(
-          dependencyGraph.projects.map((node) => [
-            node.name,
-            node.path,
-            dependencyGraph.dependenciesOf(node).map((dep) => dep.name).join(
-              '\n',
-            ),
-            dependencyGraph.dependentsOf(node).map((dep) => dep.name).join(
-              '\n',
-            ),
-          ]),
-        )
-          .header(['name', 'path', 'dependencies', 'reverse dependencies'])
-          .border(true)
-          .toString(),
-    )
-  }
-
-  const subcommand = flags._[0]
-  const subcommandArgs = flags._.slice(1)
-  const otherFlags = flags['--']
-
-  logger.debug('subcommand=', subcommand)
-  logger.debug('subcommandArgs=', subcommandArgs)
-  logger.debug('otherFlags=', otherFlags)
-}
-
-function parseGlobalArgs(args: string[]): {
-  args: string[]
-  verbose: boolean
-  debug: boolean
-} {
-  const verbose = args.includes('-V') || args.includes('--verbose')
-  const debug = args.includes('--debug')
-  return {
-    args: args.filter((arg) =>
-      arg !== '--verbose' && arg !== '-V' && arg !== '--debug'
-    ),
-    verbose,
-    debug,
+    default:
+      buildCommand().showHelp()
   }
 }

@@ -1,11 +1,11 @@
-import { std_yaml } from '../../deps.ts'
+import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import { version } from '../../version/mod.ts'
 
 /**
- * The schema of `d.yaml`.
+ * The schema definition of `d.yaml`.
  */
-export interface ProjectYaml {
+export interface WorkspaceYamlSchema {
   version: string
   name: string
   packages: {
@@ -14,9 +14,14 @@ export interface ProjectYaml {
   }
 }
 
-export function loadProjectYaml(filepath: string): ProjectYaml {
+/**
+ * Loads the `d.yaml` file from the given `filepath`.
+ *
+ * This function assumes that the given `filepath` file exists.
+ */
+export function loadWorkspaceYaml(filepath: string): WorkspaceYamlSchema {
   const text = Deno.readTextFileSync(filepath)
-  const parsedText = std_yaml.parse(text)
+  const parsedText = std.yaml.parse(text)
   if (typeof parsedText !== 'object' || parsedText === null) {
     throw new DError(`Invalid yaml file format`)
   }
@@ -70,6 +75,6 @@ export function loadProjectYaml(filepath: string): ProjectYaml {
   return {
     version: yaml.version,
     name: yaml.name,
-    packages: yaml.packages as ProjectYaml['packages'],
+    packages: yaml.packages as WorkspaceYamlSchema['packages'],
   }
 }

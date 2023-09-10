@@ -1,34 +1,48 @@
-import { cliffy_ansi } from '../../deps.ts'
+import { cliffy } from '../../deps.ts'
+import { LINE_FEED, Stderr, Stdout } from '../../util/mod.ts'
 import { Ansi } from './ansi.ts'
 
 export abstract class Logger {
-  static standard(options?: { debug: boolean }): Logger {
-    return new StandardLogger(options)
+  static standard(options: {
+    stdout: Stdout
+    stderr: Stderr
+    debug: boolean
+    colorSupported: boolean
+  }): Logger {
+    return new StandardLogger({
+      ...options,
+      ansi: Ansi(cliffy.ansi.colors, options.colorSupported),
+    })
   }
 
-  static verbose(options?: { logTime?: boolean; debug: boolean }): Logger {
-    return new VerboseLogger(options?.logTime ?? true, options?.debug ?? false)
+  static verbose(options: {
+    stdout: Stdout
+    stderr: Stderr
+    logTime?: boolean
+    debug: boolean
+    colorSupported: boolean
+  }): Logger {
+    return new VerboseLogger({
+      ...options,
+      ansi: Ansi(cliffy.ansi.colors, options.colorSupported),
+      logTime: options?.logTime ?? true,
+    })
   }
 
   public abstract get ansi(): Ansi
 
   public abstract get isVerbose(): boolean
 
+  public abstract get isDebug(): boolean
+
   /** Print an error message. */
-  public abstract stderr(message: string): void
+  public abstract stderr(message: string, options?: { prefix?: boolean }): void
 
   /** Print a standard status message. */
-  public abstract stdout(message: string): void
-
-  /** Print a debugging message. */
-  // deno-lint-ignore no-explicit-any
-  public abstract debug(...data: any[]): void
-
-  /** Print trace output. */
-  public abstract trace(message: string): void
+  public abstract stdout(message: string, options?: { prefix?: boolean }): void
 
   /** Print text to stdout, without a trailing newline. */
-  public abstract write(message: string): void
+  public abstract write(message: string, options?: { prefix?: boolean }): void
 
   /** Print a character code to stdout, without a trailing newline. */
   public abstract writeCharCode(charCode: number): void
@@ -37,12 +51,23 @@ export abstract class Logger {
 }
 
 class StandardLogger implements Logger {
-  constructor(options?: { debug?: boolean }) {
+  constructor(
+    options: {
+      stdout: Deno.WriterSync
+      stderr: Deno.WriterSync
+      ansi: Ansi
+      debug?: boolean
+    },
+  ) {
+    this.#stdout = options.stdout
+    this.#stderr = options.stderr
     this.#debug = options?.debug ?? false
+    this.#ansi = options.ansi
   }
 
-  readonly #encoder = new TextEncoder()
-  readonly #ansi = Ansi(cliffy_ansi.colors)
+  readonly #stdout: Deno.WriterSync
+  readonly #stderr: Deno.WriterSync
+  readonly #ansi: Ansi
   readonly #debug: boolean
 
   public get ansi(): Ansi {
@@ -53,26 +78,20 @@ class StandardLogger implements Logger {
     return false
   }
 
+  public get isDebug(): boolean {
+    return this.#debug
+  }
+
   public stderr(message: string): void {
-    console.error(message)
+    writeLine(this.#stderr, message)
   }
 
   public stdout(message: string): void {
-    console.log(message)
-  }
-
-  // deno-lint-ignore no-explicit-any
-  public debug(...data: any[]): void {
-    if (this.#debug) {
-      console.error(...data)
-    }
-  }
-
-  public trace(_: string): void {
+    writeLine(this.#stdout, message)
   }
 
   public write(message: string): void {
-    Deno.stdout.write(this.#encoder.encode(message))
+    write(this.#stdout, message)
   }
 
   public writeCharCode(charCode: number): void {
@@ -80,22 +99,31 @@ class StandardLogger implements Logger {
   }
 
   public horizontalLine(): void {
-    this.stdout('─'.repeat(Deno.consoleSize().columns))
+    this.stdout('─'.repeat(consoleWidth()))
   }
 }
 
 class VerboseLogger implements Logger {
-  readonly #startTime = new Date().getTime()
-  readonly #encoder = new TextEncoder()
-  readonly #ansi = Ansi(cliffy_ansi.colors)
-  readonly #debug: boolean
-
-  constructor(
-    private readonly logTime: boolean = false,
-    debug: boolean,
-  ) {
-    this.#debug = debug
+  constructor(options: {
+    stdout: Deno.WriterSync
+    stderr: Deno.WriterSync
+    ansi: Ansi
+    logTime?: boolean
+    debug: boolean
+  }) {
+    this.#stdout = options.stdout
+    this.#stderr = options.stderr
+    this.#ansi = options.ansi
+    this.#debug = options.debug
+    this.#logTime = options.logTime ?? false
   }
+
+  readonly #stdout: Deno.WriterSync
+  readonly #stderr: Deno.WriterSync
+  readonly #startTime = new Date().getTime()
+  readonly #ansi: Ansi
+  readonly #debug: boolean
+  readonly #logTime: boolean
 
   public get ansi(): Ansi {
     return this.#ansi
@@ -105,41 +133,47 @@ class VerboseLogger implements Logger {
     return true
   }
 
-  public stdout(message: string): void {
-    console.log(this._createPrefix() + message)
+  public get isDebug(): boolean {
+    return this.#debug
   }
 
-  public stderr(message: string): void {
-    console.error(this._createPrefix() + cliffy_ansi.colors.red(message))
-  }
-
-  // deno-lint-ignore no-explicit-any
-  public debug(...data: any[]): void {
-    if (this.#debug) {
-      console.error(this._createPrefix(), ...data)
+  public stdout(message: string, options?: { prefix?: boolean }): void {
+    const { prefix = true } = options ?? {}
+    if (prefix) {
+      writeLine(this.#stdout, this._createPrefix() + message)
+    } else {
+      writeLine(this.#stdout, message)
     }
   }
 
-  public trace(message: string): void {
-    console.trace(this._createPrefix() + cliffy_ansi.colors.gray(message))
+  public stderr(message: string, options?: { prefix?: boolean }): void {
+    const { prefix = true } = options ?? {}
+    if (prefix) {
+      writeLine(this.#stderr, this._createPrefix() + message)
+    } else {
+      writeLine(this.#stderr, message)
+    }
   }
 
-  public write(message: string): void {
-    Deno.stdout.write(this.#encoder.encode(message))
+  public write(message: string, options?: { prefix?: boolean }): void {
+    const { prefix = true } = options ?? {}
+    if (prefix) {
+      write(this.#stdout, this._createPrefix() + message)
+    } else {
+      write(this.#stdout, message)
+    }
   }
 
   public writeCharCode(charCode: number): void {
-    this.write(String.fromCharCode(charCode))
+    this.write(String.fromCharCode(charCode), { prefix: false })
   }
 
   public horizontalLine(): void {
-    const prefix = this._createPrefix()
-    const columns = Deno.consoleSize().columns - prefix.length
-    console.log(prefix + '─'.repeat(columns))
+    this.stdout('─'.repeat(consoleWidth()))
   }
 
   private _createPrefix(): string {
-    if (!this.logTime) {
+    if (!this.#logTime) {
       return ''
     }
 
@@ -171,25 +205,20 @@ class DelegateLogger implements Logger {
     return this.logger.isVerbose
   }
 
-  public stderr(message: string): void {
-    this.logger.stderr(message)
+  public get isDebug(): boolean {
+    return this.logger.isDebug
   }
 
-  public stdout(message: string): void {
-    this.logger.stdout(message)
+  public stderr(message: string, options?: { prefix?: boolean }): void {
+    this.logger.stderr(message, options)
   }
 
-  // deno-lint-ignore no-explicit-any
-  public debug(...data: any[]): void {
-    this.logger.debug(...data)
+  public stdout(message: string, options?: { prefix?: boolean }): void {
+    this.logger.stdout(message, options)
   }
 
-  public trace(message: string): void {
-    this.logger.trace(message)
-  }
-
-  public write(message: string): void {
-    this.logger.write(message)
+  public write(message: string, options?: { prefix?: boolean }): void {
+    this.logger.write(message, options)
   }
 
   public writeCharCode(charCode: number): void {
@@ -216,7 +245,13 @@ export class DLogger extends DelegateLogger {
 
   public verbose(message: string): void {
     if (this.isVerbose) {
-      this.success(message, { dryRun: true })
+      this.stdout(this.ansi.style.verbose(message))
+    }
+  }
+
+  public debug(message: string): void {
+    if (this.isDebug) {
+      this.stderr(this.ansi.style.debug(message))
     }
   }
 
@@ -300,34 +335,64 @@ export class DLogger extends DelegateLogger {
   }
 
   public newLine() {
-    this.logger.write('\n')
+    this.logger.write(LINE_FEED, { prefix: false })
   }
 }
 
-function Ansi(colors: cliffy_ansi.Colors): Ansi {
-  const color = {
-    command: colors.yellow,
-    commandLabel: colors.brightYellow,
-    successMessage: colors.green,
-    successLabel: colors.brightGreen,
-    warningMessage: colors.yellow,
-    warningLabel: colors.brightYellow,
-    errorMessage: colors.red,
-    errorLabel: colors.brightRed,
-    hintMessage: colors.gray,
-    hintLabel: colors.gray,
-    dryRunWarningMessage: colors.magenta,
-    dryRunWarningLabel: colors.brightMagenta,
-  }
-  const style = {
-    command: colors.bold,
-    success: colors.bold,
-    label: colors.bold,
-    target: (message: string) => colors.cyan(colors.bold(message)),
-    packagePath: colors.blue,
-    packageName: colors.bold,
-    errorPackageName: (message: string) => colors.yellow(colors.bold(message)),
-  }
+function Ansi(colors: cliffy.ansi.Colors, colorSupported: boolean): Ansi {
+  const color = colorSupported
+    ? {
+      command: colors.yellow,
+      commandLabel: colors.brightYellow,
+      successMessage: colors.green,
+      successLabel: colors.brightGreen,
+      warningMessage: colors.yellow,
+      warningLabel: colors.brightYellow,
+      errorMessage: colors.red,
+      errorLabel: colors.brightRed,
+      hintMessage: colors.gray,
+      hintLabel: colors.gray,
+      dryRunWarningMessage: colors.magenta,
+      dryRunWarningLabel: colors.brightMagenta,
+    }
+    : {
+      command: (message: string) => message,
+      commandLabel: (message: string) => message,
+      successMessage: (message: string) => message,
+      successLabel: (message: string) => message,
+      warningMessage: (message: string) => message,
+      warningLabel: (message: string) => message,
+      errorMessage: (message: string) => message,
+      errorLabel: (message: string) => message,
+      hintMessage: (message: string) => message,
+      hintLabel: (message: string) => message,
+      dryRunWarningMessage: (message: string) => message,
+      dryRunWarningLabel: (message: string) => message,
+    }
+  const style = colorSupported
+    ? {
+      command: colors.bold,
+      success: colors.bold,
+      label: colors.bold,
+      target: (message: string) => colors.cyan(colors.bold(message)),
+      packagePath: colors.blue,
+      packageName: colors.bold,
+      errorPackageName: (message: string) =>
+        colors.yellow(colors.bold(message)),
+      verbose: colors.gray,
+      debug: colors.blue,
+    }
+    : {
+      command: (message: string) => message,
+      success: (message: string) => message,
+      label: (message: string) => message,
+      target: (message: string) => message,
+      packagePath: (message: string) => message,
+      packageName: (message: string) => message,
+      errorPackageName: (message: string) => message,
+      verbose: (message: string) => message,
+      debug: (message: string) => message,
+    }
   const label = {
     success: color.successLabel(style.label('SUCCESS')),
     warning: color.warningLabel(style.label('WARNING')),
@@ -338,4 +403,22 @@ function Ansi(colors: cliffy_ansi.Colors): Ansi {
     check: colors.brightGreen(style.label('✓')),
   }
   return { color, label, style }
+}
+
+const encoder = new TextEncoder()
+
+function consoleWidth(): number {
+  try {
+    return Deno.consoleSize().columns
+  } catch {
+    return 80
+  }
+}
+
+function writeLine(writer: Deno.WriterSync, message: string) {
+  write(writer, message + LINE_FEED)
+}
+
+function write(writer: Deno.WriterSync, message: string) {
+  writer.writeSync(encoder.encode(message))
 }

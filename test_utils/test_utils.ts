@@ -1,7 +1,9 @@
-import { std_fs, std_path, std_yaml } from '../lib/deps.ts'
+import { std } from '../lib/deps.ts'
+import { Buffer } from '../lib/test_deps.ts'
+import { LINE_FEED } from '../lib/util/mod.ts'
 
 export async function writeTextFile(path: string, text: string): Promise<void> {
-  await std_fs.ensureDir(std_path.dirname(path))
+  await std.fs.ensureDir(std.path.dirname(path))
   await Deno.writeTextFile(path, text)
 }
 
@@ -13,7 +15,7 @@ export function writeYamlFile(
   path: string,
   data: Record<string, unknown>,
 ): Promise<void> {
-  return writeTextFile(path, std_yaml.stringify(data))
+  return writeTextFile(path, std.yaml.stringify(data))
 }
 
 export function removeIndent(s: string): string {
@@ -24,4 +26,17 @@ export function removeIndent(s: string): string {
     return lines.map((line) => line.replace(indent[0], '')).join('\n')
   }
   return s
+}
+
+export function buildStringFromBuffer(buffer: Buffer): string {
+  const decoder = new TextDecoder()
+  return decoder.decode(buffer.bytes())
+}
+
+export function buildStringLinesFromBuffer(buffer: Buffer): string[] {
+  return buildStringFromBuffer(buffer).split(LINE_FEED)
+}
+
+export function buildAbsPath(...paths: string[]): string {
+  return std.path.join(Deno.cwd(), ...paths)
 }
