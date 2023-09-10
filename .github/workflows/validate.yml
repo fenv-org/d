@@ -44,10 +44,21 @@ jobs:
           deno-version: ${{ steps.latest_deno.outputs.release }}
 
       - name: Update `.dvmrc` and `DENO_VERSION`
+        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           echo "${{ steps.latest_deno.outputs.release }}" > .dvmrc
           echo "export const DENO_VERSION = '${{ steps.latest_deno.outputs.release }}'" \
             > lib/version/src/deno_version.ts
+
+      - name: Update `.dvmrc` and `DENO_VERSION` on Windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          Set-Content `
+            -Path "lib\version\src\deno_version.ts" `
+            -Value (
+              "export const DENO_VERSION = " +
+              "'${{ steps.latest_deno.outputs.release }}'"
+            )
 
       - name: Commit changes
         if: ${{ matrix.os == 'ubuntu-latest' }}
