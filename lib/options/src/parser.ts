@@ -1,4 +1,5 @@
 import { cliffy } from '../../deps.ts'
+import { DENO_VERSION } from '../../version/src/deno_version.ts'
 import { VERSION_STRING } from '../../version/src/version.ts'
 import { FileOrGlobType } from './cliffy_types.ts'
 import { Options } from './options.ts'
@@ -10,7 +11,10 @@ export function buildCommand() {
     .name('d')
     .usage('[command] <OPTIONS>')
     .version(VERSION_STRING)
-    .description('A Dart/Flutter multi-package project manager')
+    .description(
+      `A Dart/Flutter multi-package project manager\n\n` +
+        `Powered by deno v${DENO_VERSION}`,
+    )
     .globalType('fileOrGlob', new FileOrGlobType())
     .env(
       'D_WORKSPACE=<workspace:file>',
@@ -42,7 +46,6 @@ export function buildCommand() {
     )
     .command('help', new command.HelpCommand().global())
     .command('bootstrap', bootstrapCommand())
-    .command('bs', bootstrapCommand())
     .command('graph', graphCommand())
 }
 

@@ -1,10 +1,8 @@
 {
   "fmt": {
-    "options": {
-      "indentWidth": 2,
-      "singleQuote": true,
-      "semiColons": false
-    }
+    "indentWidth": 2,
+    "singleQuote": true,
+    "semiColons": false
   },
   "test": {
     "include": ["lib/**/*_test.ts", "lib/**/*.test.ts"]
