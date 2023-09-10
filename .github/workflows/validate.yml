@@ -43,11 +43,14 @@ jobs:
         with:
           deno-version: ${{ steps.latest_deno.outputs.release }}
 
+      - id: sanitize_deno_version
+        run: deno run --allow-env --allow-write bin/remove_prefix_v.ts "${{ steps.latest_deno.outputs.release }}"
+
       - name: Update `.dvmrc` and `DENO_VERSION`
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
-          echo "${{ steps.latest_deno.outputs.release }}" > .dvmrc
-          echo "export const DENO_VERSION = '${{ steps.latest_deno.outputs.release }}'" \
+          echo "${{ steps.sanitize_deno_version.outputs.semvar }}" > .dvmrc
+          echo "export const DENO_VERSION = '${{ steps.sanitize_deno_version.outputs.semvar }}'" \
             > lib/version/src/deno_version.ts
 
       - name: Update `.dvmrc` and `DENO_VERSION` on Windows
@@ -57,7 +60,7 @@ jobs:
             -Path "lib\version\src\deno_version.ts" `
             -Value (
               "export const DENO_VERSION = " +
-              "'${{ steps.latest_deno.outputs.release }}'"
+              "'${{ steps.sanitize_deno_version.outputs.semvar }}'"
             )
 
       - name: Commit changes
