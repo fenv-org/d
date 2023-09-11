@@ -1,8 +1,8 @@
 import { cliffy } from '../../deps.ts'
 import { DENO_VERSION } from '../../version/src/deno_version.ts'
 import { VERSION_STRING } from '../../version/src/version.ts'
-import { FileOrGlobType } from './cliffy_types.ts'
-import { Options } from './options.ts'
+import { DirOrGlobType, FileOrGlobType } from './cliffy_types.ts'
+import { Flags } from './options.ts'
 
 const { command } = cliffy
 
@@ -16,6 +16,7 @@ export function buildCommand() {
         `Powered by deno v${DENO_VERSION}`,
     )
     .globalType('fileOrGlob', new FileOrGlobType())
+    .globalType('dirOrGlob', new DirOrGlobType())
     .env(
       'D_WORKSPACE=<workspace:file>',
       'The path to the `d.yaml` file or the directory containing it. ' +
@@ -55,15 +56,15 @@ export function buildCommand() {
 export async function parseArgs(
   cwd: string,
   args: string[],
-): Promise<Options> {
+): Promise<Flags> {
   const flags = await buildCommand().parse(args)
   const commandName = flags.cmd.getName()
   return {
     cwd,
-    name: commandName === 'bs' ? 'bootstrap' : commandName,
+    name: commandName,
     args: flags.args,
     options: flags.options,
-  } as unknown as Options
+  } as unknown as Flags
 }
 
 /**
@@ -73,12 +74,18 @@ export async function parseArgs(
  */
 function bootstrapCommand() {
   return new command.Command()
+    .alias('bs')
     .description(
       'Initialize the workspace and link packages specified in `d.yaml` file.',
     )
     .option(
       '--file-exists <file/glob:fileOrGlob>',
       'A glob pattern or a specific file that must exist',
+      { collect: true },
+    )
+    .option(
+      '--dir-exists <dir/glob:dirOrGlob>',
+      'A glob pattern or a specific directory that must exist',
       { collect: true },
     )
 }

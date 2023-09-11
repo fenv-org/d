@@ -1,7 +1,7 @@
 /**
  * The definition of `d`'s command line arguments.
  */
-export type Options =
+export type Flags =
   & {
     readonly cwd: string
     readonly args: string[]
@@ -9,7 +9,7 @@ export type Options =
   & (
     | {
       readonly name: 'bootstrap'
-      readonly options: PackageFilterOptions & GlobalOptions
+      readonly options: BootstrapOptions & GlobalOptions
     }
     | {
       readonly name: 'graph'
@@ -32,6 +32,11 @@ export type GlobalOptions = {
  * Additional package filters.
  */
 export type PackageFilterOptions = {
-  readonly fileExists: string[]
-  readonly dirExists: string[]
+  readonly fileExists?: string[]
+  readonly dirExists?: string[]
 }
+
+/**
+ * The definition of `d bootstrap` command flags.
+ */
+export type BootstrapOptions = PackageFilterOptions

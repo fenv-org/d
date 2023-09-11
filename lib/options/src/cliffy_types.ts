@@ -11,3 +11,9 @@ export class FileOrGlobType extends cliffy.command.FileType {
     return value
   }
 }
+
+export class DirOrGlobType extends cliffy.command.FileType {
+  parse({ value }: cliffy.command.ArgumentValue): string {
+    return value
+  }
+}
