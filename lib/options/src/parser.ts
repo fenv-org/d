@@ -80,7 +80,7 @@ function bootstrapCommand() {
     )
     .option(
       '--file-exists <file/glob:fileOrGlob>',
-      'A glob pattern or a specific file that must exist',
+      'Includes the packages that has the specified file or any file maglob pattern',
       { collect: true },
     )
     .option(
