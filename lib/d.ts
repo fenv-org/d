@@ -1,5 +1,5 @@
-import { bootstrapCommand } from './command/bootstrap/src/bootstrap_command.ts'
-import { graphCommand } from './command/graph/mod.ts'
+import { runBootstrapCommand } from './command/bootstrap/mod.ts'
+import { runGraphCommand } from './command/graph/mod.ts'
 import { Context } from './context/mod.ts'
 import { buildCommand, Flags, parseArgs } from './options/mod.ts'
 import { Stderr, Stdout } from './util/mod.ts'
@@ -45,14 +45,14 @@ function runCommand(options: {
   const { context, workspace, flags } = options
   switch (flags.name) {
     case 'bootstrap':
-      return bootstrapCommand({
+      return runBootstrapCommand({
         context,
         workspace,
         flags: flags.options,
       })
 
     case 'graph':
-      return graphCommand({ context, workspace })
+      return runGraphCommand({ context, workspace })
 
     default:
       return buildCommand().showHelp()

@@ -1,17 +1,25 @@
-import { Context } from '../../../context/mod.ts'
-import { BootstrapOptions } from '../../../options/mod.ts'
-import { Workspace } from '../../../workspace/mod.ts'
+import { cliffy } from '../../../deps.ts'
+import {
+  addPackageFilterOptions,
+  PackageFilterOptions,
+} from '../../common/mod.ts'
 
-export async function bootstrapCommand(options: {
-  context: Context
-  workspace: Workspace
-  flags: BootstrapOptions
-}): Promise<void> {
-  const { context, workspace, flags } = options
-  const { logger } = context
-  const { ansi } = logger
+/**
+ * The definition of `d bootstrap` command flags.
+ */
+export type BootstrapOptions = PackageFilterOptions
 
-  logger.command('d bootstrap')
-  logger.indentIn()
-    .stdout(`${ansi.label.child} ${ansi.style.target(workspace.workspaceDir)}`)
+/**
+ * `bootstrap` subcommand.
+ *
+ * `bs` is one of the aliases for `bootstrap`.
+ */
+export function bootstrapCommand() {
+  const command = new cliffy.command.Command()
+    .alias('bs')
+    .usage('[OPTIONS]')
+    .description(
+      'Initialize the workspace and link packages specified in `d.yaml` file.',
+    )
+  return addPackageFilterOptions(command)
 }
