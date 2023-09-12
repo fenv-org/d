@@ -6,10 +6,10 @@ import { cliffy } from '../../../deps.ts'
  * Additional package filters.
  */
 export type PackageFilterOptions = {
-  readonly fileExists?: string[]
-  readonly noFileExists?: string[]
-  readonly dirExists?: string[]
-  readonly noDirExists?: string[]
+  readonly includeHasFile?: string[]
+  readonly excludeHasFile?: string[]
+  readonly includeHasDir?: string[]
+  readonly excludeHasDir?: string[]
 }
 
 export function addPackageFilterOptions<
@@ -48,25 +48,25 @@ export function addPackageFilterOptions<
 ) {
   return command
     .option(
-      '--file-exists <file/glob:fileOrGlob>',
+      '--include-has-file <file/glob:fileOrGlob>',
       'Includes the packages that has any matching file. Relative path from ' +
         'the package root.',
       { collect: true },
     )
     .option(
-      '--no-file-exists <file/glob:fileOrGlob>',
+      '--exclude-has-file <file/glob:fileOrGlob>',
       'Excludes the packages that has any matching file. Relative path from ' +
         'the package root.',
       { collect: true },
     )
     .option(
-      '--dir-exists <dir/glob:dirOrGlob>',
+      '--include-has-dir <dir/glob:dirOrGlob>',
       'Includes the packages that has any matching directory. Relative path ' +
         'from the package root.',
       { collect: true },
     )
     .option(
-      '--no-dir-exists <dir/glob:dirOrGlob>',
+      '--exclude-has-dir <dir/glob:dirOrGlob>',
       'Excludes the packages that has any matching directory. Relative path ' +
         'from the package root.',
       { collect: true },

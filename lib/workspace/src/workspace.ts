@@ -132,9 +132,9 @@ export class Workspace {
     logger: DLogger
   }): AsyncGenerator<DartProject> {
     const { logger, pwd, glob, excludeRegExps } = options
-    const joinedGlob = join(pwd, glob, 'pubspec.yaml')
+    const joinedGlob = join(glob, 'pubspec.yaml')
     logger.debug(`Searching dart projects: ${joinedGlob}`)
-    const walkEntries = expandGlob(joinedGlob)
+    const walkEntries = expandGlob(joinedGlob, { root: pwd })
     for await (const walkEntry of walkEntries) {
       const dartProject = await DartProject.fromPubspecFilepath(
         walkEntry.path,

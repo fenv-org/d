@@ -12,6 +12,45 @@ export async function runBootstrapCommand(options: {
   const { ansi } = logger
 
   logger.command('d bootstrap')
-  logger.indentIn()
-    .stdout(`${ansi.label.child} ${ansi.style.target(workspace.workspaceDir)}`)
+
+  const indentLogger = logger.indentIn()
+  indentLogger.stdout(
+    `${ansi.label.child} ${ansi.style.target(workspace.workspaceDir)}`,
+  )
+
+  if (flags.includeHasFile) {
+    indentLogger.indentIn()
+      .debug(
+        ` [package filter] include has file=${
+          JSON.stringify(flags.includeHasFile)
+        }`,
+      )
+  }
+  if (flags.excludeHasFile) {
+    indentLogger.indentIn()
+      .debug(
+        ` [package filter] exclude has file=${
+          JSON.stringify(flags.excludeHasFile)
+        }`,
+      )
+  }
+  if (flags.includeHasDir) {
+    indentLogger.indentIn()
+      .debug(
+        ` [package filter] include has directory=${
+          JSON.stringify(flags.includeHasDir)
+        }`,
+      )
+  }
+  if (flags.excludeHasDir) {
+    indentLogger.indentIn()
+      .debug(
+        ` [package filter] exclude has directory=${
+          JSON.stringify(flags.excludeHasDir)
+        }`,
+      )
+  }
+
+  const filteredWorkspace = await workspace.applyPackageFilterOptions(flags)
+  console.log(filteredWorkspace)
 }
