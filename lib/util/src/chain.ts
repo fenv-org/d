@@ -15,8 +15,8 @@ export class Chain<T> {
     return new Chain(fn())
   }
 
-  static empty(): Chain<void> {
-    return new Chain(undefined)
+  static empty<T>(): Chain<T | undefined> {
+    return Chain.ofNullable<T>(undefined)
   }
 
   readonly #value: T
@@ -43,11 +43,15 @@ export class Chain<T> {
   }
 
   public mapAsync<R>(fn: (value: T) => R | Promise<R>): AsyncChain<R> {
-    return AsyncChain.of(Promise.resolve(fn(this.#value)))
+    return this.toAsync().mapAsync(fn)
   }
 
-  public flatMapAsync<R>(fn: (value: T) => AsyncChain<R>): AsyncChain<R> {
-    return fn(this.#value)
+  public flatMapAsync<R>(
+    fn: (
+      value: T,
+    ) => AsyncChain<R> | Chain<R> | Promise<AsyncChain<R> | Chain<R>>,
+  ): AsyncChain<R> {
+    return this.toAsync().flatMapAsync(fn)
   }
 }
 
@@ -76,8 +80,8 @@ export class AsyncChain<T> {
     return new AsyncChain(fn())
   }
 
-  public static empty(): AsyncChain<void> {
-    return new AsyncChain(Promise.resolve())
+  public static empty<T>(): AsyncChain<T | undefined> {
+    return AsyncChain.ofNullable<T>(Promise.resolve(undefined))
   }
 
   public get promise(): Promise<T> {
@@ -98,7 +102,26 @@ export class AsyncChain<T> {
     return new AsyncChain(this.#promise.then(fn))
   }
 
-  public flatMapAsync<R>(fn: (value: T) => AsyncChain<R>): AsyncChain<R> {
-    return new AsyncChain(this.#promise.then((value) => fn(value).#promise))
+  public flatMapAsync<R>(
+    fn: (
+      value: T,
+    ) => AsyncChain<R> | Chain<R> | Promise<AsyncChain<R> | Chain<R>>,
+  ): AsyncChain<R> {
+    return new AsyncChain(this.#promise.then(
+      async (it) => {
+        const resultOrPromise = fn(it)
+        if (resultOrPromise instanceof Chain) {
+          return resultOrPromise.value
+        } else if (resultOrPromise instanceof Promise) {
+          const result = await resultOrPromise
+          if (result instanceof Chain) {
+            return result.value
+          }
+          return result.#promise
+        } else {
+          return resultOrPromise.#promise
+        }
+      },
+    ))
   }
 }
