@@ -1,7 +1,6 @@
 import { PackageFilterOptions } from '../../command/common/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
-import { Chain } from '../../util/mod.ts'
 
 /**
  * Returns an array of {@link DartProject} instances that contains only
@@ -11,13 +10,11 @@ export async function applyPackageFilterOptions(
   dartProjects: DartProject[],
   options: PackageFilterOptions,
 ): Promise<DartProject[]> {
-  return await Chain
-    .of(dartProjects)
-    .mapAsync((it) => applyIncludeHasFileOptions(it, options.includeHasFile))
-    .mapAsync((it) => applyExcludeHasFileOptions(it, options.excludeHasFile))
-    .mapAsync((it) => applyIncludeHasDirOptions(it, options.includeHasDir))
-    .mapAsync((it) => applyExcludeHasDirOptions(it, options.excludeHasDir))
-    .promise
+  return await Promise.resolve(dartProjects)
+    .then((it) => applyIncludeHasFileOptions(it, options.includeHasFile))
+    .then((it) => applyExcludeHasFileOptions(it, options.excludeHasFile))
+    .then((it) => applyIncludeHasDirOptions(it, options.includeHasDir))
+    .then((it) => applyExcludeHasDirOptions(it, options.excludeHasDir))
 }
 
 async function applyIncludeHasFileOptions(

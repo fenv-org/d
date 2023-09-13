@@ -53,13 +53,13 @@ export class Chain<T> {
   public flatMapAsync<R>(
     fn: (
       value: T,
-    ) => AsyncChain<R> | Chain<R> | Promise<AsyncChain<R> | Chain<R>>,
+    ) => AsyncChain<R> | Chain<R> | Promise<R> | Promise<Chain<R>>,
   ): AsyncChain<R> {
     return this.toAsync().flatMapAsync(fn)
   }
 }
 
-export class AsyncChain<T> {
+export class AsyncChain<T> implements PromiseLike<T> {
   private constructor(promise: Promise<T>) {
     this.#promise = promise
   }
@@ -96,15 +96,36 @@ export class AsyncChain<T> {
 
   public static flatten<T>(
     chain:
-      | AsyncChain<AsyncChain<T>>
-      | Chain<AsyncChain<T>>
-      | AsyncChain<Chain<T>>,
+      | PromiseLike<PromiseLike<T>>
+      | Chain<PromiseLike<T>>
+      | PromiseLike<Chain<T>>,
   ): AsyncChain<T> {
-    return chain.flatMapAsync((it) => it)
+    if (chain instanceof Promise) {
+      return new AsyncChain(chain.then((it) => it))
+    } else if (chain instanceof Chain) {
+      return new AsyncChain(Promise.resolve(chain.value))
+    } else {
+      return new AsyncChain(Promise.resolve(chain))
+        .flatMapAsync((it) => it instanceof Chain ? it : Chain.of(it))
+    }
   }
 
   public get promise(): Promise<T> {
     return this.#promise
+  }
+
+  then<TResult1 = T, TResult2 = never>(
+    onfulfilled?:
+      | ((value: T) => TResult1 | PromiseLike<TResult1>)
+      | null
+      | undefined,
+    onrejected?:
+      // deno-lint-ignore no-explicit-any
+      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+      | null
+      | undefined,
+  ): PromiseLike<TResult1 | TResult2> {
+    return this.#promise.then(onfulfilled, onrejected)
   }
 
   public tapAsync(fn: (value: T) => unknown | Promise<unknown>): AsyncChain<T> {
@@ -124,7 +145,7 @@ export class AsyncChain<T> {
   public flatMapAsync<R>(
     fn: (
       value: T,
-    ) => AsyncChain<R> | Chain<R> | Promise<AsyncChain<R> | Chain<R>>,
+    ) => AsyncChain<R> | Chain<R> | Promise<R> | Promise<Chain<R>>,
   ): AsyncChain<R> {
     return new AsyncChain(this.#promise.then(
       async (it) => {
@@ -136,9 +157,9 @@ export class AsyncChain<T> {
           if (result instanceof Chain) {
             return result.value
           }
-          return result.#promise
+          return result
         } else {
-          return resultOrPromise.#promise
+          return resultOrPromise
         }
       },
     ))
