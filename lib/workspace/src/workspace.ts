@@ -1,9 +1,11 @@
+import { PackageFilterOptions } from '../../command/common/mod.ts'
 import { Context } from '../../context/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import { DLogger } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'
+import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
 
 const { exists, expandGlob } = std.fs
@@ -21,7 +23,7 @@ export class Workspace {
     /**
      * The absolute path of the `d.yaml` file of the main project.
      */
-    public workspaceFilepath: string,
+    public readonly workspaceFilepath: string,
     /**
      * The found dart projects.
      */
@@ -34,6 +36,19 @@ export class Workspace {
    */
   get workspaceDir(): string {
     return dirname(this.workspaceFilepath)
+  }
+
+  /**
+   * Creates a new {@link Workspace} clone applying the given
+   * package filter {@link options}.
+   */
+  async applyPackageFilterOptions(
+    options: PackageFilterOptions,
+  ): Promise<Workspace> {
+    return new Workspace(
+      this.workspaceFilepath,
+      await applyPackageFilterOptions(this.dartProjects, options),
+    )
   }
 
   /**
@@ -117,9 +132,9 @@ export class Workspace {
     logger: DLogger
   }): AsyncGenerator<DartProject> {
     const { logger, pwd, glob, excludeRegExps } = options
-    const joinedGlob = join(pwd, glob, 'pubspec.yaml')
+    const joinedGlob = join(glob, 'pubspec.yaml')
     logger.debug(`Searching dart projects: ${joinedGlob}`)
-    const walkEntries = expandGlob(joinedGlob)
+    const walkEntries = expandGlob(joinedGlob, { root: pwd })
     for await (const walkEntry of walkEntries) {
       const dartProject = await DartProject.fromPubspecFilepath(
         walkEntry.path,

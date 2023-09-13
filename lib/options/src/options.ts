@@ -1,7 +1,9 @@
+import { BootstrapOptions } from '../../command/bootstrap/mod.ts'
+
 /**
  * The definition of `d`'s command line arguments.
  */
-export type Options =
+export type Flags =
   & {
     readonly cwd: string
     readonly args: string[]
@@ -9,7 +11,7 @@ export type Options =
   & (
     | {
       readonly name: 'bootstrap'
-      readonly options: PackageFilterOptions & GlobalOptions
+      readonly options: BootstrapOptions & GlobalOptions
     }
     | {
       readonly name: 'graph'
@@ -26,12 +28,4 @@ export type GlobalOptions = {
   readonly config?: string
   readonly dWorkspace?: string
   readonly dLogTime?: number
-}
-
-/**
- * Additional package filters.
- */
-export type PackageFilterOptions = {
-  readonly fileExists: string[]
-  readonly dirExists: string[]
 }

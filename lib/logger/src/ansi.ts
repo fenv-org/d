@@ -24,6 +24,7 @@ export interface Ansi {
     readonly hint: string
     readonly running: string
     readonly check: string
+    readonly child: string
   }
 
   readonly style: {
@@ -36,5 +37,6 @@ export interface Ansi {
     readonly errorPackageName: Styling
     readonly verbose: Styling
     readonly debug: Styling
+    readonly info: Styling
   }
 }

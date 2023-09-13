@@ -1,3 +1,4 @@
+import { border } from 'https://deno.land/x/cliffy@v1.0.0-rc.3/table/mod.ts'
 import { cliffy } from '../../deps.ts'
 import { LINE_FEED, Stderr, Stdout } from '../../util/mod.ts'
 import { Ansi } from './ansi.ts'
@@ -236,12 +237,24 @@ export class DLogger extends DelegateLogger {
     childIndentation?: string
   }) {
     super(logger)
-    this._indentation = options?.indentation ?? ''
-    this._childIndentation = options?.childIndentation ?? '  '
+    this.#indentation = options?.indentation ?? ''
   }
 
-  private readonly _indentation: string
-  private readonly _childIndentation: string
+  readonly #indentation: string
+
+  public stdout(
+    message: string,
+    options?: { prefix?: boolean },
+  ): void {
+    super.stdout(this.#indentation + message, options)
+  }
+
+  public stderr(
+    message: string,
+    options?: { prefix?: boolean },
+  ): void {
+    super.stderr(this.#indentation + message, options)
+  }
 
   public verbose(message: string): void {
     if (this.isVerbose) {
@@ -269,7 +282,7 @@ export class DLogger extends DelegateLogger {
         `${ansi.color.command('$')} ${ansi.style.command(command)}`,
       )
     } else {
-      this.stdout(ansi.style.command(command))
+      this.stdout(ansi.color.command(ansi.style.command(command)))
     }
   }
 
@@ -337,9 +350,32 @@ export class DLogger extends DelegateLogger {
   public newLine() {
     this.logger.write(LINE_FEED, { prefix: false })
   }
+
+  public indent(): DLogger {
+    this.logger.write(this.#indentation, { prefix: false })
+    return this
+  }
+
+  public indentIn(): DLogger {
+    return new DLogger(this.logger, {
+      indentation: this.#indentation + '  ',
+    })
+  }
+
+  public indentOut(): DLogger {
+    return this.#indentation.length > 2
+      ? new DLogger(this.logger, {
+        indentation: this.#indentation.slice(2),
+      })
+      : this
+  }
 }
 
 function Ansi(colors: cliffy.ansi.Colors, colorSupported: boolean): Ansi {
+  function identity<T>(t: T): T {
+    return t
+  }
+
   const color = colorSupported
     ? {
       command: colors.yellow,
@@ -356,18 +392,18 @@ function Ansi(colors: cliffy.ansi.Colors, colorSupported: boolean): Ansi {
       dryRunWarningLabel: colors.brightMagenta,
     }
     : {
-      command: (message: string) => message,
-      commandLabel: (message: string) => message,
-      successMessage: (message: string) => message,
-      successLabel: (message: string) => message,
-      warningMessage: (message: string) => message,
-      warningLabel: (message: string) => message,
-      errorMessage: (message: string) => message,
-      errorLabel: (message: string) => message,
-      hintMessage: (message: string) => message,
-      hintLabel: (message: string) => message,
-      dryRunWarningMessage: (message: string) => message,
-      dryRunWarningLabel: (message: string) => message,
+      command: identity<string>,
+      commandLabel: identity<string>,
+      successMessage: identity<string>,
+      successLabel: identity<string>,
+      warningMessage: identity<string>,
+      warningLabel: identity<string>,
+      errorMessage: identity<string>,
+      errorLabel: identity<string>,
+      hintMessage: identity<string>,
+      hintLabel: identity<string>,
+      dryRunWarningMessage: identity<string>,
+      dryRunWarningLabel: identity<string>,
     }
   const style = colorSupported
     ? {
@@ -381,17 +417,19 @@ function Ansi(colors: cliffy.ansi.Colors, colorSupported: boolean): Ansi {
         colors.yellow(colors.bold(message)),
       verbose: colors.gray,
       debug: colors.blue,
+      info: (message: string) => colors.brightCyan(colors.bold(message)),
     }
     : {
-      command: (message: string) => message,
-      success: (message: string) => message,
-      label: (message: string) => message,
-      target: (message: string) => message,
-      packagePath: (message: string) => message,
-      packageName: (message: string) => message,
-      errorPackageName: (message: string) => message,
-      verbose: (message: string) => message,
-      debug: (message: string) => message,
+      command: identity<string>,
+      success: identity<string>,
+      label: identity<string>,
+      target: identity<string>,
+      packagePath: identity<string>,
+      packageName: identity<string>,
+      errorPackageName: identity<string>,
+      verbose: identity<string>,
+      debug: identity<string>,
+      info: identity<string>,
     }
   const label = {
     success: color.successLabel(style.label('SUCCESS')),
@@ -401,6 +439,7 @@ function Ansi(colors: cliffy.ansi.Colors, colorSupported: boolean): Ansi {
     hint: color.hintLabel(style.label('HINT')),
     running: color.commandLabel(style.label('RUNNING')),
     check: colors.brightGreen(style.label('✓')),
+    child: `${border.bottomLeft}>`,
   }
   return { color, label, style }
 }

@@ -1,6 +1,7 @@
-import { graphCommand } from './command/graph/mod.ts'
+import { runBootstrapCommand } from './command/bootstrap/mod.ts'
+import { runGraphCommand } from './command/graph/mod.ts'
 import { Context } from './context/mod.ts'
-import { buildCommand, parseArgs } from './options/mod.ts'
+import { buildCommand, Flags, parseArgs } from './options/mod.ts'
 import { Stderr, Stdout } from './util/mod.ts'
 import { Workspace } from './workspace/mod.ts'
 
@@ -27,22 +28,33 @@ export async function dMain(
   const flags = await parseArgs(options.cwd, args)
   const context = Context.fromFlags({
     ...flags,
-    stderr: options.stderr,
-    stdout: options.stdout,
-    colorSupported: options.colorSupported,
+    ...options,
   })
   const workspace = await Workspace.fromContext(context)
+  const voidOrPromise = runCommand({ context, workspace, flags })
+  if (voidOrPromise) {
+    await voidOrPromise
+  }
+}
 
+function runCommand(options: {
+  context: Context
+  workspace: Workspace
+  flags: Flags
+}): Promise<void> | void {
+  const { context, workspace, flags } = options
   switch (flags.name) {
     case 'bootstrap':
-      // await workspace.bootstrap(flags.options)
-      break
+      return runBootstrapCommand({
+        context,
+        workspace,
+        flags: flags.options,
+      })
 
     case 'graph':
-      graphCommand({ context, workspace })
-      break
+      return runGraphCommand({ context, workspace })
 
     default:
-      buildCommand().showHelp()
+      return buildCommand().showHelp()
   }
 }
