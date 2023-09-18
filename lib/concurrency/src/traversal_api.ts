@@ -7,19 +7,22 @@ const { deferred } = std.async
 /**
  * Result of visiting a node.
  */
-export enum VisitResult {
+export type VisitResult =
   /**
    * Continue the traversal.
    */
-  Continue,
+  | {
+    kind: 'continue'
+  }
   /**
    * Stop the traversal.
    *
    * It does not stop immediately. The traversal will stop after the current
    * visiting nodes are done.
-   */
-  Stop,
-}
+   */ | {
+    kind: 'stop'
+    code: number
+  }
 
 /**
  * Callback that is called when a node is visiting.
@@ -134,6 +137,7 @@ export class Traversal {
   #run(promise: std.async.Deferred<void>, removeNode?: string) {
     const room = this.#concurrency -
       this.#visitingNodes.size
+    const result: { code?: number } = {}
     if (room > 0) {
       const nodes = poll({
         state: this.#state,
@@ -141,21 +145,29 @@ export class Traversal {
         maximum: room,
       })
       if (nodes.length === 0 && this.#state.remainingNodeCount === 0) {
-        promise.resolve()
+        if (result.code) {
+          promise.reject(result.code)
+        } else {
+          promise.resolve()
+        }
         return
       }
       for (const node of nodes) {
         this.#visitingNodes.add(node)
-        this.#visit(promise, node)
+        this.#visit(promise, node, result)
       }
     }
   }
 
-  async #visit(promise: std.async.Deferred<void>, node: string): Promise<void> {
+  async #visit(
+    promise: std.async.Deferred<void>,
+    node: string,
+    result: { code?: number },
+  ): Promise<void> {
     const visitResult = await this.#onVisit(node)
     this.#visitingNodes.delete(node)
-    switch (visitResult) {
-      case VisitResult.Continue: {
+    switch (visitResult.kind) {
+      case 'continue': {
         this.#run(promise, node)
         if (this.#visitingNodes.size === 0 && this.#concurrency === 0) {
           // The finally running node is just done.
@@ -164,11 +176,14 @@ export class Traversal {
         break
       }
 
-      case VisitResult.Stop:
+      case 'stop':
         this.#concurrency = 0
+        if (!result.code) {
+          result.code = visitResult.code
+        }
         if (this.#visitingNodes.size === 0) {
           // `node` is the only running node and it is just done.
-          promise.resolve()
+          promise.reject(visitResult.code)
         }
     }
   }
