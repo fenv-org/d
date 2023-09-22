@@ -51,8 +51,8 @@ Deno.test('supportColors & verbose & debug', async (t) => {
   stderr.reset()
 
   await t.step('debug', () => {
-    // advance 10 minutes 30 seconds
-    now += 1000 * 60 * 10 + 1000 * 30
+    // advance 123 milliseconds
+    now += 123
     logger.stderr({ debug: true, timestamp: true })
       .package('test')
       .indent()
@@ -66,7 +66,7 @@ Deno.test('supportColors & verbose & debug', async (t) => {
     console.log(bufferToString(stderr))
     assertEquals(
       bufferToString(stderr),
-      styles.gray.bold('[21m 00.000s]') + ' ' +
+      styles.gray.bold('[10m 30.123s]') + ' ' +
         '[' + styles.brightYellow.bold('test') + ']   ' +
         styles.brightGreen.bold('└>') + ' ' +
         styles.magenta('$') + styles.magenta(' ') +
@@ -128,8 +128,8 @@ Deno.test('!supportColors & verbose & debug', async (t) => {
   stderr.reset()
 
   await t.step('debug', () => {
-    // advance 10 minutes 30 seconds
-    now += 1000 * 60 * 10 + 1000 * 30
+    // advance 123 milliseconds
+    now += 123
     logger.stderr({ debug: true, timestamp: true })
       .package('test')
       .indent()
@@ -143,7 +143,7 @@ Deno.test('!supportColors & verbose & debug', async (t) => {
     console.log(bufferToString(stderr))
     assertEquals(
       bufferToString(stderr),
-      '[21m 00.000s] [test]   └> $ Hello world' + LINE_FEED,
+      '[10m 30.123s] [test]   └> $ Hello world' + LINE_FEED,
     )
   })
 
@@ -194,8 +194,8 @@ Deno.test('supportColors & !verbose & !debug', async (t) => {
   stderr.reset()
 
   await t.step('debug', () => {
-    // advance 10 minutes 30 seconds
-    now += 1000 * 60 * 10 + 1000 * 30
+    // advance 123 milliseconds
+    now += 123
     logger.stderr({ debug: true, timestamp: true })
       .package('test')
       .indent()

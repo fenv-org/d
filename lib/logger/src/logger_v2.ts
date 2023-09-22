@@ -117,9 +117,10 @@ class LoggerV2Impl implements LoggerV2 {
       })
       : VoidLogBuilder.instance
     if (options?.timestamp) {
-      builder.timestamp()
+      return builder.timestamp()
+    } else {
+      return builder
     }
-    return builder
   }
 
   #enabled(
