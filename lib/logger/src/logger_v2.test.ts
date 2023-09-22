@@ -1,7 +1,8 @@
 import { assertEquals, Buffer } from '../../test_deps.ts'
-import { LINE_FEED } from '../../util/mod.ts'
 import { createStyles } from '../mod.ts'
 import { createLoggerV2 } from './logger_v2.ts'
+
+const LINE_FEED = Deno.build.os === 'windows' ? '\r\n' : '\n'
 
 function bufferToString(buffer: Buffer): string {
   const decoder = new TextDecoder()
@@ -171,11 +172,8 @@ Deno.test('supportColors & !verbose & !debug', async (t) => {
     stdout,
     stderr,
     supportColors: true,
-    verboseEnabled: false,
-    debugEnabled: false,
     now: () => now,
   })
-  const styles = createStyles({ supportColors: true })
 
   await t.step('verbose', () => {
     // advance 10 minutes 30 seconds
