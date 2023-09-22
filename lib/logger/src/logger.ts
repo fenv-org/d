@@ -1,4 +1,3 @@
-import { border } from 'https://deno.land/x/cliffy@v1.0.0-rc.3/table/mod.ts'
 import { cliffy } from '../../deps.ts'
 import { LINE_FEED, Stderr, Stdout } from '../../util/mod.ts'
 import { Ansi } from './ansi.ts'
@@ -439,7 +438,7 @@ function Ansi(colors: cliffy.ansi.Colors, colorSupported: boolean): Ansi {
     hint: color.hintLabel(style.label('HINT')),
     running: color.commandLabel(style.label('RUNNING')),
     check: colors.brightGreen(style.label('✓')),
-    child: `${border.bottomLeft}>`,
+    child: `${cliffy.table.border.bottomLeft}>`,
   }
   return { color, label, style }
 }
