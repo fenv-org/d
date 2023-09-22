@@ -52,9 +52,9 @@ class LoggerV2Impl implements LoggerV2 {
     debugEnabled?: boolean
     now: () => number
   }) {
+    this.colors = createStyles(options)
     this.#stdout = options.stdout
     this.#stderr = options.stderr
-    this.#colors = createStyles(options)
     this.#verboseEnabled = options.verboseEnabled ?? false
     this.#debugEnabled = options.debugEnabled ?? false
     this.#now = options.now
@@ -63,15 +63,12 @@ class LoggerV2Impl implements LoggerV2 {
 
   #stdout: Stdout
   #stderr: Stderr
-  #colors: Styles
   #verboseEnabled: boolean
   #debugEnabled: boolean
   #now: () => number
   #startAt: number
 
-  get colors(): Styles {
-    return this.#colors
-  }
+  readonly colors: Styles
 
   stdout(
     options?: {
@@ -92,7 +89,7 @@ class LoggerV2Impl implements LoggerV2 {
   ): LogBuilder {
     return this.#builder(this.#stderr, {
       ...options,
-      defaultStyling: this.#colors.magenta,
+      defaultStyling: this.colors.magenta,
     })
   }
 
@@ -110,7 +107,7 @@ class LoggerV2Impl implements LoggerV2 {
         stream: stream,
         now: this.#now,
         startAt: this.#startAt,
-        styles: this.#colors,
+        styles: this.colors,
         defaultStyling: options?.defaultStyling,
         timestamp: false,
         package: undefined,
