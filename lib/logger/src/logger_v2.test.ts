@@ -53,8 +53,7 @@ Deno.test('supportColors & verbose & debug', async (t) => {
   await t.step('debug', () => {
     // advance 10 minutes 30 seconds
     now += 1000 * 60 * 10 + 1000 * 30
-    logger.stderr({ debug: true })
-      .timestamp()
+    logger.stderr({ debug: true, timestamp: true })
       .package('test')
       .indent()
       .childArrow()
@@ -131,8 +130,7 @@ Deno.test('!supportColors & verbose & debug', async (t) => {
   await t.step('debug', () => {
     // advance 10 minutes 30 seconds
     now += 1000 * 60 * 10 + 1000 * 30
-    logger.stderr({ debug: true })
-      .timestamp()
+    logger.stderr({ debug: true, timestamp: true })
       .package('test')
       .indent()
       .childArrow()
@@ -198,8 +196,7 @@ Deno.test('supportColors & !verbose & !debug', async (t) => {
   await t.step('debug', () => {
     // advance 10 minutes 30 seconds
     now += 1000 * 60 * 10 + 1000 * 30
-    logger.stderr({ debug: true })
-      .timestamp()
+    logger.stderr({ debug: true, timestamp: true })
       .package('test')
       .indent()
       .childArrow()
