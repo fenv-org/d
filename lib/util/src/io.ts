@@ -1,4 +1,4 @@
-import { supportColorCheck } from '../../deps.ts'
+import { std, supportColorCheck } from '../../deps.ts'
 
 /**
  * The line feed sequence of the current operating system.
@@ -31,5 +31,26 @@ export function supportsColor(stream: Deno.Writer & { rid?: number }): boolean {
     return checkResult && checkResult.hasBasic
   } else {
     return false
+  }
+}
+
+/**
+ * A helper class that provides many helper functions to manipulate the
+ * byte array stream.
+ */
+export class ByteStreams {
+  /**
+   * Reads the given stream as a string line by line.
+   */
+  static async *readLines(
+    stream: ReadableStream<Uint8Array>,
+  ): AsyncIterable<string> {
+    for await (
+      const line of stream
+        .pipeThrough(new TextDecoderStream())
+        .pipeThrough(new std.streams.TextLineStream())
+    ) {
+      yield line
+    }
   }
 }
