@@ -9,46 +9,42 @@ export async function runBootstrapCommand(options: {
 }): Promise<void> {
   const { context, workspace, flags } = options
   const { logger } = context
-  const { ansi } = logger
 
-  logger.command('d bootstrap')
+  logger.stdout({ timestamp: true })
+    .command('d bootstrap')
+    .lineFeed()
 
-  const indentLogger = logger.indentIn()
-  indentLogger.stdout(
-    `${ansi.label.child} ${ansi.style.target(workspace.workspaceDir)}`,
-  )
+  logger.stdout({ timestamp: true }).indent()
+    .childArrow()
+    .push((s) => s.cyan.bold(`workspace directory: ${workspace.workspaceDir}`))
+    .lineFeed()
 
+  const filterDebugLogger = logger
+    .stdout({ debug: true, timestamp: true })
+    .indent(2)
   if (flags.includeHasFile) {
-    indentLogger.indentIn()
-      .debug(
-        ` [package filter] include has file=${
-          JSON.stringify(flags.includeHasFile)
-        }`,
-      )
+    filterDebugLogger
+      .push('[package filter] include has file=')
+      .push(JSON.stringify(flags.includeHasFile))
+      .lineFeed()
   }
   if (flags.excludeHasFile) {
-    indentLogger.indentIn()
-      .debug(
-        ` [package filter] exclude has file=${
-          JSON.stringify(flags.excludeHasFile)
-        }`,
-      )
+    filterDebugLogger
+      .push('[package filter] exclude has file=')
+      .push(JSON.stringify(flags.excludeHasFile))
+      .lineFeed()
   }
   if (flags.includeHasDir) {
-    indentLogger.indentIn()
-      .debug(
-        ` [package filter] include has directory=${
-          JSON.stringify(flags.includeHasDir)
-        }`,
-      )
+    filterDebugLogger
+      .push('[package filter] include has directory=')
+      .push(JSON.stringify(flags.includeHasDir))
+      .lineFeed()
   }
   if (flags.excludeHasDir) {
-    indentLogger.indentIn()
-      .debug(
-        ` [package filter] exclude has directory=${
-          JSON.stringify(flags.excludeHasDir)
-        }`,
-      )
+    filterDebugLogger
+      .push('[package filter] exclude has directory=')
+      .push(JSON.stringify(flags.excludeHasDir))
+      .lineFeed()
   }
 
   const filteredWorkspace = await workspace.applyPackageFilterOptions(flags)

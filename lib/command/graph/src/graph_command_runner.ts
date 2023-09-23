@@ -30,10 +30,13 @@ export function runGraphCommand(options: {
     .toString()
     .split('\n')
 
-  context.logger.success(
-    `Analyzed dependency graph: base dir: ${workspace.workspaceDir}`,
-  )
+  const { logger } = context
+  logger.stdout({ timestamp: true })
+    .push((s) => s.bold('Analyzed dependency graph: '))
+    .push('the base directory path is ')
+    .push(`\`${workspace.workspaceDir}\``)
+    .lineFeed()
   for (const line of tabularGraphRepresentation) {
-    context.logger.stdout(line)
+    logger.stdout().push(line).lineFeed()
   }
 }
