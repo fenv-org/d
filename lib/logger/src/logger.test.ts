@@ -41,7 +41,7 @@ Deno.test('supportColors & verbose & debug', async (t) => {
     assertEquals(
       bufferToString(stdout),
       styles.gray.bold('[10m 30.000s]') + ' ' +
-        '[' + styles.brightYellow.bold('test') + ']   ' +
+        '[' + styles.blue.bold('test') + ']   ' +
         styles.brightGreen.bold('└>') + ' ' +
         '$ Hello ' + styles.bgBlue.italic.bold('world') + LINE_FEED,
     )
@@ -67,7 +67,7 @@ Deno.test('supportColors & verbose & debug', async (t) => {
     assertEquals(
       bufferToString(stderr),
       styles.gray.bold('[10m 30.123s]') + ' ' +
-        '[' + styles.brightYellow.bold('test') + ']   ' +
+        '[' + styles.blue.bold('test') + ']   ' +
         styles.brightGreen.bold('└>') + ' ' +
         styles.magenta('$') + styles.magenta(' ') +
         styles.magenta('Hello') + styles.magenta(' ') +
