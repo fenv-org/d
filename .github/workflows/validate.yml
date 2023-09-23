@@ -7,6 +7,9 @@ on:
   pull_request:
   merge_group:
 
+env:
+  FLUTTER_VERSION: 3.13.4
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -42,6 +45,17 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: ${{ steps.latest_deno.outputs.release }}
+
+      - name: Set up Flutter
+        uses: flutter-actions/setup-flutter@v2
+        with:
+          channel: stable
+          version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: flutter-${{ matrix.os }}-${{ env.FLUTTER_VERSION }}
+
+      - name: Check Flutter CLI
+        run: flutter doctor -v
 
       - id: sanitize_deno_version
         run: deno run --allow-env --allow-write bin/remove_prefix_v.ts "${{ steps.latest_deno.outputs.release }}"
