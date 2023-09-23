@@ -1,0 +1,5 @@
+pubspec.lock
+pubspec_overrides.yaml
+**/android/local.properties
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/Generated.xcconfig
