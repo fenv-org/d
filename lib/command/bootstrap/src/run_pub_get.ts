@@ -1,8 +1,8 @@
 import { VisitResult } from '../../../concurrency/mod.ts'
 import { Context } from '../../../context/mod.ts'
 import { std } from '../../../deps.ts'
-import { Logger, logLabels } from '../../../logger/mod.ts'
-import { ByteStreams } from '../../../util/mod.ts'
+import { logLabels } from '../../../logger/mod.ts'
+import { runShellCommand } from '../../../util/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
 
 export async function runFlutterPubGet(
@@ -39,23 +39,12 @@ export async function runFlutterPubGet(
     .command('flutter pub get', { withDollarSign: true })
     .lineFeed()
 
-  const command = new Deno.Command(
-    'flutter',
-    {
-      args: ['pub', 'get'],
-      cwd: dartProject.path,
-      stdout: 'piped',
-      stderr: 'piped',
-    },
-  )
-  const child = command.spawn()
+  const output = await runShellCommand('flutter', {
+    args: ['pub', 'get'],
+    dartProject,
+    logger,
+  })
 
-  await Promise.all([
-    outputStdout({ logger, packageName: node, stdout: child.stdout }),
-    outputStderr({ logger, packageName: node, stderr: child.stderr }),
-  ])
-
-  const output = await child.status
   if (!output.success) {
     logger.stderr()
       .label(logLabels.error)
@@ -65,32 +54,4 @@ export async function runFlutterPubGet(
     return { kind: 'stop', code: output.code }
   }
   return { kind: 'continue' }
-}
-
-async function outputStdout(options: {
-  logger: Logger
-  packageName: string
-  stdout: ReadableStream<Uint8Array>
-}) {
-  const { logger, packageName, stdout } = options
-  for await (const line of ByteStreams.readLines(stdout)) {
-    logger.stdout({ timestamp: true })
-      .package(packageName)
-      .push(line)
-      .lineFeed()
-  }
-}
-
-async function outputStderr(options: {
-  logger: Logger
-  packageName: string
-  stderr: ReadableStream<Uint8Array>
-}) {
-  const { logger, packageName, stderr } = options
-  for await (const line of ByteStreams.readLines(stderr)) {
-    logger.stderr({ timestamp: true })
-      .package(packageName)
-      .push(line)
-      .lineFeed()
-  }
 }
