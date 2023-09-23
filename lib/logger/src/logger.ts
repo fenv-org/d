@@ -3,7 +3,7 @@ import { LINE_FEED, Stderr, Stdout } from '../../util/mod.ts'
 import { Styling } from '../mod.ts'
 import { createStyles, Styles } from './styling.ts'
 
-export function createLoggerV2(options: {
+export function createLogger(options: {
   stdout: Stdout
   stderr: Stderr
   supportColors: boolean
@@ -11,14 +11,14 @@ export function createLoggerV2(options: {
   debugEnabled?: boolean
   now?: () => number
   dLogTime?: number
-}): LoggerV2 {
+}): Logger {
   return new LoggerV2Impl({
     ...options,
     now: options.now ?? Date.now,
   })
 }
 
-export interface LoggerV2 {
+export interface Logger {
   readonly colors: Styles
 
   stdout(options?: {
@@ -45,7 +45,7 @@ export interface LogBuilder {
   lineFeed(): void
 }
 
-class LoggerV2Impl implements LoggerV2 {
+class LoggerV2Impl implements Logger {
   constructor(options: {
     stdout: Stdout
     stderr: Stderr

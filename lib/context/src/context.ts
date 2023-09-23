@@ -1,5 +1,5 @@
 import { std } from '../../deps.ts'
-import { createLoggerV2, LoggerV2 } from '../../logger/mod.ts'
+import { createLogger, Logger } from '../../logger/mod.ts'
 import { GlobalOptions } from '../../options/mod.ts'
 import { Stderr, Stdout, supportsColor } from '../../util/mod.ts'
 
@@ -11,7 +11,7 @@ export class Context {
     cwd: string
     verbose: boolean
     debug: boolean
-    logger: LoggerV2
+    logger: Logger
     config?: string
     dWorkspace?: string
   }) {
@@ -26,7 +26,7 @@ export class Context {
   readonly cwd: string
   readonly verbose: boolean
   readonly debug: boolean
-  readonly logger: LoggerV2
+  readonly logger: Logger
   readonly config: string | undefined
   readonly dWorkspace: string | undefined
 
@@ -51,7 +51,7 @@ export class Context {
           ? flags.options.dWorkspace
           : std.path.resolve(flags.cwd, flags.options.dWorkspace)
         : undefined,
-      logger: createLoggerV2({
+      logger: createLogger({
         stdout: flags.stdout,
         stderr: flags.stderr,
         supportColors: flags.colorSupported ?? supportsColor(flags.stdout),

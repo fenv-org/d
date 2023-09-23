@@ -3,7 +3,7 @@ import { Context } from '../../context/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
-import { LoggerV2 } from '../../logger/mod.ts'
+import { Logger } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'
 import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
@@ -133,7 +133,7 @@ export class Workspace {
     pwd: string
     glob: string
     excludeRegExps: RegExp[]
-    logger: LoggerV2
+    logger: Logger
   }): AsyncGenerator<DartProject> {
     const { logger, pwd, glob, excludeRegExps } = options
     const joinedGlob = join(glob, 'pubspec.yaml')
