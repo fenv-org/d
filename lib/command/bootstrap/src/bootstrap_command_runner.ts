@@ -1,13 +1,10 @@
 import { Traversal } from '../../../concurrency/mod.ts'
 import { Context } from '../../../context/mod.ts'
 import { DependencyGraph } from '../../../dart/mod.ts'
-import { std } from '../../../deps.ts'
 import { DError } from '../../../error/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
 import { BootstrapOptions } from './bootstrap_command.ts'
-import { runFlutterPubGet } from './traverse_handler.ts'
-
-const { TextLineStream } = std.streams
+import { runFlutterPubGet } from './run_pub_get.ts'
 
 export async function runBootstrapCommand(options: {
   context: Context

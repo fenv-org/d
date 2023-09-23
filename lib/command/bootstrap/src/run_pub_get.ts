@@ -2,9 +2,8 @@ import { VisitResult } from '../../../concurrency/mod.ts'
 import { Context } from '../../../context/mod.ts'
 import { std } from '../../../deps.ts'
 import { Logger, logLabels } from '../../../logger/mod.ts'
+import { ByteStreams } from '../../../util/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
-
-const { TextLineStream } = std.streams
 
 export async function runFlutterPubGet(
   node: string,
@@ -18,15 +17,6 @@ export async function runFlutterPubGet(
   const dartProject = workspace.dartProjects.find((project) =>
     project.name === node
   )!
-  const command = new Deno.Command(
-    'flutter',
-    {
-      args: ['pub', 'get'],
-      cwd: dartProject.path,
-      stdout: 'piped',
-      stderr: 'piped',
-    },
-  )
 
   logger.stdout({ timestamp: true })
     .package(node)
@@ -49,6 +39,15 @@ export async function runFlutterPubGet(
     .command('flutter pub get', { withDollarSign: true })
     .lineFeed()
 
+  const command = new Deno.Command(
+    'flutter',
+    {
+      args: ['pub', 'get'],
+      cwd: dartProject.path,
+      stdout: 'piped',
+      stderr: 'piped',
+    },
+  )
   const child = command.spawn()
 
   await Promise.all([
@@ -74,11 +73,7 @@ async function outputStdout(options: {
   stdout: ReadableStream<Uint8Array>
 }) {
   const { logger, packageName, stdout } = options
-  for await (
-    const line of stdout
-      .pipeThrough(new TextDecoderStream())
-      .pipeThrough(new TextLineStream())
-  ) {
+  for await (const line of ByteStreams.readLines(stdout)) {
     logger.stdout({ timestamp: true })
       .package(packageName)
       .push(line)
@@ -92,11 +87,7 @@ async function outputStderr(options: {
   stderr: ReadableStream<Uint8Array>
 }) {
   const { logger, packageName, stderr } = options
-  for await (
-    const line of stderr
-      .pipeThrough(new TextDecoderStream())
-      .pipeThrough(new TextLineStream())
-  ) {
+  for await (const line of ByteStreams.readLines(stderr)) {
     logger.stderr({ timestamp: true })
       .package(packageName)
       .push(line)
