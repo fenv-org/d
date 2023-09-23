@@ -2,7 +2,9 @@ import { Traversal } from '../../../concurrency/mod.ts'
 import { Context } from '../../../context/mod.ts'
 import { DependencyGraph } from '../../../dart/mod.ts'
 import { DError } from '../../../error/mod.ts'
+import { Logger } from '../../../logger/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
+import { PackageFilterOptions } from '../../common/mod.ts'
 import { BootstrapOptions } from './bootstrap_command.ts'
 import { runFlutterPubGet } from './run_pub_get.ts'
 
@@ -22,7 +24,27 @@ export async function runBootstrapCommand(options: {
     .childArrow()
     .push((s) => s.cyan.bold(`workspace directory: ${workspace.workspaceDir}`))
     .lineFeed()
+  logPackageFilters(logger, flags)
 
+  const filteredWorkspace = await workspace.applyPackageFilterOptions(flags)
+  const dependencyGraph = DependencyGraph.fromDartProjects(
+    filteredWorkspace.dartProjects,
+  )
+  const commonArgs = { context, workspace }
+  const flutterPubGetPerEachNode = (node: string) =>
+    runFlutterPubGet(node, commonArgs)
+  const traversal = Traversal.fromDependencyGraph(dependencyGraph, {
+    onVisit: flutterPubGetPerEachNode,
+  })
+
+  try {
+    await traversal.start()
+  } catch (error) {
+    throw new DError(`Failed to bootstrap with result: ${error}`)
+  }
+}
+
+function logPackageFilters(logger: Logger, flags: PackageFilterOptions) {
   const filterDebugLogger = logger
     .stdout({ debug: true, timestamp: true })
     .indent(2)
@@ -49,22 +71,5 @@ export async function runBootstrapCommand(options: {
       .push('[package filter] exclude has directory=')
       .push(JSON.stringify(flags.excludeHasDir))
       .lineFeed()
-  }
-
-  const filteredWorkspace = await workspace.applyPackageFilterOptions(flags)
-  const dependencyGraph = DependencyGraph.fromDartProjects(
-    filteredWorkspace.dartProjects,
-  )
-  const commonArgs = { context, workspace }
-  const flutterPubGetPerEachNode = (node: string) =>
-    runFlutterPubGet(node, commonArgs)
-  const traversal = Traversal.fromDependencyGraph(dependencyGraph, {
-    onVisit: flutterPubGetPerEachNode,
-  })
-
-  try {
-    await traversal.start()
-  } catch (error) {
-    throw new DError(`Failed to bootstrap with result: ${error}`)
   }
 }
