@@ -23,10 +23,13 @@ export async function runFlutterPubGet(
     .push((s) => s.bold('Running: '))
     .lineFeed()
 
-  const relativePackageDirectory = std.path.relative(
+  let relativePackageDirectory = std.path.relative(
     workspace.workspaceDir,
     dartProject.path,
   )
+  relativePackageDirectory = relativePackageDirectory === ''
+    ? '.'
+    : relativePackageDirectory
   logger.stdout({ timestamp: true })
     .indent()
     .childArrow()
