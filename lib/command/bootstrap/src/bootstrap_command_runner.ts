@@ -6,6 +6,7 @@ import { Logger } from '../../../logger/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
 import { PackageFilterOptions } from '../../common/mod.ts'
 import { BootstrapOptions } from './bootstrap_command.ts'
+import { writePubspecOverridesYamlFiles } from './bootstrap_pubspec_overrides.ts'
 import { runFlutterPubGet } from './run_pub_get.ts'
 
 export async function runBootstrapCommand(options: {
@@ -30,6 +31,12 @@ export async function runBootstrapCommand(options: {
   const dependencyGraph = DependencyGraph.fromDartProjects(
     filteredWorkspace.dartProjects,
   )
+
+  // Write pubspec_overrides.yaml files before running `flutter pub get`.
+  await writePubspecOverridesYamlFiles(filteredWorkspace, dependencyGraph)
+
+  // Run `flutter pub get` for each package.
+  // We traverse the dependency graph in topological order.
   const commonArgs = { context, workspace }
   const flutterPubGetPerEachNode = (node: string) =>
     runFlutterPubGet(node, commonArgs)
