@@ -1,6 +1,6 @@
 import { std } from '../../deps.ts'
 import { assertEquals } from '../../test_deps.ts'
-import { createStyles } from './styling_v2.ts'
+import { createStyles } from './styling.ts'
 
 const colors = std.fmt.colors
 

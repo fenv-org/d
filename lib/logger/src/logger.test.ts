@@ -1,6 +1,6 @@
 import { assertEquals, Buffer } from '../../test_deps.ts'
 import { createStyles } from '../mod.ts'
-import { createLoggerV2 } from './logger_v2.ts'
+import { createLoggerV2 } from './logger.ts'
 
 const LINE_FEED = Deno.build.os === 'windows' ? '\r\n' : '\n'
 
