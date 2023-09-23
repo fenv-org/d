@@ -26,7 +26,9 @@ Deno.test('Show graph', async (t) => {
     assertEquals(
       stdoutLines,
       [
-        `Analyzed dependency graph: base dir: ${buildAbsPath('test-sample')}`,
+        `Analyzed dependency graph: the base directory path is \`${
+          buildAbsPath('test-sample')
+        }\``,
         `┌──────────────────────┬─────────────────────┬──────────────────────┬──────────────────────┐`,
         `│ name                 │ path                │ dependencies         │ dependents           │`,
         `├──────────────────────┼─────────────────────┼──────────────────────┼──────────────────────┤`,
@@ -73,7 +75,9 @@ Deno.test('Show graph', async (t) => {
     assertEquals(
       stdoutLines,
       [
-        `Analyzed dependency graph: base dir: ${buildAbsPath('test-sample')}`,
+        `Analyzed dependency graph: the base directory path is \`${
+          buildAbsPath('test-sample')
+        }\``,
         `┌──────────────────────┬─────────────────────┬──────────────────────┬──────────────────────┐`,
         `│ name                 │ path                │ dependencies         │ dependents           │`,
         `├──────────────────────┼─────────────────────┼──────────────────────┼──────────────────────┤`,

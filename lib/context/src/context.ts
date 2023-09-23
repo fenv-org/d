@@ -57,6 +57,7 @@ export class Context {
         supportColors: flags.colorSupported ?? supportsColor(flags.stdout),
         verboseEnabled: flags.options.verbose,
         debugEnabled: flags.options.debug,
+        dLogTime: flags.options.dLogTime,
       }),
     })
   }

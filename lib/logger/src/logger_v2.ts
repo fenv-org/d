@@ -10,6 +10,7 @@ export function createLoggerV2(options: {
   verboseEnabled?: boolean
   debugEnabled?: boolean
   now?: () => number
+  dLogTime?: number
 }): LoggerV2 {
   return new LoggerV2Impl({
     ...options,
@@ -51,6 +52,7 @@ class LoggerV2Impl implements LoggerV2 {
     supportColors: boolean
     verboseEnabled?: boolean
     debugEnabled?: boolean
+    dLogTime?: number
     now: () => number
   }) {
     this.colors = createStyles(options)
@@ -60,6 +62,7 @@ class LoggerV2Impl implements LoggerV2 {
     this.#debugEnabled = options.debugEnabled ?? false
     this.#now = options.now
     this.#startAt = options.now()
+    this.#dLogTime = options.dLogTime
   }
 
   #stdout: Stdout
@@ -68,6 +71,7 @@ class LoggerV2Impl implements LoggerV2 {
   #debugEnabled: boolean
   #now: () => number
   #startAt: number
+  #dLogTime?: number
 
   readonly colors: Styles
 
@@ -78,7 +82,10 @@ class LoggerV2Impl implements LoggerV2 {
       timestamp?: boolean
     },
   ): LogBuilder {
-    return this.#builder(this.#stdout, options)
+    return this.#builder(this.#stdout, {
+      ...options,
+      timestampEnabled: this.#dLogTime !== 0,
+    })
   }
 
   stderr(
@@ -90,6 +97,7 @@ class LoggerV2Impl implements LoggerV2 {
   ): LogBuilder {
     return this.#builder(this.#stderr, {
       ...options,
+      timestampEnabled: this.#dLogTime !== 0,
       defaultStyling: this.colors.magenta,
     })
   }
@@ -101,6 +109,7 @@ class LoggerV2Impl implements LoggerV2 {
       debug?: boolean
       timestamp?: boolean
       defaultStyling?: Styling
+      timestampEnabled: boolean
     } | undefined,
   ): LogBuilder {
     const builder = this.#enabled(options)
@@ -110,7 +119,10 @@ class LoggerV2Impl implements LoggerV2 {
         startAt: this.#startAt,
         styles: this.colors,
         defaultStyling: options?.defaultStyling,
-        timestamp: options?.verbose || options?.debug ? false : undefined,
+        timestamp:
+          options?.timestampEnabled && (options?.verbose || options?.debug)
+            ? false
+            : undefined,
         package: undefined,
         indent: 0,
         childArrow: false,
