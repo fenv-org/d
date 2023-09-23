@@ -1,6 +1,13 @@
+import { Traversal } from '../../../concurrency/mod.ts'
 import { Context } from '../../../context/mod.ts'
+import { DependencyGraph } from '../../../dart/mod.ts'
+import { std } from '../../../deps.ts'
+import { DError } from '../../../error/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
 import { BootstrapOptions } from './bootstrap_command.ts'
+import { runFlutterPubGet } from './traverse_handler.ts'
+
+const { TextLineStream } = std.streams
 
 export async function runBootstrapCommand(options: {
   context: Context
@@ -48,5 +55,19 @@ export async function runBootstrapCommand(options: {
   }
 
   const filteredWorkspace = await workspace.applyPackageFilterOptions(flags)
-  console.log(filteredWorkspace)
+  const dependencyGraph = DependencyGraph.fromDartProjects(
+    filteredWorkspace.dartProjects,
+  )
+  const commonArgs = { context, workspace }
+  const flutterPubGetPerEachNode = (node: string) =>
+    runFlutterPubGet(node, commonArgs)
+  const traversal = Traversal.fromDependencyGraph(dependencyGraph, {
+    onVisit: flutterPubGetPerEachNode,
+  })
+
+  try {
+    await traversal.start()
+  } catch (error) {
+    throw new DError(`Failed to bootstrap with result: ${error}`)
+  }
 }

@@ -40,9 +40,15 @@ export interface LogBuilder {
   indent(count?: number): LogBuilder
   childArrow(): LogBuilder
   command(command: string, options?: { withDollarSign: boolean }): LogBuilder
+  label(l: LogLabel): LogBuilder
   push(text: string | ((styles: Styles) => string)): LogBuilder
   pushCharCode(...args: number[]): LogBuilder
   lineFeed(): void
+}
+
+export type LogLabel = (s: Styles) => string
+export const logLabels: Record<string, LogLabel> = {
+  error: (s: Styles) => s.red.bold('ERROR'),
 }
 
 class LoggerV2Impl implements Logger {
@@ -128,6 +134,7 @@ class LoggerV2Impl implements Logger {
         childArrow: false,
         command: undefined,
         buffer: '',
+        _label: undefined,
       })
       : VoidLogBuilder.instance
     if (options?.timestamp) {
@@ -185,6 +192,10 @@ class VoidLogBuilder implements LogBuilder {
   }
 
   lineFeed(): void {}
+
+  label(_: LogLabel): LogBuilder {
+    return this
+  }
 }
 
 class LogBuilderImpl implements LogBuilder {
@@ -204,6 +215,7 @@ class LogBuilderImpl implements LogBuilder {
       readonly childArrow: boolean
       readonly command: string | undefined
       readonly buffer: string
+      readonly _label: LogLabel | undefined
     },
   ) {}
 
@@ -273,6 +285,13 @@ class LogBuilderImpl implements LogBuilder {
     return this.push(chars)
   }
 
+  label(l: LogLabel): LogBuilder {
+    return this.options._label === l ? this : new LogBuilderImpl({
+      ...this.options,
+      _label: l,
+    })
+  }
+
   lineFeed() {
     const segments = []
 
@@ -285,8 +304,12 @@ class LogBuilderImpl implements LogBuilder {
     }
 
     if (this.options.package) {
-      const packageName = this.#styles.brightYellow.bold(this.options.package)
+      const packageName = this.#styles.blue.bold(this.options.package)
       segments.push(`[${packageName}]`)
+    }
+
+    if (this.options._label) {
+      segments.push(`${this.options._label(this.#styles)}:`)
     }
 
     if (this.options.indent > 0) {

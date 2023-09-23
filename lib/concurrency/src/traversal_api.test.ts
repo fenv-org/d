@@ -4,7 +4,7 @@ import {
 } from 'https://deno.land/std@0.201.0/async/deferred.ts'
 import { DartProject, DependencyGraph, PubDependency } from '../../dart/mod.ts'
 import { cliffy, std } from '../../deps.ts'
-import { assertEquals } from '../../test_deps.ts'
+import { assertEquals, fail } from '../../test_deps.ts'
 import { Traversal, VisitResult } from './traversal_api.ts'
 
 Deno.test('traversal_api', async (t) => {
@@ -148,7 +148,12 @@ Deno.test('traversal_api', async (t) => {
     )
 
     // validation
-    await promise
+    try {
+      await promise
+      fail()
+    } catch (error) {
+      assertEquals(error, 1)
+    }
     assertEquals(log, [
       '[project_0]: enter',
       '[project_0]: exit with continue',
@@ -351,14 +356,14 @@ async function onVisit(option: {
       cliffy.ansi.colors.brightRed(`[${projectName}]`),
       'exit with continue',
     )
-    return VisitResult.Continue
+    return { kind: 'continue' }
   } else {
     log.push(`[${projectName}]: exit with stop`)
     console.log(
       cliffy.ansi.colors.brightRed(`[${projectName}]`),
       'exit with stop',
     )
-    return VisitResult.Stop
+    return { kind: 'stop', code: 1 }
   }
 }
 
