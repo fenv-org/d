@@ -1,6 +1,6 @@
 import { assertEquals, Buffer } from '../../test_deps.ts'
 import { createStyles } from '../mod.ts'
-import { createLoggerV2 } from './logger_v2.ts'
+import { createLogger } from './logger.ts'
 
 const LINE_FEED = Deno.build.os === 'windows' ? '\r\n' : '\n'
 
@@ -13,7 +13,7 @@ Deno.test('supportColors & verbose & debug', async (t) => {
   let now = 0
   const stdout = new Buffer()
   const stderr = new Buffer()
-  const logger = createLoggerV2({
+  const logger = createLogger({
     stdout,
     stderr,
     supportColors: true,
@@ -94,7 +94,7 @@ Deno.test('!supportColors & verbose & debug', async (t) => {
   let now = 0
   const stdout = new Buffer()
   const stderr = new Buffer()
-  const logger = createLoggerV2({
+  const logger = createLogger({
     stdout,
     stderr,
     supportColors: false,
@@ -166,7 +166,7 @@ Deno.test('supportColors & !verbose & !debug', async (t) => {
   let now = 0
   const stdout = new Buffer()
   const stderr = new Buffer()
-  const logger = createLoggerV2({
+  const logger = createLogger({
     stdout,
     stderr,
     supportColors: true,

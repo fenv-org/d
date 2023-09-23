@@ -1,5 +1,5 @@
 import { std } from '../../deps.ts'
-import { DLogger, Logger } from '../../logger/mod.ts'
+import { createLogger, Logger } from '../../logger/mod.ts'
 import { GlobalOptions } from '../../options/mod.ts'
 import { Stderr, Stdout, supportsColor } from '../../util/mod.ts'
 
@@ -11,7 +11,7 @@ export class Context {
     cwd: string
     verbose: boolean
     debug: boolean
-    logger: DLogger
+    logger: Logger
     config?: string
     dWorkspace?: string
   }) {
@@ -19,7 +19,6 @@ export class Context {
     this.verbose = options.verbose
     this.debug = options.debug
     this.logger = options.logger
-    this.ansi = options.logger.ansi
     this.config = options.config
     this.dWorkspace = options.dWorkspace
   }
@@ -27,8 +26,7 @@ export class Context {
   readonly cwd: string
   readonly verbose: boolean
   readonly debug: boolean
-  readonly logger: DLogger
-  readonly ansi: DLogger['ansi']
+  readonly logger: Logger
   readonly config: string | undefined
   readonly dWorkspace: string | undefined
 
@@ -53,20 +51,14 @@ export class Context {
           ? flags.options.dWorkspace
           : std.path.resolve(flags.cwd, flags.options.dWorkspace)
         : undefined,
-      logger: new DLogger(
-        flags.options.verbose
-          ? Logger.verbose({
-            ...flags,
-            logTime: flags.options.dLogTime !== 0,
-            debug: flags.options.debug,
-            colorSupported: flags.colorSupported ?? supportsColor(flags.stdout),
-          })
-          : Logger.standard({
-            ...flags,
-            debug: flags.options.debug,
-            colorSupported: flags.colorSupported ?? supportsColor(flags.stdout),
-          }),
-      ),
+      logger: createLogger({
+        stdout: flags.stdout,
+        stderr: flags.stderr,
+        supportColors: flags.colorSupported ?? supportsColor(flags.stdout),
+        verboseEnabled: flags.options.verbose,
+        debugEnabled: flags.options.debug,
+        dLogTime: flags.options.dLogTime,
+      }),
     })
   }
 }

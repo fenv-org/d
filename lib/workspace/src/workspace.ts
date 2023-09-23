@@ -3,7 +3,7 @@ import { Context } from '../../context/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
-import { DLogger } from '../../logger/mod.ts'
+import { Logger } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'
 import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
@@ -57,12 +57,16 @@ export class Workspace {
   static async fromContext(context: Context): Promise<Workspace> {
     const { logger } = context
     const workspaceFilepath = await Workspace.#findWorkspaceFile(context)
-    logger.verbose(`Found workspace file: ${workspaceFilepath}`)
+    logger.stdout({ verbose: true, timestamp: true })
+      .push('Found workspace file: ')
+      .push(workspaceFilepath)
+      .lineFeed()
 
     const workspaceYaml = loadWorkspaceYaml(workspaceFilepath)
-    logger.debug(
-      'Loaded workspace file: ' + JSON.stringify(workspaceYaml, null, '  '),
-    )
+    logger.stdout({ debug: true, timestamp: true })
+      .push('Loaded workspace file: ')
+      .push(JSON.stringify(workspaceYaml, null, '  '))
+      .lineFeed()
 
     const workspaceDir = dirname(workspaceFilepath)
     const excludeRegExps = util
@@ -129,24 +133,34 @@ export class Workspace {
     pwd: string
     glob: string
     excludeRegExps: RegExp[]
-    logger: DLogger
+    logger: Logger
   }): AsyncGenerator<DartProject> {
     const { logger, pwd, glob, excludeRegExps } = options
     const joinedGlob = join(glob, 'pubspec.yaml')
-    logger.debug(`Searching dart projects: ${joinedGlob}`)
+    logger
+      .stdout({ debug: true, timestamp: true })
+      .push('Searching dart projects: ')
+      .push(joinedGlob)
+      .lineFeed()
     const walkEntries = expandGlob(joinedGlob, { root: pwd })
     for await (const walkEntry of walkEntries) {
       const dartProject = await DartProject.fromPubspecFilepath(
         walkEntry.path,
       )
       if (Workspace.#shouldExclude(dartProject, excludeRegExps)) {
-        logger.debug(`Found but excluded dart project: ${walkEntry.path}`)
+        logger.stdout({ debug: true, timestamp: true })
+          .push('Found but excluded dart project: ')
+          .push(walkEntry.path)
+          .lineFeed()
         continue
       }
 
-      logger.verbose(
-        `Found dart project: ${dartProject.name}: ${dartProject.path}`,
-      )
+      logger.stdout({ verbose: true, timestamp: true })
+        .push('Found dart project: ')
+        .push(dartProject.name)
+        .push(': ')
+        .push(dartProject.path)
+        .lineFeed()
       yield dartProject
     }
   }
