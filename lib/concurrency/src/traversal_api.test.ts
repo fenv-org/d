@@ -1,11 +1,9 @@
-import {
-  Deferred,
-  deferred,
-} from 'https://deno.land/std@0.201.0/async/deferred.ts'
 import { DartProject, DependencyGraph, PubDependency } from '../../dart/mod.ts'
 import { cliffy, std } from '../../deps.ts'
 import { assertEquals, fail } from '../../test_deps.ts'
 import { Traversal, VisitResult } from './traversal_api.ts'
+
+const { deferred } = std.async
 
 Deno.test('traversal_api', async (t) => {
   // setup: https://i.stack.imgur.com/zuLmn.png
@@ -31,8 +29,8 @@ Deno.test('traversal_api', async (t) => {
   await t.step('traverse with concurrency 1', async () => {
     // setup
     const graph = DependencyGraph.fromDartProjects(projects)
-    const visitMap: Record<number, Deferred<boolean>> = {}
-    const waitMap: Record<number, Deferred<void>> = {}
+    const visitMap: Record<number, std.async.Deferred<boolean>> = {}
+    const waitMap: Record<number, std.async.Deferred<void>> = {}
     for (let i = 0; i < projects.length; i++) {
       waitMap[i] = deferred<void>()
     }
@@ -109,8 +107,8 @@ Deno.test('traversal_api', async (t) => {
   await t.step('traverse with concurrency 1: stop on node 8', async () => {
     // setup
     const graph = DependencyGraph.fromDartProjects(projects)
-    const visitMap: Record<number, Deferred<boolean>> = {}
-    const waitMap: Record<number, Deferred<void>> = {}
+    const visitMap: Record<number, std.async.Deferred<boolean>> = {}
+    const waitMap: Record<number, std.async.Deferred<void>> = {}
     for (let i = 0; i < projects.length; i++) {
       waitMap[i] = deferred<void>()
     }
@@ -175,8 +173,8 @@ Deno.test('traversal_api', async (t) => {
   await t.step('traverse with concurrency 5', async () => {
     // setup
     const graph = DependencyGraph.fromDartProjects(projects)
-    const visitMap: Record<number, Deferred<boolean>> = {}
-    const waitMap: Record<number, Deferred<void>> = {}
+    const visitMap: Record<number, std.async.Deferred<boolean>> = {}
+    const waitMap: Record<number, std.async.Deferred<void>> = {}
     for (let i = 0; i < projects.length; i++) {
       waitMap[i] = deferred<void>()
     }
@@ -252,8 +250,8 @@ Deno.test('traversal_api', async (t) => {
   await t.step('traverse with concurrency 5: stop on node 8', async () => {
     // setup
     const graph = DependencyGraph.fromDartProjects(projects)
-    const visitMap: Record<number, Deferred<boolean>> = {}
-    const waitMap: Record<number, Deferred<void>> = {}
+    const visitMap: Record<number, std.async.Deferred<boolean>> = {}
+    const waitMap: Record<number, std.async.Deferred<void>> = {}
     for (let i = 0; i < projects.length; i++) {
       waitMap[i] = deferred<void>()
     }
@@ -339,8 +337,8 @@ function dartProjectOf(option: {
 }
 
 async function onVisit(option: {
-  visitMap: Record<number, Deferred<boolean>>
-  waitMap: Record<number, Deferred<void>>
+  visitMap: Record<number, std.async.Deferred<boolean>>
+  waitMap: Record<number, std.async.Deferred<void>>
   log: string[]
   projectName: string
 }): Promise<VisitResult> {
@@ -369,8 +367,8 @@ async function onVisit(option: {
 
 async function waitAndGo(
   options: {
-    visitMap: Record<number, Deferred<boolean>>
-    waitMap: Record<number, Deferred<void>>
+    visitMap: Record<number, std.async.Deferred<boolean>>
+    waitMap: Record<number, std.async.Deferred<void>>
     stopOn?: number
   },
   ...ids: number[]
