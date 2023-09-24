@@ -1,0 +1,51 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Version of `d` to release
+        required: true
+  push:
+    tags:
+      - v*.*.*
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          # - windows-latest
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up repository
+        uses: actions/checkout@v3
+
+      - name: Get deno version
+        id: get_deno_version
+        run: echo ::set-output name=deno_version::$(cat .dvmrc)
+
+      - name: Show deno version
+        run: echo ${{ steps.get_deno_version.outputs.deno_version }}
+
+      # Sets `inputs.version` to `output.version` if the trigger is `workflow_dispatch`
+      # Sets the tag version to `output.version` if the trigger is `push`
+      - name: Set the release version
+        id: set_release_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo ::set-output name=version::${{ github.event.inputs.version }}
+          else
+            echo ::set-output name=version::${{ github.ref }}
+          fi
+
+      - name: Show release version
+        run: echo ${{ steps.set_release_version.outputs.version }}
