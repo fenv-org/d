@@ -11,6 +11,5 @@ deno compile \
   --allow-net \
   --allow-run \
   --no-prompt \
-  --output build/fpm \
-  driver/main.ts \
-  -- --release
+  --output build/d \
+  driver/main.ts
