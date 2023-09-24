@@ -11,6 +11,6 @@ deno run \
   --allow-env \
   --allow-net \
   --allow-run \
-  driver/main-dev.ts \
+  driver/main.ts \
   --config test-sample/d.yaml \
-  $@
+  "$@"
