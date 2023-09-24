@@ -44,7 +44,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
           else
-            echo "version=${{ github.ref }}" >> $GITHUB_OUTPUT
+            echo "version=$(echo "${{ github.ref }}" | xargs basename)" >> $GITHUB_OUTPUT
           fi
 
       - name: Show release version
