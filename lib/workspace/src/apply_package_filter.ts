@@ -102,6 +102,7 @@ async function hasMatches(
         root: dartProject.path,
         includeDirs: options.type === 'dir',
         extended: true,
+        followSymlinks: true,
       })
       for await (const _ of filesIterator) {
         return true
