@@ -33,5 +33,5 @@ deno run \
   --allow-read \
   --allow-write \
   --allow-net \
-  --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS \
+  --allow-env=DENO_DIR,HOME,DENO_AUTH_TOKENS,XDG_CACHE_HOME \
   -
