@@ -31,7 +31,7 @@ jobs:
 
       - name: Get deno version
         id: get_deno_version
-        run: echo ::set-output name=deno_version::$(cat .dvmrc)
+        run: echo "deno_version=$(cat .dvmrc)" >> $GITHUB_OUTPUT
 
       - name: Show deno version
         run: echo ${{ steps.get_deno_version.outputs.deno_version }}
@@ -42,9 +42,9 @@ jobs:
         id: set_release_version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo ::set-output name=version::${{ github.event.inputs.version }}
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=version::${{ github.ref }}
+            echo "version=${{ github.ref }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Show release version
