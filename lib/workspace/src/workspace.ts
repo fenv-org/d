@@ -9,7 +9,7 @@ import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
 
 const { exists, expandGlob } = std.fs
-const { join, dirname, globToRegExp } = std.path
+const { join, dirname, globToRegExp, joinGlobs } = std.path
 
 export const DEFAULT_PROJECT_FILENAME = 'd.yaml'
 
@@ -73,8 +73,8 @@ export class Workspace {
       .asArray(workspaceYaml.packages.exclude)
       .map((glob) =>
         glob.includes('**')
-          ? globToRegExp(glob)
-          : globToRegExp(join('**', glob))
+          ? globToRegExp(glob, { extended: true })
+          : globToRegExp(joinGlobs(['**', glob], { extended: true }))
       )
 
     const dartProjects = (await Promise.all(
@@ -142,7 +142,11 @@ export class Workspace {
       .push('Searching dart projects: ')
       .push(joinedGlob)
       .lineFeed()
-    const walkEntries = expandGlob(joinedGlob, { root: pwd })
+    const walkEntries = expandGlob(joinedGlob, {
+      root: pwd,
+      extended: true,
+      followSymlinks: true,
+    })
     for await (const walkEntry of walkEntries) {
       const dartProject = await DartProject.fromPubspecFilepath(
         walkEntry.path,
