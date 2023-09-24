@@ -11,8 +11,11 @@ import { bundle } from 'https://deno.land/x/emit/mod.ts'
 import * as fs from 'https://deno.land/std/fs/mod.ts'
 import * as path from 'https://deno.land/std/path/mod.ts'
 
+const _path = '$1'.startsWith('http')
+  ? '$1'
+  : path.resolve('$1')
 const { code, map } = await bundle(
-  new URL(path.resolve('$1'), import.meta.url)
+  new URL(_path, import.meta.url)
 )
 
 if ('$2') {
