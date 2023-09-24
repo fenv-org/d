@@ -4,15 +4,15 @@ permissions:
   contents: write
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        type: string
-        description: Version of `d` to release
-        required: true
-  # push:
-  #   tags:
-  #     - v*.*.*
+  # workflow_dispatch:
+  #   inputs:
+  #     version:
+  #       type: string
+  #       description: Version of `d` to release
+  #       required: true
+  push:
+    tags:
+      - v*.*.*
 
 jobs:
   release:
@@ -78,32 +78,42 @@ jobs:
       - name: Run tests
         run: deno test --allow-all
 
-      - name: Commit changes
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          file_pattern: "lib/version/src/version.ts"
-          commit_message: "chore: update version to ${{ steps.set_release_version.outputs.version }}"
+      # - name: Commit changes
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   uses: stefanzweifel/git-auto-commit-action@v4
+      #   with:
+      #     file_pattern: "lib/version/src/version.ts"
+      #     commit_message: "chore: update version to ${{ steps.set_release_version.outputs.version }}"
 
-      - name: Commit files
+      # - name: Commit files
+      #   run: |
+      #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
+      #     git config --local user.name "github-actions[bot]"
+      #     git tag -f "${{ steps.set_release_version.outputs.version }}"
+
+      # - name: Push tag
+      #   if: ${{ matrix.os == 'ubuntu-latest' }}
+      #   uses: ad-m/github-push-action@v0.6.0
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     tags: ${{ steps.set_release_version.outputs.version }}
+      #     force: true
+
+      - name: Bundle `main.ts`
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git tag -f "${{ steps.set_release_version.outputs.version }}"
-
-      - name: Push tag
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tags: ${{ steps.set_release_version.outputs.version }}
-          force: true
+          bin/bundle.sh \
+            driver/main.ts \
+            build/main.js
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: ${{ matrix.os == 'ubuntu-latest' }}
         with:
+          files: |
+            build/main.js
           tag_name: ${{ steps.set_release_version.outputs.version }}
+          generate_release_notes: true
           body: |
             Release ${{ steps.set_release_version.outputs.version }}
           draft: false
