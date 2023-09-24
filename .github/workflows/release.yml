@@ -29,12 +29,17 @@ jobs:
       - name: Set up repository
         uses: actions/checkout@v3
 
-      - name: Get deno version
+      - name: Get `deno` version
         id: get_deno_version
         run: echo "deno_version=$(cat .dvmrc)" >> $GITHUB_OUTPUT
 
-      - name: Show deno version
+      - name: Show `deno` version
         run: echo ${{ steps.get_deno_version.outputs.deno_version }}
+
+      - name: Set up `deno`
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ steps.get_deno_version.outputs.deno_version }}
 
       # Sets `inputs.version` to `output.version` if the trigger is `workflow_dispatch`
       # Sets the tag version to `output.version` if the trigger is `push`
@@ -42,10 +47,33 @@ jobs:
         id: set_release_version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            version="${{ github.event.inputs.version }}"
           else
-            echo "version=$(echo "${{ github.ref }}" | xargs basename)" >> $GITHUB_OUTPUT
+            version="$(echo "${{ github.ref }}" | xargs basename)"
           fi
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Show release version
         run: echo ${{ steps.set_release_version.outputs.version }}
+
+      - name: Update 'lib/version/src/version.ts'
+        run: |
+          # remove the leading "v" from "steps.set_release_version.outputs.version"
+          # and set the result to "version"
+          version="$(echo "${{ steps.set_release_version.outputs.version }}" | sed 's/^v//')"
+          echo "export const VERSION_STRING = '$version'" > lib/version/src/version.ts
+
+      - name: Get `flutter` version
+        id: get_flutter_version
+        run: echo "flutter_version=$(cat test-sample/.flutter-version)" >> $GITHUB_OUTPUT
+
+      - name: Set up `flutter`
+        uses: flutter-actions/setup-flutter@v2
+        with:
+          channel: stable
+          version: ${{ steps.get_flutter_version.outputs.flutter_version }}
+          cache: true
+          cache-key: flutter
+
+      - name: Run tests
+        run: deno test --allow-all
