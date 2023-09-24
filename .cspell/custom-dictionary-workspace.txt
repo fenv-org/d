@@ -1,3 +1,6 @@
+codecov
+deno
+LukeChannings
 Millis
 pubspec
 semvar
