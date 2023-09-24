@@ -5,7 +5,6 @@
 
 set -eox pipefail
 
-dvm use 1>&2
 echo "
 import { bundle } from 'https://deno.land/x/emit/mod.ts'
 import * as fs from 'https://deno.land/std/fs/mod.ts'
