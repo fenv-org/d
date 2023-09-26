@@ -1,6 +1,7 @@
 import { loadProjectYaml } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
+import { Workspace } from '../../workspace/mod.ts'
 import { RELATIVE_CACHE_DIRECTORY } from './cache_directory.ts'
 
 export type BootstrapCache = {
@@ -67,7 +68,22 @@ export async function loadBootstrapCache(
   }
 }
 
-export async function ensurePackageExists(
+export async function saveBootstrapCache(
+  workspace: Workspace,
+): Promise<void> {
+  const cacheDirectory = std.path.resolve(
+    workspace.workspaceDir,
+    RELATIVE_CACHE_DIRECTORY,
+  )
+  await std.fs.ensureDir(cacheDirectory)
+  const cacheFilepath = std.path.join(cacheDirectory, 'bootstrap.yaml')
+  const cache = {
+    workspaceFilepath: workspace.workspaceFilepath,
+    packages: {},
+  }
+}
+
+async function ensurePackageExists(
   packageName: string,
   pubspecFilepath: string,
 ): Promise<void> {
