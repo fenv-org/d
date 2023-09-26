@@ -1,4 +1,4 @@
-import { BootstrapOptions } from '../../command/bootstrap/mod.ts'
+import { BootstrapOptions } from '../../command/mod.ts'
 
 /**
  * The definition of `d`'s command line arguments.

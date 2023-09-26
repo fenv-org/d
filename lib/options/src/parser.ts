@@ -1,5 +1,4 @@
-import { bootstrapCommand } from '../../command/bootstrap/mod.ts'
-import { graphCommand } from '../../command/graph/mod.ts'
+import { bootstrapCommand, graphCommand } from '../../command/mod.ts'
 import { cliffy } from '../../deps.ts'
 import { DENO_VERSION, VERSION_STRING } from '../../version/mod.ts'
 import { DirOrGlobType, FileOrGlobType } from './cliffy_types.ts'

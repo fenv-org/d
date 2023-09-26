@@ -1,4 +1,4 @@
-import { PackageFilterOptions } from '../../command/common/mod.ts'
+import { PackageFilterOptions } from '../../command/mod.ts'
 import { Context } from '../../context/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
