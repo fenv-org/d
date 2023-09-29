@@ -1,3 +1,4 @@
+import { saveBootstrapCache } from '../../../cache/mod.ts'
 import { Traversal } from '../../../concurrency/mod.ts'
 import { Context } from '../../../context/mod.ts'
 import { DependencyGraph } from '../../../dart/mod.ts'
@@ -49,6 +50,11 @@ export async function runBootstrapCommand(options: {
   } catch (error) {
     throw new DError(`Failed to bootstrap with result: ${error}`)
   }
+
+  logger.stdout({ timestamp: true })
+    .push('Successfully bootstrapped and writing bootstrap cache')
+    .lineFeed()
+  await saveBootstrapCache(filteredWorkspace, dependencyGraph)
 }
 
 function logPackageFilters(logger: Logger, flags: PackageFilterOptions) {

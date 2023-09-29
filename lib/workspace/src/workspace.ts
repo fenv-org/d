@@ -1,6 +1,6 @@
 import {
+  BootstrapCacheLoadResult,
   loadBootstrapCache,
-  LoadBootstrapCacheResult,
 } from '../../cache/mod.ts'
 import { PackageFilterOptions } from '../../command/mod.ts'
 import { Context } from '../../context/mod.ts'
@@ -31,7 +31,7 @@ export class Workspace {
     /**
      * The cached result of the latest `d bootstrap` execution.
      */
-    public readonly bootstrapCache: LoadBootstrapCacheResult,
+    public readonly bootstrapCache: BootstrapCacheLoadResult,
     /**
      * The found dart projects.
      */

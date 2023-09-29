@@ -1,22 +1,22 @@
-import { loadProjectYaml } from '../../dart/mod.ts'
+import { DependencyGraph, loadProjectYaml } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import { Workspace } from '../../workspace/mod.ts'
 import { RELATIVE_CACHE_DIRECTORY } from './cache_directory.ts'
 
 export type BootstrapCache = {
-  readonly workspaceFilepath: string
-  readonly packages: {
-    readonly [packageName: string]: {
-      readonly pubspecRelativePath: string
-      readonly dependency: string[]
+  workspaceFilepath: string
+  packages: {
+    [packageName: string]: {
+      pubspecRelativePath: string
+      dependency: string[]
     }
   }
 }
 
-export type LoadBootstrapCacheResult = {
+export type BootstrapCacheLoadResult = {
   type: 'success'
-  cache: BootstrapCache
+  cache: Readonly<BootstrapCache>
 } | {
   type: 'error'
   error: Error
@@ -31,7 +31,7 @@ export type LoadBootstrapCacheResult = {
  */
 export async function loadBootstrapCache(
   workspaceDir: string,
-): Promise<LoadBootstrapCacheResult> {
+): Promise<BootstrapCacheLoadResult> {
   const cacheFilepath = std.path.resolve(
     workspaceDir,
     RELATIVE_CACHE_DIRECTORY,
@@ -70,17 +70,36 @@ export async function loadBootstrapCache(
 
 export async function saveBootstrapCache(
   workspace: Workspace,
+  dependencyGraph: DependencyGraph,
 ): Promise<void> {
+  const cache: BootstrapCache = {
+    workspaceFilepath: workspace.workspaceFilepath,
+    packages: {},
+  }
+
+  for (const dartProject of workspace.dartProjects) {
+    const relativePath = std.path.relative(
+      workspace.workspaceDir,
+      dartProject.path,
+    )
+    cache.packages[dartProject.name] = {
+      pubspecRelativePath: std.path.join(relativePath, 'pubspec.yaml'),
+      dependency: dependencyGraph
+        .dependenciesOf(dartProject)
+        .map((dependency) => dependency.name),
+    }
+  }
+
   const cacheDirectory = std.path.resolve(
     workspace.workspaceDir,
     RELATIVE_CACHE_DIRECTORY,
   )
   await std.fs.ensureDir(cacheDirectory)
   const cacheFilepath = std.path.join(cacheDirectory, 'bootstrap.yaml')
-  const cache = {
-    workspaceFilepath: workspace.workspaceFilepath,
-    packages: {},
-  }
+  await Deno.writeTextFile(
+    cacheFilepath,
+    std.yaml.stringify(cache),
+  )
 }
 
 async function ensurePackageExists(
