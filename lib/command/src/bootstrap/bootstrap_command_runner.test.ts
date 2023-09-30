@@ -140,6 +140,8 @@ async function removeGarbages() {
   for (
     const walkEntry of std.fs.expandGlobSync('**/pubspec_overrides.yaml', {
       root: 'test-sample',
+      extended: true,
+      followSymlinks: true,
     })
   ) {
     promises.push(Deno.remove(walkEntry.path, { recursive: true }))
@@ -147,6 +149,8 @@ async function removeGarbages() {
   for (
     const walkEntry of std.fs.expandGlobSync('**/pubspec.lock', {
       root: 'test-sample',
+      extended: true,
+      followSymlinks: true,
     })
   ) {
     promises.push(Deno.remove(walkEntry.path, { recursive: true }))

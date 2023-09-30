@@ -103,6 +103,7 @@ async function hasMatches(
         includeDirs: options.type === 'dir',
         extended: true,
         followSymlinks: true,
+        resolveSymlinksToRealPaths: false,
       })
       for await (const _ of filesIterator) {
         return true
