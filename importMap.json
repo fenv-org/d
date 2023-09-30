@@ -2,6 +2,7 @@
   "imports": {
     "deps.ts": "./lib/deps.ts",
     "test_deps.ts": "./lib/test_deps.ts",
-    "cache/mod.ts": "./lib/cache/mod.ts"
+    "cache/mod.ts": "./lib/cache/mod.ts",
+    "command/mod.ts": "./lib/command/mod.ts"
   }
 }

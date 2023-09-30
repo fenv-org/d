@@ -1,4 +1,4 @@
-import { runBootstrapCommand, runGraphCommand } from './command/mod.ts'
+import { runBootstrapCommand, runGraphCommand } from 'command/mod.ts'
 import { Context } from './context/mod.ts'
 import { buildCommand, Flags, parseArgs } from './options/mod.ts'
 import { Stderr, Stdout } from './util/mod.ts'

@@ -1,5 +1,5 @@
+import { PackageFilterOptions } from 'command/mod.ts'
 import { std } from 'deps.ts'
-import { PackageFilterOptions } from '../../command/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 
 /**
