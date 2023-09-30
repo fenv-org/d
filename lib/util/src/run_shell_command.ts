@@ -22,18 +22,43 @@ export async function runShellCommand(
   options?: ShellCommandOptions,
 ): Promise<Deno.CommandStatus> {
   const logger = options?.logger
-  const denoCommand = new Deno.Command(command, {
-    ...options,
-    stdout: logger ? 'piped' : undefined,
-    stderr: logger ? 'piped' : undefined,
-    cwd: options?.dartProject
+  let denoCommand: Deno.Command
+  if (Deno.build.os === 'windows') {
+    denoCommand = new Deno.Command(command, {
+      ...options,
+      stdout: logger ? 'piped' : undefined,
+      stderr: logger ? 'piped' : undefined,
+      cwd: options?.dartProject
+        ? options?.cwd
+          ? std.path.isAbsolute(options.cwd)
+            ? options.cwd
+            : std.path.join(options.dartProject.path, options.cwd)
+          : options.dartProject.path
+        : options?.cwd,
+    })
+  } else {
+    // Runs the given command with `bash -c` instead of running it directly.
+    // This is a workaround of the problem that Deno resolves symlinks to
+    // real paths.
+    const cwd = options?.dartProject
       ? options?.cwd
         ? std.path.isAbsolute(options.cwd)
           ? options.cwd
           : std.path.join(options.dartProject.path, options.cwd)
         : options.dartProject.path
-      : options?.cwd,
-  })
+      : options?.cwd
+    const cdCommand = cwd ? `cd ${escapeForShell(cwd)} && ` : ''
+    denoCommand = new Deno.Command('bash', {
+      ...options,
+      args: [
+        '-c',
+        cdCommand + escapeForShell([command, ...options?.args ?? []]),
+      ],
+      stdout: logger ? 'piped' : undefined,
+      stderr: logger ? 'piped' : undefined,
+      cwd: undefined,
+    })
+  }
 
   const child = denoCommand.spawn()
   if (logger && options.dartProject) {
@@ -79,4 +104,9 @@ async function outputStderr(options: {
       .push(line)
       .lineFeed()
   }
+}
+
+function escapeForShell(args: string[] | string): string {
+  args = typeof args === 'string' ? [args] : args
+  return args.map((arg) => `'${arg.replace(/'/g, '\'\\\'\'')}'`).join(' ')
 }

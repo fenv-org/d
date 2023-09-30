@@ -47,7 +47,7 @@ export interface LogBuilder {
 }
 
 export type LogLabel = (s: Styles) => string
-export const logLabels: Record<string, LogLabel> = {
+export const logLabels = {
   error: (s: Styles) => s.red.bold('ERROR'),
 }
 

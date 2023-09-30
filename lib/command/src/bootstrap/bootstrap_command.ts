@@ -2,7 +2,7 @@ import { cliffy } from '../../../deps.ts'
 import {
   addPackageFilterOptions,
   PackageFilterOptions,
-} from '../../common/mod.ts'
+} from '../common/package_filter_options.ts'
 
 /**
  * The definition of `d bootstrap` command flags.

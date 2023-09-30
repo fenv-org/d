@@ -1,4 +1,4 @@
-import { PackageFilterOptions } from '../../command/common/mod.ts'
+import { PackageFilterOptions } from '../../command/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
 
@@ -103,6 +103,7 @@ async function hasMatches(
         includeDirs: options.type === 'dir',
         extended: true,
         followSymlinks: true,
+        resolveSymlinksToRealPaths: false,
       })
       for await (const _ of filesIterator) {
         return true

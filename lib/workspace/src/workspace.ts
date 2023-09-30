@@ -1,9 +1,13 @@
-import { PackageFilterOptions } from '../../command/common/mod.ts'
+import {
+  BootstrapCacheLoadResult,
+  loadBootstrapCache,
+} from '../../cache/mod.ts'
+import { PackageFilterOptions } from '../../command/mod.ts'
 import { Context } from '../../context/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
 import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
-import { Logger } from '../../logger/mod.ts'
+import { Logger, logLabels } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'
 import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
@@ -24,6 +28,10 @@ export class Workspace {
      * The absolute path of the `d.yaml` file of the main project.
      */
     public readonly workspaceFilepath: string,
+    /**
+     * The cached result of the latest `d bootstrap` execution.
+     */
+    public readonly bootstrapCache: BootstrapCacheLoadResult,
     /**
      * The found dart projects.
      */
@@ -47,6 +55,7 @@ export class Workspace {
   ): Promise<Workspace> {
     return new Workspace(
       this.workspaceFilepath,
+      this.bootstrapCache,
       await applyPackageFilterOptions(this.dartProjects, options),
     )
   }
@@ -62,36 +71,48 @@ export class Workspace {
       .push(workspaceFilepath)
       .lineFeed()
 
-    const workspaceYaml = loadWorkspaceYaml(workspaceFilepath)
-    logger.stdout({ debug: true, timestamp: true })
-      .push('Loaded workspace file: ')
-      .push(JSON.stringify(workspaceYaml, null, '  '))
-      .lineFeed()
+    const bootstrapCache = await loadBootstrapCache(
+      std.path.dirname(workspaceFilepath),
+    )
 
-    const workspaceDir = dirname(workspaceFilepath)
-    const excludeRegExps = util
-      .asArray(workspaceYaml.packages.exclude)
-      .map((glob) =>
-        glob.includes('**')
-          ? globToRegExp(glob, { extended: true })
-          : globToRegExp(joinGlobs(['**', glob], { extended: true }))
-      )
+    let dartProjects: DartProject[]
 
-    const dartProjects = (await Promise.all(
-      util
-        .asArray(workspaceYaml.packages.include)
-        .map((glob) =>
-          Workspace.#findDartProjects({
-            pwd: workspaceDir,
-            glob,
-            excludeRegExps,
-            logger,
-          })
+    switch (bootstrapCache.type) {
+      case 'success': {
+        logger.stdout({ debug: true, timestamp: true })
+          .push('Using cached dart projects: ')
+          .push(JSON.stringify(bootstrapCache.cache))
+          .lineFeed()
+        const workspaceDir = dirname(workspaceFilepath)
+        dartProjects = await Promise.all(
+          Object.entries(bootstrapCache.cache.packages)
+            .map(([_, { pubspecRelativePath }]) =>
+              std.path.resolve(workspaceDir, pubspecRelativePath)
+            )
+            .map(DartProject.fromPubspecFilepath),
         )
-        .map(util.collectAsArray),
-    )).flat()
+        break
+      }
 
-    return new Workspace(workspaceFilepath, dartProjects)
+      case 'error':
+        logger.stdout({ debug: true, timestamp: true })
+          .label(logLabels.error)
+          .push('Failed to load bootstrap cache: ')
+          .push(bootstrapCache.error.message)
+          .lineFeed()
+        /* falls through */
+
+      case 'not_found':
+        logger.stdout({ debug: true, timestamp: true })
+          .push('No bootstrap cache exists')
+          .lineFeed()
+        dartProjects = await Workspace.#dartProjectsFromWorkspaceYaml(
+          logger,
+          workspaceFilepath,
+        )
+        break
+    }
+    return new Workspace(workspaceFilepath, bootstrapCache, dartProjects)
   }
 
   static async #findWorkspaceFile(context: Context): Promise<string> {
@@ -146,6 +167,7 @@ export class Workspace {
       root: pwd,
       extended: true,
       followSymlinks: true,
+      resolveSymlinksToRealPaths: false,
     })
     for await (const walkEntry of walkEntries) {
       const dartProject = await DartProject.fromPubspecFilepath(
@@ -174,5 +196,39 @@ export class Workspace {
     excludeRegExps: RegExp[],
   ): boolean {
     return excludeRegExps.some((exclude) => exclude.test(dartProject.path))
+  }
+
+  static async #dartProjectsFromWorkspaceYaml(
+    logger: Logger,
+    workspaceFilepath: string,
+  ): Promise<DartProject[]> {
+    const workspaceYaml = loadWorkspaceYaml(workspaceFilepath)
+    logger.stdout({ debug: true, timestamp: true })
+      .push('Loaded workspace file: ')
+      .push(JSON.stringify(workspaceYaml, null, '  '))
+      .lineFeed()
+
+    const workspaceDir = dirname(workspaceFilepath)
+    const excludeRegExps = util
+      .asArray(workspaceYaml.packages.exclude)
+      .map((glob) =>
+        glob.includes('**')
+          ? globToRegExp(glob, { extended: true })
+          : globToRegExp(joinGlobs(['**', glob], { extended: true }))
+      )
+
+    return (await Promise.all(
+      util
+        .asArray(workspaceYaml.packages.include)
+        .map((glob) =>
+          Workspace.#findDartProjects({
+            pwd: workspaceDir,
+            glob,
+            excludeRegExps,
+            logger,
+          })
+        )
+        .map(util.collectAsArray),
+    )).flat()
   }
 }
