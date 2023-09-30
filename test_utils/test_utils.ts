@@ -1,5 +1,4 @@
-import { std } from '../lib/deps.ts'
-import { Buffer } from '../lib/test_deps.ts'
+import { Buffer, std } from 'test_deps.ts'
 import { LINE_FEED } from '../lib/util/mod.ts'
 
 export async function writeTextFile(path: string, text: string): Promise<void> {

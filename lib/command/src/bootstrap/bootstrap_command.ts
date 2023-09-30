@@ -1,4 +1,4 @@
-import { cliffy } from '../../../deps.ts'
+import { cliffy } from 'deps.ts'
 import {
   addPackageFilterOptions,
   PackageFilterOptions,

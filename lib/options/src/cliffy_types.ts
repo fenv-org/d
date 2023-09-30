@@ -1,4 +1,4 @@
-import { cliffy } from '../../deps.ts'
+import { cliffy } from 'deps.ts'
 import { DError } from '../../error/mod.ts'
 
 export class FileOrGlobType extends cliffy.command.FileType {

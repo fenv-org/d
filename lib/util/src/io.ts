@@ -1,4 +1,4 @@
-import { std, supportColorCheck } from '../../deps.ts'
+import { std, supportColorCheck } from 'deps.ts'
 
 /**
  * The line feed sequence of the current operating system.

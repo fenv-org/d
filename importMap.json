@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "deps.ts": "./lib/deps.ts",
+    "test_deps.ts": "./lib/test_deps.ts"
+  }
+}

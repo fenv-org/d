@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { cliffy } from '../../../deps.ts'
+import { cliffy } from "deps.ts"
 
 /**
  * Additional package filters.

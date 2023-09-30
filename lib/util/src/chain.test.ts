@@ -1,5 +1,5 @@
-import { std } from '../../deps.ts'
-import { assertEquals } from '../../test_deps.ts'
+import { std } from 'deps.ts'
+import { assertEquals } from 'test_deps.ts'
 import { AsyncChain, Chain } from './chain.ts'
 
 Deno.test('Chain.of', () => {

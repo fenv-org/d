@@ -1,4 +1,4 @@
-import { std } from '../../deps.ts'
+import { std } from 'deps.ts'
 import { DENO_VERSION } from './deno_version.ts'
 import { VERSION_STRING } from './version.ts'
 

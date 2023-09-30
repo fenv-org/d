@@ -1,4 +1,4 @@
-import { assertEquals } from '../../test_deps.ts'
+import { assertEquals } from 'test_deps.ts'
 import { DartProject } from './dart_project.ts'
 import { DependencyGraph } from './dependency_graph.ts'
 

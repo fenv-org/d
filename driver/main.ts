@@ -1,6 +1,6 @@
+import { std } from 'deps.ts'
 import { supportColorCheck } from 'https://raw.githubusercontent.com/frunkad/supports-color/24c4e4afbdccc88011d6b33d06f0056a0d889f86/mod.ts'
 import { dMain } from '../lib/d.ts'
-import { std } from '../lib/deps.ts'
 
 const DEBUG_FLAG = '--debug'
 

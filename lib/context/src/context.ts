@@ -1,4 +1,4 @@
-import { std } from '../../deps.ts'
+import { std } from 'deps.ts'
 import { createLogger, Logger } from '../../logger/mod.ts'
 import { GlobalOptions } from '../../options/mod.ts'
 import { Stderr, Stdout, supportsColor } from '../../util/mod.ts'

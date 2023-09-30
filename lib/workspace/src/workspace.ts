@@ -1,3 +1,4 @@
+import { std } from 'deps.ts'
 import {
   BootstrapCacheLoadResult,
   loadBootstrapCache,
@@ -5,7 +6,6 @@ import {
 import { PackageFilterOptions } from '../../command/mod.ts'
 import { Context } from '../../context/mod.ts'
 import { DartProject } from '../../dart/mod.ts'
-import { std } from '../../deps.ts'
 import { DError } from '../../error/mod.ts'
 import { Logger, logLabels } from '../../logger/mod.ts'
 import * as util from '../../util/mod.ts'

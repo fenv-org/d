@@ -1,4 +1,4 @@
-import { assertEquals, Buffer } from '../../test_deps.ts'
+import { assertEquals, Buffer } from 'test_deps.ts'
 import { createStyles } from '../mod.ts'
 import { createLogger } from './logger.ts'
 
