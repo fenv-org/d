@@ -1,9 +1,5 @@
+import { DartProject, DependencyGraph, PubspecOverridesYaml } from 'dart/mod.ts'
 import { std } from 'deps.ts'
-import {
-  DartProject,
-  DependencyGraph,
-  PubspecOverridesYaml,
-} from '../../../dart/mod.ts'
 import { LINE_FEED } from '../../../util/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
 
