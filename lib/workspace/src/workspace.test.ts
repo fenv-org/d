@@ -1,5 +1,5 @@
+import { Context } from 'context/mod.ts'
 import { std } from 'deps.ts'
-import { Context } from '../../context/mod.ts'
 import { assert, assertEquals, fail, writeYamlFile } from '../../test_deps.ts'
 import { Workspace } from './workspace.ts'
 

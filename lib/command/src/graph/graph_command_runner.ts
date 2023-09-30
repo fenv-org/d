@@ -1,5 +1,5 @@
+import { Context } from 'context/mod.ts'
 import { cliffy, std } from 'deps.ts'
-import { Context } from '../../../context/mod.ts'
 import { DependencyGraph } from '../../../dart/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
 

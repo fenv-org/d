@@ -1,6 +1,6 @@
 import { VisitResult } from 'concurrency/mod.ts'
+import { Context } from 'context/mod.ts'
 import { std } from 'deps.ts'
-import { Context } from '../../../context/mod.ts'
 import { logLabels } from '../../../logger/mod.ts'
 import { runShellCommand } from '../../../util/mod.ts'
 import { Workspace } from '../../../workspace/mod.ts'
