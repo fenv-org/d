@@ -1,5 +1,5 @@
 import { saveBootstrapCache } from 'cache/mod.ts'
-import { Traversal } from '../../../concurrency/mod.ts'
+import { Traversal } from 'concurrency/mod.ts'
 import { Context } from '../../../context/mod.ts'
 import { DependencyGraph } from '../../../dart/mod.ts'
 import { DError } from '../../../error/mod.ts'
