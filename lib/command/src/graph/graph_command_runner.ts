@@ -4,7 +4,9 @@ import { cliffy, std } from 'deps.ts'
 import { Workspace } from 'workspace/mod.ts'
 
 export async function runGraphCommand(context: Context): Promise<void> {
-  const workspace = await Workspace.fromContext(context)
+  const workspace = await Workspace.fromContext(context, {
+    useBootstrapCache: 'fallbackToWorkspaceFile',
+  })
   const dependencyGraph = DependencyGraph.fromDartProjects(
     workspace.dartProjects,
   )

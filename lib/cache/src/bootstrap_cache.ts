@@ -4,6 +4,9 @@ import { DError } from 'error/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
 import { RELATIVE_CACHE_DIRECTORY } from './cache_directory.ts'
 
+/**
+ * The schema of the bootstrap cache.
+ */
 export type BootstrapCache = {
   workspaceFilepath: string
   packages: {
@@ -20,8 +23,6 @@ export type BootstrapCacheLoadResult = {
 } | {
   type: 'error'
   error: Error
-} | {
-  type: 'not_found'
 }
 
 /**
@@ -38,12 +39,14 @@ export async function loadBootstrapCache(
     'bootstrap.yaml',
   )
   if (!await std.fs.exists(cacheFilepath, { isFile: true })) {
-    return { type: 'not_found' }
+    return {
+      type: 'error',
+      error: new DError(`Need to bootstrap the workspace`),
+    }
   }
 
-  const cache = await std.yaml.parse(
-    await Deno.readTextFile(cacheFilepath),
-  ) as BootstrapCache
+  const cache = await std.yaml
+    .parse(await Deno.readTextFile(cacheFilepath)) as BootstrapCache
 
   if (std.path.dirname(cache.workspaceFilepath) !== workspaceDir) {
     return {

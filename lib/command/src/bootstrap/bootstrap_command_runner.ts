@@ -17,7 +17,8 @@ export async function runBootstrapCommand(context: Context, options: {
   const { logger } = context
 
   const workspace = await Workspace.fromContext(context, {
-    useBootstrapCache: false,
+    useBootstrapCache: 'never',
+    ...flags,
   })
 
   logger.stdout({ timestamp: true })
@@ -30,13 +31,11 @@ export async function runBootstrapCommand(context: Context, options: {
     .lineFeed()
   logPackageFilters(logger, flags)
 
-  const filteredWorkspace = await workspace.applyPackageFilterOptions(flags)
-  const dependencyGraph = DependencyGraph.fromDartProjects(
-    filteredWorkspace.dartProjects,
-  )
+  const dependencyGraph = DependencyGraph
+    .fromDartProjects(workspace.dartProjects)
 
   // Write pubspec_overrides.yaml files before running `flutter pub get`.
-  await writePubspecOverridesYamlFiles(filteredWorkspace, dependencyGraph)
+  await writePubspecOverridesYamlFiles(workspace, dependencyGraph)
 
   // Run `flutter pub get` for each package.
   // We traverse the dependency graph in topological order.
@@ -56,7 +55,7 @@ export async function runBootstrapCommand(context: Context, options: {
   logger.stdout({ timestamp: true })
     .push('Successfully bootstrapped and writing bootstrap cache')
     .lineFeed()
-  await saveBootstrapCache(filteredWorkspace, dependencyGraph)
+  await saveBootstrapCache(workspace, dependencyGraph)
 }
 
 function logPackageFilters(logger: Logger, flags: PackageFilterOptions) {
