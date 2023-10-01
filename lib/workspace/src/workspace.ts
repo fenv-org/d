@@ -5,7 +5,7 @@ import { DartProject } from 'dart/mod.ts'
 import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
 import { Logger, logLabels } from 'logger/mod.ts'
-import * as util from '../../util/mod.ts'
+import * as util from 'util/mod.ts'
 import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
 

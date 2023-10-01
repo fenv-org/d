@@ -1,5 +1,5 @@
 import { Buffer, std } from 'test_deps.ts'
-import { LINE_FEED } from '../lib/util/mod.ts'
+import { LINE_FEED } from 'util/mod.ts'
 
 export async function writeTextFile(path: string, text: string): Promise<void> {
   await std.fs.ensureDir(std.path.dirname(path))
