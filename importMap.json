@@ -12,6 +12,7 @@
     "logger/mod.ts": "./lib/logger/mod.ts",
     "options/mod.ts": "./lib/options/mod.ts",
     "util/mod.ts": "./lib/util/mod.ts",
-    "version/mod.ts": "./lib/version/mod.ts"
+    "version/mod.ts": "./lib/version/mod.ts",
+    "workspace/mod.ts": "./lib/workspace/mod.ts"
   }
 }

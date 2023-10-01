@@ -3,7 +3,7 @@ import { Context } from 'context/mod.ts'
 import { std } from 'deps.ts'
 import { logLabels } from 'logger/mod.ts'
 import { runShellCommand } from 'util/mod.ts'
-import { Workspace } from '../../../workspace/mod.ts'
+import { Workspace } from 'workspace/mod.ts'
 
 export async function runFlutterPubGet(
   node: string,
