@@ -1,7 +1,7 @@
 import { std } from 'deps.ts'
+import { DError } from 'error/mod.ts'
 import { assert, assertEquals, assertFalse } from 'test_deps.ts'
 import { dMain } from '../../../d.ts'
-import { DError } from '../../../error/mod.ts'
 
 Deno.test('Bootstrapping', async (t) => {
   // Run bootstrap

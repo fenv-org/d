@@ -1,6 +1,6 @@
 import { DependencyGraph, loadProjectYaml } from 'dart/mod.ts'
 import { std } from 'deps.ts'
-import { DError } from '../../error/mod.ts'
+import { DError } from 'error/mod.ts'
 import { Workspace } from '../../workspace/mod.ts'
 import { RELATIVE_CACHE_DIRECTORY } from './cache_directory.ts'
 
