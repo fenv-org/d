@@ -14,21 +14,16 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-# If "$1" doesn't have a leading `v`, we should add it
-if [[ ! "$1" =~ ^v ]]; then
-  version="v$1"
-else
-  version="$1"
-fi
-
+version="$1"
+versionTag="v$1"
 
 # Update version string
 echo "export const VERSION_STRING = '$version'" > lib/version/src/version.ts
 
 # # Commit and tag
 git add lib/version/src/version.ts
-git commit -m "Bump up version: $version"
-git tag "$version"
+git commit -m "Bump up version: $versionTag"
+git tag "$versionTag"
 
 # Push
 git push origin
