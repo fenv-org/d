@@ -16,16 +16,21 @@ export async function runBootstrapCommand(context: Context, options: {
   const { flags } = options
   const { logger } = context
 
+  logger.stdout({ timestamp: true })
+    .command('d bootstrap')
+    .lineFeed()
+
+  logger.stdout({ timestamp: true })
+    .indent()
+    .push('Loading `d.yaml` file')
+    .lineFeed()
   const workspace = await Workspace.fromContext(context, {
     useBootstrapCache: 'never',
     ...flags,
   })
 
   logger.stdout({ timestamp: true })
-    .command('d bootstrap')
-    .lineFeed()
-
-  logger.stdout({ timestamp: true }).indent()
+    .indent()
     .childArrow()
     .push((s) => s.cyan.bold(`workspace directory: ${workspace.workspaceDir}`))
     .lineFeed()
@@ -34,6 +39,10 @@ export async function runBootstrapCommand(context: Context, options: {
   const dependencyGraph = DependencyGraph
     .fromDartProjects(workspace.dartProjects)
 
+  logger.stdout({ timestamp: true })
+    .indent().indent()
+    .push('Generating `pubspec_overrides.yaml` files')
+    .lineFeed()
   // Write pubspec_overrides.yaml files before running `flutter pub get`.
   await writePubspecOverridesYamlFiles(workspace, dependencyGraph)
 
