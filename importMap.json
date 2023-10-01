@@ -1,8 +1,8 @@
 {
   "imports": {
     "https://deno.land/std/": "https://deno.land/std@0.203.0/",
-    "deps.ts": "./lib/deps.ts",
-    "test_deps.ts": "./lib/test_deps.ts",
+    "deps.ts": "./lib/deps/deps.ts",
+    "test_deps.ts": "./test_deps.ts",
     "cache/mod.ts": "./lib/cache/mod.ts",
     "command/mod.ts": "./lib/command/mod.ts",
     "concurrency/mod.ts": "./lib/concurrency/mod.ts",
@@ -13,6 +13,7 @@
     "options/mod.ts": "./lib/options/mod.ts",
     "util/mod.ts": "./lib/util/mod.ts",
     "version/mod.ts": "./lib/version/mod.ts",
-    "workspace/mod.ts": "./lib/workspace/mod.ts"
+    "workspace/mod.ts": "./lib/workspace/mod.ts",
+    "test_utils/mod.ts": "./test_utils/mod.ts"
   }
 }
