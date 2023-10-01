@@ -43,6 +43,8 @@ export async function runCleanCommand(
       onVisit: flutterPubGetPerEachNode,
     })
 
+    // TODO: We should not throw an error here.
+    // TODO: We should not exit early.
     try {
       await traversal.start()
     } catch (error) {
@@ -50,7 +52,7 @@ export async function runCleanCommand(
     }
 
     logger.stdout({ timestamp: true })
-      .push('Successfully bootstrapped and writing bootstrap cache')
+      .push('Successfully cleaned the workspace')
       .lineFeed()
   }
 }
