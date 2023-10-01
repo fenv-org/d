@@ -2,6 +2,7 @@ import { removeBootstrapCache } from 'cache/mod.ts'
 import { Traversal } from 'concurrency/mod.ts'
 import { Context } from 'context/mod.ts'
 import { DependencyGraph } from 'dart/mod.ts'
+import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
 import { runFlutterClean } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
@@ -29,6 +30,9 @@ export async function runCleanCommand(
     .push((s) => s.cyan.bold(`workspace directory: ${workspace.workspaceDir}`))
     .lineFeed()
 
+  logger.stdout({ timestamp: true, verbose: true })
+    .push(`Removing bootstrap cache`)
+    .lineFeed()
   await removeBootstrapCache(workspace.workspaceDir)
 
   if (flags.flutter) {
@@ -52,7 +56,20 @@ export async function runCleanCommand(
     }
   }
 
-  // TODO: Remove `pubspec_overrides.yaml` files.
+  for (const dartProject of workspace.dartProjects) {
+    if (
+      dartProject.pubspecOverridesFilepath &&
+      await std.fs.exists(dartProject.pubspecOverridesFilepath)
+    ) {
+      logger.stdout({ timestamp: true, verbose: true })
+        .push(
+          'Removing pubspec overrides file: ' +
+            dartProject.pubspecOverridesFilepath,
+        )
+        .lineFeed()
+      await Deno.remove(dartProject.pubspecOverridesFilepath)
+    }
+  }
 
   logger.stdout({ timestamp: true })
     .push('Successfully cleaned the workspace')
