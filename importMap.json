@@ -9,6 +9,7 @@
     "context/mod.ts": "./lib/context/mod.ts",
     "dart/mod.ts": "./lib/dart/mod.ts",
     "error/mod.ts": "./lib/error/mod.ts",
-    "logger/mod.ts": "./lib/logger/mod.ts"
+    "logger/mod.ts": "./lib/logger/mod.ts",
+    "options/mod.ts": "./lib/options/mod.ts"
   }
 }
