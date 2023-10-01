@@ -1,6 +1,6 @@
 import { DartProject } from 'dart/mod.ts'
 import { std } from 'deps.ts'
-import { Logger } from '../../logger/mod.ts'
+import { Logger } from 'logger/mod.ts'
 import { ByteStreams } from './io.ts'
 
 export type ShellCommandOptions =
