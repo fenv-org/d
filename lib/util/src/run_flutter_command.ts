@@ -5,14 +5,15 @@ import { logLabels } from 'logger/mod.ts'
 import { runShellCommand } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
 
-export async function runFlutterPubGet(
+export async function runFlutterCommand(
   node: string,
   options: {
+    args: string[]
     context: Context
     workspace: Workspace
   },
 ): Promise<VisitResult> {
-  const { context, workspace } = options
+  const { context, workspace, args } = options
   const { logger } = context
   const dartProject = workspace.dartProjects.find((project) =>
     project.name === node
@@ -39,15 +40,10 @@ export async function runFlutterPubGet(
   logger.stdout({ timestamp: true })
     .indent(2)
     .childArrow()
-    .command('flutter pub get', { withDollarSign: true })
+    .command(`flutter ${args.join(' ')}`, { withDollarSign: true })
     .lineFeed()
 
-  const output = await runShellCommand('flutter', {
-    args: ['pub', 'get'],
-    dartProject,
-    logger,
-  })
-
+  const output = await runShellCommand('flutter', { args, dartProject, logger })
   if (!output.success) {
     logger.stderr()
       .label(logLabels.error)
@@ -57,4 +53,24 @@ export async function runFlutterPubGet(
     return { kind: 'stop', code: output.code }
   }
   return { kind: 'continue' }
+}
+
+export function runFlutterPubGet(
+  node: string,
+  options: {
+    context: Context
+    workspace: Workspace
+  },
+): Promise<VisitResult> {
+  return runFlutterCommand(node, { args: ['pub', 'get'], ...options })
+}
+
+export function runFlutterClean(
+  node: string,
+  options: {
+    context: Context
+    workspace: Workspace
+  },
+): Promise<VisitResult> {
+  return runFlutterCommand(node, { args: ['clean'], ...options })
 }

@@ -2,7 +2,7 @@ import { DependencyGraph, loadProjectYaml } from 'dart/mod.ts'
 import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
-import { RELATIVE_CACHE_DIRECTORY } from './cache_directory.ts'
+import { getCacheDirectory, getCacheFilepath } from './cache_directory.ts'
 
 /**
  * The schema of the bootstrap cache.
@@ -33,11 +33,7 @@ export type BootstrapCacheLoadResult = {
 export async function loadBootstrapCache(
   workspaceDir: string,
 ): Promise<BootstrapCacheLoadResult> {
-  const cacheFilepath = std.path.resolve(
-    workspaceDir,
-    RELATIVE_CACHE_DIRECTORY,
-    'bootstrap.yaml',
-  )
+  const cacheFilepath = getCacheFilepath(workspaceDir)
   if (!await std.fs.exists(cacheFilepath, { isFile: true })) {
     return {
       type: 'error',
@@ -71,6 +67,9 @@ export async function loadBootstrapCache(
   }
 }
 
+/**
+ * Saves the bootstrap cache for the given workspace.
+ */
 export async function saveBootstrapCache(
   workspace: Workspace,
   dependencyGraph: DependencyGraph,
@@ -93,16 +92,25 @@ export async function saveBootstrapCache(
     }
   }
 
-  const cacheDirectory = std.path.resolve(
-    workspace.workspaceDir,
-    RELATIVE_CACHE_DIRECTORY,
-  )
+  const cacheDirectory = getCacheDirectory(workspace.workspaceDir)
   await std.fs.ensureDir(cacheDirectory)
   const cacheFilepath = std.path.join(cacheDirectory, 'bootstrap.yaml')
   await Deno.writeTextFile(
     cacheFilepath,
     std.yaml.stringify(cache),
   )
+}
+
+/**
+ * Removes the bootstrap cache for the given workspace.
+ */
+export async function removeBootstrapCache(
+  workspaceDir: string,
+): Promise<void> {
+  const cacheDirectory = getCacheDirectory(workspaceDir)
+  if (await std.fs.exists(cacheDirectory, { isDirectory: true })) {
+    return Deno.remove(cacheDirectory, { recursive: true })
+  }
 }
 
 async function ensurePackageExists(

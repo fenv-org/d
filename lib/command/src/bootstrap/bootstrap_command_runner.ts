@@ -4,11 +4,11 @@ import { Context } from 'context/mod.ts'
 import { DependencyGraph } from 'dart/mod.ts'
 import { DError } from 'error/mod.ts'
 import { Logger } from 'logger/mod.ts'
+import { runFlutterPubGet } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
 import { PackageFilterOptions } from '../common/package_filter_options.ts'
 import { BootstrapOptions } from './bootstrap_command.ts'
 import { writePubspecOverridesYamlFiles } from './bootstrap_pubspec_overrides.ts'
-import { runFlutterPubGet } from './run_pub_get.ts'
 
 export async function runBootstrapCommand(context: Context, options: {
   flags: BootstrapOptions

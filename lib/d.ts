@@ -1,4 +1,8 @@
-import { runBootstrapCommand, runGraphCommand } from 'command/mod.ts'
+import {
+  runBootstrapCommand,
+  runCleanCommand,
+  runGraphCommand,
+} from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
 import { buildCommand, Flags, parseArgs } from 'options/mod.ts'
 import { Stderr, Stdout } from 'util/mod.ts'
@@ -46,8 +50,7 @@ function runCommand(
       return runGraphCommand(context)
 
     case 'clean':
-      console.error(flags)
-      return
+      return runCleanCommand(context, { flags: flags.options })
 
     case 'completions':
       return
