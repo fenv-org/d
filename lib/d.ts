@@ -45,6 +45,13 @@ function runCommand(
     case 'graph':
       return runGraphCommand(context)
 
+    case 'clean':
+      console.error(flags)
+      return
+
+    case 'completions':
+      return
+
     default:
       return buildCommand().showHelp()
   }

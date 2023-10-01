@@ -1,4 +1,4 @@
-import { BootstrapOptions } from 'command/mod.ts'
+import { BootstrapOptions, CleanOptions } from 'command/mod.ts'
 
 /**
  * The definition of `d`'s command line arguments.
@@ -15,6 +15,14 @@ export type Flags =
     }
     | {
       readonly name: 'graph'
+      readonly options: GlobalOptions
+    }
+    | {
+      readonly name: 'clean'
+      readonly options: CleanOptions & GlobalOptions
+    }
+    | {
+      readonly name: 'completions'
       readonly options: GlobalOptions
     }
   )

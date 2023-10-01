@@ -1,4 +1,4 @@
-import { bootstrapCommand, graphCommand } from 'command/mod.ts'
+import { bootstrapCommand, cleanCommand, graphCommand } from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
 import { DENO_VERSION, VERSION_STRING } from 'version/mod.ts'
 import { DirOrGlobType, FileOrGlobType } from './cliffy_types.ts'
@@ -40,6 +40,8 @@ export function buildCommand() {
     .command('help', new command.HelpCommand().global())
     .command('bootstrap', bootstrapCommand())
     .command('graph', graphCommand())
+    .command('clean', cleanCommand())
+    .command('completions', new cliffy.command.CompletionsCommand())
 }
 
 /**
@@ -50,6 +52,22 @@ export async function parseArgs(
   args: string[],
 ): Promise<Flags> {
   const flags = await buildCommand().parse(args)
+
+  // Check whether `flags.cmd` is any of `BashCompletionsCommand`,
+  // `FishCompletionsCommand`, `ZshCompletionsCommand` or not.
+  if (
+    flags.cmd instanceof cliffy.command.BashCompletionsCommand ||
+    flags.cmd instanceof cliffy.command.FishCompletionsCommand ||
+    flags.cmd instanceof cliffy.command.ZshCompletionsCommand
+  ) {
+    return {
+      cwd,
+      name: 'completions',
+      args: [],
+      options: flags.options,
+    } as unknown as Flags
+  }
+
   const commandName = flags.cmd.getName()
   return {
     cwd,
