@@ -50,9 +50,11 @@ export async function runCleanCommand(
     } catch (error) {
       throw new DError(`Failed to bootstrap with result: ${error}`)
     }
-
-    logger.stdout({ timestamp: true })
-      .push('Successfully cleaned the workspace')
-      .lineFeed()
   }
+
+  // TODO: Remove `pubspec_overrides.yaml` files.
+
+  logger.stdout({ timestamp: true })
+    .push('Successfully cleaned the workspace')
+    .lineFeed()
 }
