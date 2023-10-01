@@ -1,10 +1,10 @@
-import { BootstrapCacheLoadResult, loadBootstrapCache } from 'cache/mod.ts'
+import { loadBootstrapCache } from 'cache/mod.ts'
 import { PackageFilterOptions } from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
 import { DartProject } from 'dart/mod.ts'
 import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
-import { Logger, logLabels } from 'logger/mod.ts'
+import { Logger } from 'logger/mod.ts'
 import * as util from 'util/mod.ts'
 import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
@@ -13,6 +13,12 @@ const { exists, expandGlob } = std.fs
 const { join, dirname, globToRegExp, joinGlobs } = std.path
 
 export const DEFAULT_PROJECT_FILENAME = 'd.yaml'
+
+export type WorkspaceFromContextOptions =
+  & {
+    useBootstrapCache: 'always' | 'never' | 'fallbackToWorkspaceFile'
+  }
+  & PackageFilterOptions
 
 /**
  * A class that represents the workspace managed by `d`.
@@ -25,10 +31,6 @@ export class Workspace {
      * The absolute path of the `d.yaml` file of the main project.
      */
     public readonly workspaceFilepath: string,
-    /**
-     * The cached result of the latest `d bootstrap` execution.
-     */
-    public readonly bootstrapCache: BootstrapCacheLoadResult,
     /**
      * The found dart projects.
      */
@@ -44,23 +46,14 @@ export class Workspace {
   }
 
   /**
-   * Creates a new {@link Workspace} clone applying the given
-   * package filter {@link options}.
-   */
-  async applyPackageFilterOptions(
-    options: PackageFilterOptions,
-  ): Promise<Workspace> {
-    return new Workspace(
-      this.workspaceFilepath,
-      this.bootstrapCache,
-      await applyPackageFilterOptions(this.dartProjects, options),
-    )
-  }
-
-  /**
    * Constructs a new {@link Workspace} instance from the given {@link Context}.
    */
-  static async fromContext(context: Context): Promise<Workspace> {
+  static async fromContext(
+    context: Context,
+    options = {
+      useBootstrapCache: 'always',
+    } as Readonly<WorkspaceFromContextOptions>,
+  ): Promise<Workspace> {
     const { logger } = context
     const workspaceFilepath = await Workspace.#findWorkspaceFile(context)
     logger.stdout({ verbose: true, timestamp: true })
@@ -68,48 +61,43 @@ export class Workspace {
       .push(workspaceFilepath)
       .lineFeed()
 
-    const bootstrapCache = await loadBootstrapCache(
-      std.path.dirname(workspaceFilepath),
-    )
+    if (options.useBootstrapCache !== 'never') {
+      const workspaceDir = std.path.dirname(workspaceFilepath)
+      const cacheLoadResult = await loadBootstrapCache(workspaceDir)
+      switch (cacheLoadResult.type) {
+        case 'success': {
+          logger.stdout({ debug: true, timestamp: true })
+            .push('Using cached dart projects: ')
+            .push(JSON.stringify(cacheLoadResult.cache))
+            .lineFeed()
+          const workspaceDir = dirname(workspaceFilepath)
+          const dartProjects = await Promise.all(
+            Object.entries(cacheLoadResult.cache.packages)
+              .map(([_, { pubspecRelativePath }]) =>
+                std.path.resolve(workspaceDir, pubspecRelativePath)
+              )
+              .map(DartProject.fromPubspecFilepath),
+          )
+          return new Workspace(
+            workspaceFilepath,
+            await applyPackageFilterOptions(dartProjects, options),
+          )
+        }
 
-    let dartProjects: DartProject[]
-
-    switch (bootstrapCache.type) {
-      case 'success': {
-        logger.stdout({ debug: true, timestamp: true })
-          .push('Using cached dart projects: ')
-          .push(JSON.stringify(bootstrapCache.cache))
-          .lineFeed()
-        const workspaceDir = dirname(workspaceFilepath)
-        dartProjects = await Promise.all(
-          Object.entries(bootstrapCache.cache.packages)
-            .map(([_, { pubspecRelativePath }]) =>
-              std.path.resolve(workspaceDir, pubspecRelativePath)
-            )
-            .map(DartProject.fromPubspecFilepath),
-        )
-        break
+        case 'error':
+          if (options.useBootstrapCache === 'always') {
+            throw cacheLoadResult.error
+          }
+          break
       }
-
-      case 'error':
-        logger.stdout({ debug: true, timestamp: true })
-          .label(logLabels.error)
-          .push('Failed to load bootstrap cache: ')
-          .push(bootstrapCache.error.message)
-          .lineFeed()
-        /* falls through */
-
-      case 'not_found':
-        logger.stdout({ debug: true, timestamp: true })
-          .push('No bootstrap cache exists')
-          .lineFeed()
-        dartProjects = await Workspace.#dartProjectsFromWorkspaceYaml(
-          logger,
-          workspaceFilepath,
-        )
-        break
     }
-    return new Workspace(workspaceFilepath, bootstrapCache, dartProjects)
+
+    const dartProjects = await Workspace
+      .#dartProjectsFromWorkspaceYaml(logger, workspaceFilepath)
+    return new Workspace(
+      workspaceFilepath,
+      await applyPackageFilterOptions(dartProjects, options),
+    )
   }
 
   static async #findWorkspaceFile(context: Context): Promise<string> {
