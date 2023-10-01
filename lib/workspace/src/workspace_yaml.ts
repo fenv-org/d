@@ -1,6 +1,6 @@
 import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
-import { version } from '../../version/mod.ts'
+import { version } from 'version/mod.ts'
 
 /**
  * The schema definition of `d.yaml`.

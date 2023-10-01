@@ -11,6 +11,7 @@
     "error/mod.ts": "./lib/error/mod.ts",
     "logger/mod.ts": "./lib/logger/mod.ts",
     "options/mod.ts": "./lib/options/mod.ts",
-    "util/mod.ts": "./lib/util/mod.ts"
+    "util/mod.ts": "./lib/util/mod.ts",
+    "version/mod.ts": "./lib/version/mod.ts"
   }
 }
