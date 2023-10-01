@@ -4,7 +4,7 @@ import {
   Buffer,
   buildAbsPath,
   buildStringLinesFromBuffer,
-} from 'test_deps.ts'
+} from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
 Deno.test('Show graph', async (t) => {
