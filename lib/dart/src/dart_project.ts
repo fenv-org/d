@@ -1,5 +1,5 @@
-import { std } from '../../deps.ts'
-import { DError } from '../../error/mod.ts'
+import { std } from 'deps.ts'
+import { DError } from 'error/mod.ts'
 import {
   loadPubspecOverridesYaml,
   PubspecOverridesYaml,

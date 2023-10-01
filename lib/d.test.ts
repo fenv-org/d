@@ -1,5 +1,5 @@
-import { std } from '../lib/deps.ts'
-import { assertEquals } from './test_deps.ts'
+import { std } from 'deps.ts'
+import { assertEquals } from 'test/deps.ts'
 
 Deno.test('Test the behavior of `path.dirname()`', () => {
   assertEquals(std.path.dirname('/foo/bar/baz'), '/foo/bar')

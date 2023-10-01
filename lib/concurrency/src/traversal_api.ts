@@ -1,5 +1,5 @@
-import { DependencyGraph } from '../../dart/mod.ts'
-import { std } from '../../deps.ts'
+import { DependencyGraph } from 'dart/mod.ts'
+import { std } from 'deps.ts'
 import { poll, prepare, TraversalState } from './traversal_util.ts'
 
 const { deferred } = std.async

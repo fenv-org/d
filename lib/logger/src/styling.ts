@@ -1,4 +1,4 @@
-import { std } from '../../deps.ts'
+import { std } from 'deps.ts'
 
 export type Styling = (message: string) => string
 

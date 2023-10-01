@@ -1,5 +1,5 @@
-import { cliffy } from '../../deps.ts'
-import { LINE_FEED, Stderr, Stdout } from '../../util/mod.ts'
+import { cliffy } from 'deps.ts'
+import { LINE_FEED, Stderr, Stdout } from 'util/mod.ts'
 import { Styling } from '../mod.ts'
 import { createStyles, Styles } from './styling.ts'
 

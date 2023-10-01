@@ -1,6 +1,6 @@
-import { DartProject, DependencyGraph, PubDependency } from '../../dart/mod.ts'
-import { cliffy, std } from '../../deps.ts'
-import { assertEquals, fail } from '../../test_deps.ts'
+import { DartProject, DependencyGraph, PubDependency } from 'dart/mod.ts'
+import { cliffy, std } from 'deps.ts'
+import { assertEquals, fail } from 'test/deps.ts'
 import { Traversal, VisitResult } from './traversal_api.ts'
 
 const { deferred } = std.async

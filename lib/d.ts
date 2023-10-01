@@ -1,8 +1,8 @@
-import { runBootstrapCommand, runGraphCommand } from './command/mod.ts'
-import { Context } from './context/mod.ts'
-import { buildCommand, Flags, parseArgs } from './options/mod.ts'
-import { Stderr, Stdout } from './util/mod.ts'
-import { Workspace } from './workspace/mod.ts'
+import { runBootstrapCommand, runGraphCommand } from 'command/mod.ts'
+import { Context } from 'context/mod.ts'
+import { buildCommand, Flags, parseArgs } from 'options/mod.ts'
+import { Stderr, Stdout } from 'util/mod.ts'
+import { Workspace } from 'workspace/mod.ts'
 
 /**
  * The entry point of the `d` CLI application.

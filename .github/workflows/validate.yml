@@ -125,3 +125,8 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           file: cov_profile.lcov
+
+      - name: "Validate if bundler works"
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          bin/bundle.sh driver/main.ts build/main.js
