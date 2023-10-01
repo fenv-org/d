@@ -53,4 +53,6 @@ async function run(
   }
 }
 
-main()
+if (import.meta.main) {
+  await main()
+}
