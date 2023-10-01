@@ -2,7 +2,6 @@ import { runBootstrapCommand, runGraphCommand } from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
 import { buildCommand, Flags, parseArgs } from 'options/mod.ts'
 import { Stderr, Stdout } from 'util/mod.ts'
-import { Workspace } from 'workspace/mod.ts'
 
 /**
  * The entry point of the `d` CLI application.
@@ -25,33 +24,26 @@ export async function dMain(
   },
 ) {
   const flags = await parseArgs(options.cwd, args)
-  const context = Context.fromFlags({
-    ...flags,
-    ...options,
-  })
-  const workspace = await Workspace.fromContext(context)
-  const voidOrPromise = runCommand({ context, workspace, flags })
+  const context = Context.fromFlags({ ...flags, ...options })
+  const voidOrPromise = runCommand(context, { flags })
   if (voidOrPromise) {
     await voidOrPromise
   }
 }
 
-function runCommand(options: {
-  context: Context
-  workspace: Workspace
-  flags: Flags
-}): Promise<void> | void {
-  const { context, workspace, flags } = options
+function runCommand(
+  context: Context,
+  options: {
+    flags: Flags
+  },
+): Promise<void> | void {
+  const { flags } = options
   switch (flags.name) {
     case 'bootstrap':
-      return runBootstrapCommand({
-        context,
-        workspace,
-        flags: flags.options,
-      })
+      return runBootstrapCommand(context, { flags: flags.options })
 
     case 'graph':
-      return runGraphCommand({ context, workspace })
+      return runGraphCommand(context)
 
     default:
       return buildCommand().showHelp()

@@ -10,13 +10,15 @@ import { BootstrapOptions } from './bootstrap_command.ts'
 import { writePubspecOverridesYamlFiles } from './bootstrap_pubspec_overrides.ts'
 import { runFlutterPubGet } from './run_pub_get.ts'
 
-export async function runBootstrapCommand(options: {
-  context: Context
-  workspace: Workspace
+export async function runBootstrapCommand(context: Context, options: {
   flags: BootstrapOptions
 }): Promise<void> {
-  const { context, workspace, flags } = options
+  const { flags } = options
   const { logger } = context
+
+  const workspace = await Workspace.fromContext(context, {
+    useBootstrapCache: false,
+  })
 
   logger.stdout({ timestamp: true })
     .command('d bootstrap')

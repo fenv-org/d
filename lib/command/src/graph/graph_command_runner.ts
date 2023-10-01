@@ -3,11 +3,8 @@ import { DependencyGraph } from 'dart/mod.ts'
 import { cliffy, std } from 'deps.ts'
 import { Workspace } from 'workspace/mod.ts'
 
-export function runGraphCommand(options: {
-  context: Context
-  workspace: Workspace
-}): void {
-  const { context, workspace } = options
+export async function runGraphCommand(context: Context): Promise<void> {
+  const workspace = await Workspace.fromContext(context)
   const dependencyGraph = DependencyGraph.fromDartProjects(
     workspace.dartProjects,
   )

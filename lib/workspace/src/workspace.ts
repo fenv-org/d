@@ -14,6 +14,10 @@ const { join, dirname, globToRegExp, joinGlobs } = std.path
 
 export const DEFAULT_PROJECT_FILENAME = 'd.yaml'
 
+export type WorkspaceFromContextOptions = {
+  useBootstrapCache?: boolean
+}
+
 /**
  * A class that represents the workspace managed by `d`.
  *
@@ -60,7 +64,12 @@ export class Workspace {
   /**
    * Constructs a new {@link Workspace} instance from the given {@link Context}.
    */
-  static async fromContext(context: Context): Promise<Workspace> {
+  static async fromContext(
+    context: Context,
+    options = {
+      useBootstrapCache: true,
+    } as WorkspaceFromContextOptions,
+  ): Promise<Workspace> {
     const { logger } = context
     const workspaceFilepath = await Workspace.#findWorkspaceFile(context)
     logger.stdout({ verbose: true, timestamp: true })
