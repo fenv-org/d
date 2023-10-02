@@ -71,8 +71,28 @@ The install script installs `d` to `$HOME/.d` directory by default. However, you
 also specify another location like:
 
 ```sh
-$ curl -fsSL https://d-install.jerry.company | D_INSTALL_DIR=[other_directory] bash
+$ curl -fsSL https://d-install.jerry.company \
+    | D_INSTALL_DIR=[other_directory] bash
 ```
+
+### To assign any other instead of `d`
+
+If there already exists any other CLI command `d` in your shell environment, you
+can install `d` as any other name instead of `d`. For example, `oh-my-zsh` has a
+pre-defined zsh function `d` to show directory history. In this case, the
+feature will be useful.
+
+To give any other name to `d`, sets `D_CLI` environment variable.
+
+```bash
+echo 'export D_CLI=other_command` >> ~/.bashrc
+```
+
+The above is an example for `bash` users. Please add `D_CLI` according to your
+favorite shell.
+
+And then, install `d` according to above installation instructions. `d`
+installer will install `d` with the name you gave instead of `d`.
 
 ## How to use `d`
 

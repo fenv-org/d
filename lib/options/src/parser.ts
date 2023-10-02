@@ -8,7 +8,7 @@ const { command } = cliffy
 
 export function buildCommand() {
   return new command.Command()
-    .name('d')
+    .name(Deno.env.get('D_CLI') ?? 'd')
     .usage('<command> [OPTIONS]')
     .version(VERSION_STRING)
     .description(
