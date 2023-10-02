@@ -75,7 +75,7 @@ $ curl -fsSL https://d-install.jerry.company \
     | D_INSTALL_DIR=[other_directory] bash
 ```
 
-### To assign any other instead of `d`
+### To put any other name instead of `d`
 
 If there already exists any other CLI command `d` in your shell environment, you
 can install `d` as any other name instead of `d`. For example, `oh-my-zsh` has a
