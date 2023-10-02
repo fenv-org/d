@@ -116,8 +116,7 @@ jobs:
           deno coverage \
             --lcov \
             --output=cov_profile.lcov \
-            --exclude='test_utils\/.*' \
-            --exclude='test_deps\.ts' \
+            --exclude='test_lib\/.*' \
             cov_profile
 
       - name: "Upload coverage report"
