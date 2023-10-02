@@ -1,4 +1,4 @@
-import { Buffer, std } from 'test/deps.ts'
+import { assert, Buffer, std } from 'test/deps.ts'
 import { LINE_FEED } from 'util/mod.ts'
 
 export async function writeTextFile(path: string, text: string): Promise<void> {
@@ -38,4 +38,26 @@ export function buildStringLinesFromBuffer(buffer: Buffer): string[] {
 
 export function buildAbsPath(...paths: string[]): string {
   return std.path.join(Deno.cwd(), ...paths)
+}
+
+export function assertFileExists(path: string): void {
+  assert(std.fs.existsSync(path, { isFile: true }), `File not found: ${path}`)
+}
+
+export function assertFileNotExists(path: string): void {
+  assert(!std.fs.existsSync(path, { isFile: true }), `File found: ${path}`)
+}
+
+export function assertDirectoryExists(path: string): void {
+  assert(
+    std.fs.existsSync(path, { isDirectory: true }),
+    `Directory not found: ${path}`,
+  )
+}
+
+export function assertDirectoryNotExists(path: string): void {
+  assert(
+    !std.fs.existsSync(path, { isDirectory: true }),
+    `Directory found: ${path}`,
+  )
 }

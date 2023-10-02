@@ -1,6 +1,11 @@
 import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
-import { assert, assertEquals, assertFalse } from 'test/deps.ts'
+import {
+  assert,
+  assertEquals,
+  assertFileExists,
+  assertFileNotExists,
+} from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
 Deno.test('Bootstrapping', async (t) => {
@@ -26,12 +31,12 @@ Deno.test('Bootstrapping', async (t) => {
       colorSupported: true,
     })
 
-    assert(std.fs.existsSync('test-sample/app/pubspec.lock'))
-    assert(std.fs.existsSync('test-sample/app/packages/pack-e/pubspec.lock'))
-    assert(std.fs.existsSync('test-sample/packages/pack-a/pubspec.lock'))
-    assert(std.fs.existsSync('test-sample/packages/pack-b/pubspec.lock'))
-    assert(std.fs.existsSync('test-sample/packages/pack-c/pubspec.lock'))
-    assert(std.fs.existsSync('test-sample/packages/pack-d/pubspec.lock'))
+    assertFileExists('test-sample/app/pubspec.lock')
+    assertFileExists('test-sample/app/packages/pack-e/pubspec.lock')
+    assertFileExists('test-sample/packages/pack-a/pubspec.lock')
+    assertFileExists('test-sample/packages/pack-b/pubspec.lock')
+    assertFileExists('test-sample/packages/pack-c/pubspec.lock')
+    assertFileExists('test-sample/packages/pack-d/pubspec.lock')
 
     assertEquals(
       readYaml('test-sample/app/pubspec_overrides.yaml'),
@@ -55,14 +60,10 @@ Deno.test('Bootstrapping', async (t) => {
         },
       },
     )
-    assertFalse(
-      std.fs.existsSync(
-        'test-sample/app/packages/pack-e/pubspec_overrides.yaml',
-      ),
+    assertFileNotExists(
+      'test-sample/app/packages/pack-e/pubspec_overrides.yaml',
     )
-    assertFalse(
-      std.fs.existsSync('test-sample/packages/pack-a/pubspec_overrides.yaml'),
-    )
+    assertFileNotExists('test-sample/packages/pack-a/pubspec_overrides.yaml')
     assertEquals(
       readYaml('test-sample/packages/pack-b/pubspec_overrides.yaml'),
       {
@@ -100,6 +101,48 @@ Deno.test('Bootstrapping', async (t) => {
         },
       },
     )
+
+    assertEquals(
+      readYaml('test-sample/.d/bootstrap.yaml'),
+      {
+        workspaceFilepath: std.path.resolve('test-sample', 'd.yaml'),
+        packages: {
+          fpm_sample_app: {
+            pubspecRelativePath: 'app/pubspec.yaml',
+            dependency: [
+              'fpm_sample_package_a',
+              'fpm_sample_package_b',
+              'fpm_sample_package_c',
+              'fpm_sample_package_d',
+              'fpm_sample_package_e',
+            ],
+          },
+          fpm_sample_package_a: {
+            pubspecRelativePath: 'packages/pack-a/pubspec.yaml',
+            dependency: [],
+          },
+          fpm_sample_package_b: {
+            pubspecRelativePath: 'packages/pack-b/pubspec.yaml',
+            dependency: ['fpm_sample_package_a'],
+          },
+          fpm_sample_package_c: {
+            pubspecRelativePath: 'packages/pack-c/pubspec.yaml',
+            dependency: ['fpm_sample_package_a'],
+          },
+          fpm_sample_package_d: {
+            pubspecRelativePath: 'packages/pack-d/pubspec.yaml',
+            dependency: [
+              'fpm_sample_package_b',
+              'fpm_sample_package_c',
+            ],
+          },
+          fpm_sample_package_e: {
+            pubspecRelativePath: 'app/packages/pack-e/pubspec.yaml',
+            dependency: [],
+          },
+        },
+      },
+    )
   })
 
   await t.step('Should fail to bootstrap because of `pack-c`', async () => {
@@ -132,7 +175,7 @@ Deno.test('Bootstrapping', async (t) => {
     }
   })
 
-  // await removeGarbages()
+  await removeGarbages()
 })
 
 async function removeGarbages() {
@@ -155,7 +198,9 @@ async function removeGarbages() {
   ) {
     promises.push(Deno.remove(walkEntry.path, { recursive: true }))
   }
-
+  if (std.fs.existsSync('test-sample/.d')) {
+    promises.push(Deno.remove('test-sample/.d', { recursive: true }))
+  }
   await Promise.all(promises)
 }
 

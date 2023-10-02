@@ -79,7 +79,7 @@ export class Workspace {
               .map(DartProject.fromPubspecFilepath),
           )
           return new Workspace(
-            workspaceFilepath,
+            std.path.resolve(workspaceFilepath),
             await applyPackageFilterOptions(dartProjects, options),
           )
         }
@@ -95,7 +95,7 @@ export class Workspace {
     const dartProjects = await Workspace
       .#dartProjectsFromWorkspaceYaml(logger, workspaceFilepath)
     return new Workspace(
-      workspaceFilepath,
+      std.path.resolve(workspaceFilepath),
       await applyPackageFilterOptions(dartProjects, options),
     )
   }

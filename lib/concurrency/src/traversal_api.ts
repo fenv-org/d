@@ -33,25 +33,53 @@ export type VisitResult =
  */
 export type OnVisitCallback = (node: string) => Promise<VisitResult>
 
+export type TraversalOptions = {
+  /**
+   * Maximum number of nodes that can be visited concurrently.
+   * When set to 1, the traversal will run serially.
+   *
+   * @default 5
+   */
+  concurrency?: number
+  /**
+   * Callback that is called when a node is visiting.
+   */
+  onVisit: OnVisitCallback
+  /**
+   * If `true`, the traversal will stop as soon as a visit on any node ends
+   * with a failure. Otherwise, the traversal will continue until all nodes
+   * are visited.
+   *
+   * @default true
+   */
+  earlyExit?: boolean
+}
+
 /**
  * A asynchronous worker that traverses a graph in the bottom-to-top order.
  */
 export class Traversal {
-  private constructor(options: {
+  private constructor({
+    state,
+    concurrency,
+    earlyExit,
+    onVisit,
+  }: {
     state: TraversalState
-    nodes: string[]
-    inboundEdges: Record<string, string[]>
     concurrency: number
+    earlyExit: boolean
     onVisit: OnVisitCallback
   }) {
-    this.#concurrency = options.concurrency
-    this.#onVisit = options.onVisit
-    this.#state = options.state
+    this.#concurrency = concurrency
+    this.#onVisit = onVisit
+    this.#state = state
+    this.#earlyExit = earlyExit
   }
 
   readonly #onVisit: OnVisitCallback
   readonly #state: TraversalState
   readonly #visitingNodes: Set<string> = new Set()
+  readonly #earlyExit: boolean
 
   /**
    * Maximum number of nodes that can be visited concurrently.
@@ -69,10 +97,10 @@ export class Traversal {
    */
   static fromDependencyGraph(
     graph: DependencyGraph,
-    options: {
-      onVisit: OnVisitCallback
-      concurrency?: number
-    },
+    options = {
+      concurrency: 5,
+      earlyExit: true,
+    } as TraversalOptions,
   ): Traversal {
     return this.fromGraph(
       {
@@ -96,20 +124,22 @@ export class Traversal {
    *   concurrently. Default to 5.
    */
   static fromGraph(
-    options: {
+    {
+      nodes,
+      inboundEdges,
+      onVisit,
+      concurrency = 5,
+      earlyExit = true,
+    }: {
       nodes: string[]
       inboundEdges: Record<string, string[]>
-      onVisit: OnVisitCallback
-      concurrency?: number
-    },
+    } & TraversalOptions,
   ): Traversal {
     const worker = new Traversal({
-      ...options,
-      state: prepare({
-        nodes: options.nodes,
-        inboundEdges: options.inboundEdges,
-      }),
-      concurrency: options?.concurrency ?? 5,
+      state: prepare({ nodes, inboundEdges }),
+      concurrency,
+      earlyExit,
+      onVisit,
     })
 
     return worker
@@ -177,7 +207,14 @@ export class Traversal {
       }
 
       case 'stop':
-        this.#concurrency = 0
+        console.error(
+          `Stopping the traversal because of node ${node}: ${this.#earlyExit}`,
+        )
+        if (this.#earlyExit) {
+          this.#concurrency = 0
+        } else {
+          this.#run(promise, node)
+        }
         if (!result.code) {
           result.code = visitResult.code
         }

@@ -1,4 +1,8 @@
-import { runBootstrapCommand, runGraphCommand } from 'command/mod.ts'
+import {
+  runBootstrapCommand,
+  runCleanCommand,
+  runGraphCommand,
+} from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
 import { buildCommand, Flags, parseArgs } from 'options/mod.ts'
 import { Stderr, Stdout } from 'util/mod.ts'
@@ -44,6 +48,12 @@ function runCommand(
 
     case 'graph':
       return runGraphCommand(context)
+
+    case 'clean':
+      return runCleanCommand(context, { flags: flags.options })
+
+    case 'completions':
+      return
 
     default:
       return buildCommand().showHelp()
