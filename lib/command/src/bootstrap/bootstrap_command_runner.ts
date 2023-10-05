@@ -52,6 +52,7 @@ export async function runBootstrapCommand(context: Context, options: {
   const flutterPubGetPerEachNode = (node: string) =>
     runFlutterPubGet(node, commonArgs)
   const traversal = Traversal.fromDependencyGraph(dependencyGraph, {
+    concurrency: 1,
     onVisit: flutterPubGetPerEachNode,
   })
 
