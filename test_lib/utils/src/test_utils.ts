@@ -61,3 +61,8 @@ export function assertDirectoryNotExists(path: string): void {
     `Directory found: ${path}`,
   )
 }
+
+export function bufferToString(buffer: Buffer): string {
+  const decoder = new TextDecoder()
+  return decoder.decode(buffer.bytes())
+}
