@@ -1,1 +1,1 @@
-export const VERSION_STRING = '0.1.4'
+export const VERSION_STRING = '0.1.5'
