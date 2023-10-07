@@ -55,8 +55,19 @@ async function run(
 }
 
 type VersionCheckRecord = {
+  /**
+   * The latest version of d without leading `v` prefix.
+   */
   known_latest_version?: string
-  can_check_new_version_from?: string
+  /**
+   * The ISO date string that represents when can check the new release of
+   * `d` with Github release API.
+   */
+  can_check_release_from?: string
+  /**
+   * The ISO date string that represents when can announce the new release of
+   * `d`.
+   */
   can_announce_release_from?: string
 }
 
@@ -83,6 +94,15 @@ async function checkNewerVersion() {
     return now >= canAnnounceFrom
   }
 
+  function canCheckRelease(record: VersionCheckRecord) {
+    if (!record.can_check_release_from) {
+      return true
+    }
+
+    const canCheckFrom = new Date(record.can_check_release_from)
+    return now >= canCheckFrom
+  }
+
   function newerLatestVersion(
     record: VersionCheckRecord,
   ): std.semvar.SemVer | undefined {
@@ -105,11 +125,21 @@ async function checkNewerVersion() {
   if (canAnnounceRelease(versionCheckRecord)) {
     const latestVersion = newerLatestVersion(versionCheckRecord)
     if (latestVersion) {
-      const message = `* New version of "${dCli()}" is available: ` +
-        `"${std.semvar.format(latestVersion)}" *`
-      console.error('*'.repeat(message.length))
-      console.error(message)
-      console.error('*'.repeat(message.length))
+      const messages = [
+        `New version of "${dCli()}" is available: ` +
+        `"${std.semvar.format(latestVersion)}"`,
+        `To install the latest version,`,
+        `run \`curl -fsSL https://d-install.jerry.company | bash\``,
+      ]
+      const maxLineLength = messages.reduce(
+        (max, line) => Math.max(max, line.length),
+        0,
+      )
+      console.error('*'.repeat(maxLineLength + 4))
+      for (const message of messages) {
+        console.error('* ' + message.padEnd(maxLineLength) + ' *')
+      }
+      console.error('*'.repeat(maxLineLength + 4))
       console.error('')
 
       // Sets `can_announce_new_version_release_from` to one day later.
@@ -119,9 +149,23 @@ async function checkNewerVersion() {
     }
   }
 
-  // const latestResponse = await fetch(
-  //   'https://api.github.com/repos/fenv-org/d/releases/latest',
-  // )
+  if (canCheckRelease(versionCheckRecord)) {
+    const response = await fetch(
+      'https://api.github.com/repos/fenv-org/d/releases/latest',
+    )
+    if (response.ok) {
+      let latestVersion = (await response.json()).tag_name as string
+      latestVersion = latestVersion.replace(/^v/, '')
+      if (latestVersion) {
+        // Sets `known_latest_version` to the latest version.
+        versionCheckRecord.known_latest_version = latestVersion
+        // Sets `can_check_release_from` to one day later.
+        versionCheckRecord.can_check_release_from = oneDayLater
+          .toISOString()
+        updated = true
+      }
+    }
+  }
 
   if (updated) {
     await Deno.writeTextFile(
@@ -141,13 +185,17 @@ function dCli(): string {
 }
 
 function versionCheckRecordFilepath(): string {
-  return std.path.join(dHomeDir(), 'version_check_record.json')
+  return std.path.join(dHomeDir(), 'version.json')
 }
 
 async function readVersionCheckRecord(): Promise<VersionCheckRecord> {
   const filepath = versionCheckRecordFilepath()
   await std.fs.ensureFile(filepath)
-  return JSON.parse(await Deno.readTextFile(filepath))
+  try {
+    return JSON.parse(await Deno.readTextFile(filepath))
+  } catch (_) {
+    return {}
+  }
 }
 
 if (import.meta.main) {
