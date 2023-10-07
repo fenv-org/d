@@ -16,6 +16,29 @@ to `dart/flutter pub get` or `melos bootstrap`.
 
 This project is under developing actively.
 
+## Table of contents
+
+- [d](#d)
+  - [Table of contents](#table-of-contents)
+  - [Supported OS and architectures](#supported-os-and-architectures)
+    - [MacOS](#macos)
+    - [Linux](#linux)
+  - [How to install](#how-to-install)
+    - [Install the latest version](#install-the-latest-version)
+    - [Install the specific version](#install-the-specific-version)
+    - [To install `d` to the specific directory](#to-install-d-to-the-specific-directory)
+    - [To put any other name instead of `d`](#to-put-any-other-name-instead-of-d)
+  - [How to use `d`](#how-to-use-d)
+    - [Make `d.yaml`](#make-dyaml)
+    - [Specify dependencies in `pubspec.yaml`](#specify-dependencies-in-pubspecyaml)
+    - [Run `d bootstrap`](#run-d-bootstrap)
+  - [Commands](#commands)
+    - [`bootstrap`](#bootstrap)
+    - [`pub`](#pub)
+    - [`graph`](#graph)
+    - [`clean`](#clean)
+  - [Package filters](#package-filters)
+
 ## Supported OS and architectures
 
 ### MacOS
@@ -233,6 +256,21 @@ $ d bootstrap [--config <PATH-TO-d.yaml>]
 $ d bs [--config <PATH-TO-d.yaml>]
 ```
 
+Supports [package filters](#package-filters).
+
+### `pub`
+
+`pub` is a command to run `flutter pub <subcommand> [args...]` command in each
+bootstrapped packages. You can run any arbitrary `flutter pub`'s subcommand with
+this command.
+
+```shell
+$ d pub [--config <PATH-TO-d.yaml>] get
+$ d pub [--config <PATH-TO-d.yaml>] upgrade
+```
+
+Supports [package filters](#package-filters).
+
 ### `graph`
 
 `graph` is a command to describe the dependency relationship among linked
@@ -257,6 +295,35 @@ $ d clean
 # Run `flutter clean` as well as removing auto-generated files.
 $ d clean [--flutter]
 ```
+
+## Package filters
+
+- `--include-has-file <fileOrGlob>`:
+  - `--if` is an alias.
+  - Includes only packages where have any file that specifies the given pattern.
+    The pattern can be a relative file path from the package root directory or a
+    relative glob pattern from the package root directory.
+  - Can be repeated.
+- `--exclude-has-file <fileOrGlob>`:
+  - `--ef` is an alias.
+  - Excludes packages where have any file that specifies the given pattern. The
+    pattern can be a relative file path from the package root directory or a
+    relative glob pattern from the package root directory.
+  - Can be repeated.
+  - Prioritize `--include-has-file` option.
+- `--include-has-dir <dirOrGlob>`:
+  - `--id` is an alias.
+  - Includes only packages where have any directory that specifies the given
+    pattern. The pattern can be a relative directory path from the package root
+    directory or a relative glob pattern from the package root directory.
+  - Can be repeated.
+- `--exclude-has-dir <dirOrGlob>`:
+  - `--ed` is an alias.
+  - Excludes packages where have any directory that specifies the given pattern.
+    The pattern can be a relative directory path from the package root directory
+    or a relative glob pattern from the package root directory.
+  - Can be repeated.
+  - Prioritize `--include-has-dir` option.
 
 <!-- links -->
 

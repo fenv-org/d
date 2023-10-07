@@ -12,7 +12,7 @@ export type PubOptions = PackageFilterOptions
 export function pubCommand() {
   const command = new cliffy.command.Command()
     .description('Commands for managing Flutter packages.')
-    .usage(`<pub-subcommand> [args]`)
+    .usage(`[OPTIONS] <pub-subcommand> [pub-args]`)
     .arguments(`<subcommand> [args...]`)
   return addPackageFilterOptions(command).stopEarly()
 }
