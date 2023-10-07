@@ -9,9 +9,10 @@ import { CleanOptions } from './clean_command.ts'
 
 export async function runCleanCommand(
   context: Context,
-  options: { flags: CleanOptions },
+  { options }: {
+    options: CleanOptions
+  },
 ): Promise<void> {
-  const { flags } = options
   const { logger } = context
 
   logger.stdout({ timestamp: true })
@@ -20,7 +21,7 @@ export async function runCleanCommand(
 
   const workspace = await Workspace.fromContext(context, {
     useBootstrapCache: 'fallbackToWorkspaceFile',
-    ...flags,
+    ...options,
   })
 
   logger.stdout({ timestamp: true })
@@ -34,7 +35,7 @@ export async function runCleanCommand(
     .lineFeed()
   await removeBootstrapCache(workspace.workspaceDir)
 
-  if (flags.flutter) {
+  if (options.flutter) {
     // Run `flutter clean` for each package.
     // We traverse the dependency graph in topological order.
     const dependencyGraph = DependencyGraph

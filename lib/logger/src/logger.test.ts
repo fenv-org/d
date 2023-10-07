@@ -1,13 +1,8 @@
 import { createStyles } from 'logger/mod.ts'
-import { assertEquals, Buffer } from 'test/deps.ts'
+import { assertEquals, Buffer, bufferToString } from 'test/deps.ts'
 import { createLogger } from './logger.ts'
 
 const LINE_FEED = Deno.build.os === 'windows' ? '\r\n' : '\n'
-
-function bufferToString(buffer: Buffer): string {
-  const decoder = new TextDecoder()
-  return decoder.decode(buffer.bytes())
-}
 
 Deno.test('supportColors & verbose & debug', async (t) => {
   let now = 0

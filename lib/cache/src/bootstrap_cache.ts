@@ -44,7 +44,9 @@ export async function loadBootstrapCache(
   const cache = await std.yaml
     .parse(await Deno.readTextFile(cacheFilepath)) as BootstrapCache
 
-  if (std.path.dirname(cache.workspaceFilepath) !== workspaceDir) {
+  if (
+    std.path.dirname(cache.workspaceFilepath) !== std.path.resolve(workspaceDir)
+  ) {
     return {
       type: 'error',
       error: new DError(`Need to re-bootstrap the workspace`),

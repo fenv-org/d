@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
 import { cliffy } from 'deps.ts'
+import { Logger } from 'logger/mod.ts'
 
 /**
  * Additional package filters.
@@ -48,27 +49,57 @@ export function addPackageFilterOptions<
 ) {
   return command
     .option(
-      '--include-has-file <file/glob:fileOrGlob>',
+      '--include-has-file, --if <file/glob:fileOrGlob>',
       'Includes the packages that has any matching file. Relative path from ' +
         'the package root.',
       { collect: true },
     )
     .option(
-      '--exclude-has-file <file/glob:fileOrGlob>',
+      '--exclude-has-file, --ef <file/glob:fileOrGlob>',
       'Excludes the packages that has any matching file. Relative path from ' +
         'the package root.',
       { collect: true },
     )
     .option(
-      '--include-has-dir <dir/glob:dirOrGlob>',
+      '--include-has-dir, --id <dir/glob:dirOrGlob>',
       'Includes the packages that has any matching directory. Relative path ' +
         'from the package root.',
       { collect: true },
     )
     .option(
-      '--exclude-has-dir <dir/glob:dirOrGlob>',
+      '--exclude-has-dir, --ed <dir/glob:dirOrGlob>',
       'Excludes the packages that has any matching directory. Relative path ' +
         'from the package root.',
       { collect: true },
     )
+}
+
+export function logPackageFilters(logger: Logger, flags: PackageFilterOptions) {
+  const filterDebugLogger = logger
+    .stdout({ debug: true, timestamp: true })
+    .indent(2)
+  if (flags.includeHasFile) {
+    filterDebugLogger
+      .push('[package filter] include has file=')
+      .push(JSON.stringify(flags.includeHasFile))
+      .lineFeed()
+  }
+  if (flags.excludeHasFile) {
+    filterDebugLogger
+      .push('[package filter] exclude has file=')
+      .push(JSON.stringify(flags.excludeHasFile))
+      .lineFeed()
+  }
+  if (flags.includeHasDir) {
+    filterDebugLogger
+      .push('[package filter] include has directory=')
+      .push(JSON.stringify(flags.includeHasDir))
+      .lineFeed()
+  }
+  if (flags.excludeHasDir) {
+    filterDebugLogger
+      .push('[package filter] exclude has directory=')
+      .push(JSON.stringify(flags.excludeHasDir))
+      .lineFeed()
+  }
 }

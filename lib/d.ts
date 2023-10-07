@@ -2,6 +2,7 @@ import {
   runBootstrapCommand,
   runCleanCommand,
   runGraphCommand,
+  runPubCommand,
 } from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
 import { buildCommand, Flags, parseArgs } from 'options/mod.ts'
@@ -44,16 +45,19 @@ function runCommand(
   const { flags } = options
   switch (flags.name) {
     case 'bootstrap':
-      return runBootstrapCommand(context, { flags: flags.options })
+      return runBootstrapCommand(context, flags)
 
     case 'graph':
       return runGraphCommand(context)
 
     case 'clean':
-      return runCleanCommand(context, { flags: flags.options })
+      return runCleanCommand(context, flags)
 
     case 'completions':
       return
+
+    case 'pub':
+      return runPubCommand(context, flags)
 
     default:
       return buildCommand().showHelp()

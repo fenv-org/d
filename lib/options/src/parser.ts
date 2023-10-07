@@ -1,4 +1,9 @@
-import { bootstrapCommand, cleanCommand, graphCommand } from 'command/mod.ts'
+import {
+  bootstrapCommand,
+  cleanCommand,
+  graphCommand,
+  pubCommand,
+} from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
 import { DENO_VERSION, VERSION_STRING } from 'version/mod.ts'
 import { DirOrGlobType, FileOrGlobType } from './cliffy_types.ts'
@@ -41,6 +46,7 @@ export function buildCommand() {
     .command('bootstrap', bootstrapCommand())
     .command('graph', graphCommand())
     .command('clean', cleanCommand())
+    .command('pub', pubCommand())
     .command('completions', new cliffy.command.CompletionsCommand())
 }
 
@@ -72,7 +78,6 @@ export async function parseArgs(
   return {
     cwd,
     name: commandName,
-    args: flags.args,
-    options: flags.options,
+    ...flags,
   } as unknown as Flags
 }
