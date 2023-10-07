@@ -19,7 +19,7 @@ Deno.test('Bootstrapping', async (t) => {
       '--exclude-has-file',
       '**/non-existent-file',
       '--include-has-dir',
-      'ios',
+      'lib',
       '--exclude-has-dir',
       '**/non-existent-dir',
       '--verbose',
