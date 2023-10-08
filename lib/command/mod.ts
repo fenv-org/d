@@ -4,7 +4,9 @@ export * from './src/bootstrap/bootstrap_pubspec_overrides.ts'
 export * from './src/clean/clean_command.ts'
 export * from './src/clean/clean_command_runner.ts'
 export {
-  addPackageFilterOptions,
+  type DependencyFilterOptions,
+} from './src/common/dependency_filter_options.ts'
+export {
   type PackageFilterOptions,
 } from './src/common/package_filter_options.ts'
 export * from './src/graph/graph_command.ts'

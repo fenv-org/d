@@ -13,6 +13,9 @@ export type PackageFilterOptions = {
   readonly excludeHasDir?: string[]
 }
 
+/**
+ * Adds package filter options to the given {@link command}.
+ */
 export function addPackageFilterOptions<
   TParentCommandGlobals extends Record<string, unknown> | void = void,
   TParentCommandTypes extends Record<string, unknown> | void =
