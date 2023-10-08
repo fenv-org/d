@@ -3,6 +3,7 @@ import {
   runCleanCommand,
   runGraphCommand,
   runPubCommand,
+  runUpdateCommand,
 } from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
 import { buildCommand, Flags, parseArgs } from 'options/mod.ts'
@@ -60,9 +61,7 @@ function runCommand(
       return runPubCommand(context, flags)
 
     case 'update':
-      console.log('options:', flags.options)
-      console.log('args:', flags.args)
-      return
+      return runUpdateCommand(context, flags)
 
     default:
       return buildCommand().showHelp()
