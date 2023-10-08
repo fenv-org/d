@@ -37,6 +37,7 @@ This project is under developing actively.
     - [`pub`](#pub)
     - [`graph`](#graph)
     - [`clean`](#clean)
+    - [`update`](#update)
   - [Package filters](#package-filters)
 
 ## Supported OS and architectures
@@ -294,6 +295,25 @@ $ d clean
 # or
 # Run `flutter clean` as well as removing auto-generated files.
 $ d clean [--flutter]
+```
+
+### `update`
+
+`update` is a command to self-update the `d` CLI or to list the available
+versions.
+
+```shell
+# Updates `d` to the latest version.
+$ d update
+
+# Updates `d` to the specific version `X.Y.Z`.
+# Downgrade as well as upgrade is supported.
+$ d update vX.Y.Z
+```
+
+```shell
+# Show all available versions.
+$ d update [--show-list | -l]
 ```
 
 ## Package filters
