@@ -3,6 +3,7 @@ import {
   cleanCommand,
   graphCommand,
   pubCommand,
+  updateCommand,
 } from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
 import { DENO_VERSION, VERSION_STRING } from 'version/mod.ts'
@@ -47,6 +48,7 @@ export function buildCommand() {
     .command('graph', graphCommand())
     .command('clean', cleanCommand())
     .command('pub', pubCommand())
+    .command('update', updateCommand())
     .command('completions', new cliffy.command.CompletionsCommand())
 }
 

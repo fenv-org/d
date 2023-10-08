@@ -129,7 +129,7 @@ async function checkNewerVersion() {
         `New version of "${dCli()}" is available: ` +
         `"${std.semvar.format(latestVersion)}"`,
         `To install the latest version,`,
-        `run \`curl -fsSL https://d-install.jerry.company | bash\``,
+        `run \`${dCli()} update\``,
       ]
       const maxLineLength = messages.reduce(
         (max, line) => Math.max(max, line.length),
