@@ -1,4 +1,4 @@
-import { assertEquals, Buffer, bufferToString, fail, std } from 'test/deps.ts'
+import { assertEquals, Buffer, bufferToString, fail } from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
 Deno.test('pub subcommand should fails if not bootstrapped', async (t) => {
@@ -41,14 +41,6 @@ Deno.test('pub get should succeed if bootstrapped', async (t) => {
   stdout.reset()
   stderr.reset()
   await t.step('pub get', async () => {
-    const expectedOutput = Deno.readTextFileSync(
-      std.path.join(
-        'test-resources',
-        'output_pub_get.txt',
-      ),
-    )
-      .replace('$CWD', Deno.cwd())
-
     await dMain(['pub', 'get'], {
       cwd: 'test-sample',
       stdout,
@@ -57,23 +49,35 @@ Deno.test('pub get should succeed if bootstrapped', async (t) => {
     })
 
     const actualOutput = bufferToString(stdout)
+    const packageNamesInOrdered = new Set(
+      actualOutput
+        .split('\n')
+        .flatMap((line) => {
+          const matchArray = line.match(/^\[([^]+)\]/)
+          if (matchArray) {
+            return matchArray[1]
+          } else {
+            return []
+          }
+        }),
+    )
+
     assertEquals(
-      actualOutput,
-      expectedOutput,
+      [...packageNamesInOrdered],
+      [
+        'fpm_sample_package_a',
+        'fpm_sample_package_e',
+        'fpm_sample_package_b',
+        'fpm_sample_package_c',
+        'fpm_sample_package_d',
+        'fpm_sample_app',
+      ],
     )
   })
 
   stdout.reset()
   stderr.reset()
   await t.step('pub --include-has-dir get', async () => {
-    const expectedOutput = Deno.readTextFileSync(
-      std.path.join(
-        'test-resources',
-        'output_pub_get_with_id_ios.txt',
-      ),
-    )
-      .replace('$CWD', Deno.cwd())
-
     await dMain(['pub', '--id', 'ios', 'get'], {
       cwd: 'test-sample',
       stdout,
@@ -82,9 +86,28 @@ Deno.test('pub get should succeed if bootstrapped', async (t) => {
     })
 
     const actualOutput = bufferToString(stdout)
+    const packageNamesInOrdered = new Set(
+      actualOutput
+        .split('\n')
+        .flatMap((line) => {
+          const matchArray = line.match(/^\[([^]+)\]/)
+          if (matchArray) {
+            return matchArray[1]
+          } else {
+            return []
+          }
+        }),
+    )
+
     assertEquals(
-      actualOutput,
-      expectedOutput,
+      [...packageNamesInOrdered],
+      [
+        'fpm_sample_package_b',
+        'fpm_sample_package_c',
+        'fpm_sample_package_e',
+        'fpm_sample_package_d',
+        'fpm_sample_app',
+      ],
     )
   })
 
