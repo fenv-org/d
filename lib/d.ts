@@ -59,6 +59,11 @@ function runCommand(
     case 'pub':
       return runPubCommand(context, flags)
 
+    case 'update':
+      console.log('options:', flags.options)
+      console.log('args:', flags.args)
+      return
+
     default:
       return buildCommand().showHelp()
   }

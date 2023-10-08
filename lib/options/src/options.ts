@@ -1,4 +1,9 @@
-import { BootstrapOptions, CleanOptions, PubOptions } from 'command/mod.ts'
+import {
+  BootstrapOptions,
+  CleanOptions,
+  PubOptions,
+  UpdateOptions,
+} from 'command/mod.ts'
 
 /**
  * The definition of `d`'s command line arguments.
@@ -28,6 +33,10 @@ export type Flags =
     | {
       readonly name: 'pub'
       readonly options: PubOptions & GlobalOptions
+    }
+    | {
+      readonly name: 'update'
+      readonly options: UpdateOptions & GlobalOptions
     }
   )
 
