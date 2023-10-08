@@ -1,5 +1,6 @@
 import { Context } from 'context/mod.ts'
 import { std } from 'deps.ts'
+import { DError } from 'error/mod.ts'
 import { Logger, logLabels } from 'logger/mod.ts'
 import { VERSION_STRING } from 'version/mod.ts'
 import { UpdateOptions } from './update_command.ts'
@@ -38,6 +39,13 @@ async function showVersionList(logger: Logger): Promise<void> {
         .indent()
         .push((s) => s.bold(prefix + entry.tag_name.padEnd(12) + ' [latest]'))
         .lineFeed()
+    } else if (entry.prerelease) {
+      logger.stdout({ timestamp: true })
+        .indent()
+        .push((s) =>
+          s.gray(prefix + entry.tag_name.padEnd(12) + ' [pre-release]')
+        )
+        .lineFeed()
     } else {
       logger.stdout({ timestamp: true })
         .indent()
@@ -52,7 +60,17 @@ async function installLatestVersion(logger: Logger): Promise<void> {
     .command('d update')
     .lineFeed()
 
-  await runInstaller(logger)
+  const list = await retrieveVersionList()
+  if (latestOf(list) === `v${VERSION_STRING}`) {
+    logger.stdout({ timestamp: true })
+      .indent()
+      .push('The version is up-to-date: ')
+      .push((s) => s.bold.cyan(`v${VERSION_STRING}`))
+      .lineFeed()
+    Deno.exit(0)
+  } else {
+    await runInstaller(logger)
+  }
 }
 
 async function installSpecificVersion(
@@ -63,6 +81,10 @@ async function installSpecificVersion(
     .command(`d update ${version}`)
     .lineFeed()
 
+  const list = await retrieveVersionList()
+  if (!contains(list, version)) {
+    throw new DError(`Version ${version} not found`)
+  }
   await runInstaller(logger, { version })
 }
 
@@ -150,4 +172,16 @@ async function retrieveVersionList(): Promise<ReleaseSummary[]> {
       draft: entry.draft,
       prerelease: entry.prerelease,
     }))
+}
+
+function latestOf(summaries: ReleaseSummary[]): string | undefined {
+  const latest = summaries.find((entry: ReleaseSummary) => !entry.prerelease)
+  if (!latest) {
+    return undefined
+  }
+  return latest.tag_name
+}
+
+function contains(summaries: ReleaseSummary[], version: string): boolean {
+  return summaries.some((entry: ReleaseSummary) => entry.tag_name === version)
 }
