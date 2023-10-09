@@ -1,6 +1,7 @@
 export * from './src/bootstrap/bootstrap_command.ts'
 export * from './src/bootstrap/bootstrap_command_runner.ts'
 export * from './src/bootstrap/bootstrap_pubspec_overrides.ts'
+export * from './src/build_runner/build_runner_command.ts'
 export * from './src/clean/clean_command.ts'
 export * from './src/clean/clean_command_runner.ts'
 export {

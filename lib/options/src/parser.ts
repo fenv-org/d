@@ -1,5 +1,6 @@
 import {
   bootstrapCommand,
+  buildRunnerCommand,
   cleanCommand,
   graphCommand,
   pubCommand,
@@ -45,11 +46,12 @@ export function buildCommand() {
     )
     .command('help', new command.HelpCommand().global())
     .command('bootstrap', bootstrapCommand())
-    .command('graph', graphCommand())
+    .command('build_runner', buildRunnerCommand())
     .command('clean', cleanCommand())
+    .command('completions', new cliffy.command.CompletionsCommand())
+    .command('graph', graphCommand())
     .command('pub', pubCommand())
     .command('update', updateCommand())
-    .command('completions', new cliffy.command.CompletionsCommand())
 }
 
 /**
