@@ -38,6 +38,10 @@ export type Flags =
       readonly name: 'update'
       readonly options: UpdateOptions & GlobalOptions
     }
+    | {
+      readonly name: 'build_runner'
+      readonly options: GlobalOptions
+    }
   )
 
 /**

@@ -1,5 +1,6 @@
 import {
   runBootstrapCommand,
+  runBuildRunnerCommand,
   runCleanCommand,
   runGraphCommand,
   runPubCommand,
@@ -62,6 +63,9 @@ function runCommand(
 
     case 'update':
       return runUpdateCommand(context, flags)
+
+    case 'build_runner':
+      return runBuildRunnerCommand(context, flags)
 
     default:
       return buildCommand().showHelp()
