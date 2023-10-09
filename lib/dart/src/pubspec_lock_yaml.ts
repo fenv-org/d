@@ -20,6 +20,7 @@ export interface PubspecLockYaml {
 export enum DependencyType {
   directMain = 'direct main',
   directDev = 'direct dev',
+  directOverridden = 'direct overridden',
   transitive = 'transitive',
 }
 
@@ -35,7 +36,7 @@ export function existsPubspecLockIn(directory: string): Promise<boolean> {
  */
 export async function loadPubspecLockIn(
   directory: string,
-): Promise<Readonly<PubspecLockYaml>> {
+): Promise<PubspecLockYaml> {
   const content = await Deno.readTextFile(
     std.path.join(directory, 'pubspec.lock'),
   )
