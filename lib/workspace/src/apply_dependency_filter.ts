@@ -2,9 +2,11 @@ import { DependencyFilterOptions } from 'command/mod.ts'
 import {
   DartProject,
   DependencyType,
+  existsPubspecLockIn,
   loadPubspecLockIn,
   PubspecLockYaml,
 } from 'dart/mod.ts'
+import { DError } from 'error/mod.ts'
 
 type ExtDartProject = DartProject & {
   pubspecLockYaml: PubspecLockYaml
@@ -45,6 +47,9 @@ export async function applyDependencyFilterOptions(
 async function readPubspecLockYaml(
   dartProject: DartProject,
 ): Promise<ExtDartProject> {
+  if (!await existsPubspecLockIn(dartProject.path)) {
+    throw new DError(`pubspec.lock not found in ${dartProject.path}`)
+  }
   const pubspecLockYaml = await loadPubspecLockIn(dartProject.path)
   return {
     ...dartProject,
