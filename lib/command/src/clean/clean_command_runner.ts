@@ -1,9 +1,8 @@
 import { removeBootstrapCache } from 'cache/mod.ts'
 import { Traversal } from 'concurrency/mod.ts'
 import { Context } from 'context/mod.ts'
-import { DependencyGraph } from 'dart/mod.ts'
 import { std } from 'deps.ts'
-import { runFlutterClean } from 'util/mod.ts'
+import { logLabels } from 'logger/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
 import { CleanOptions } from './clean_command.ts'
 
@@ -36,26 +35,19 @@ export async function runCleanCommand(
   await removeBootstrapCache(workspace.workspaceDir)
 
   if (options.flutter) {
-    // Run `flutter clean` for each package.
-    // We traverse the dependency graph in topological order.
-    const dependencyGraph = DependencyGraph
-      .fromDartProjects(workspace.dartProjects)
-    const commonArgs = { context, workspace }
-    const flutterCleanPerEachNode = (node: string) =>
-      runFlutterClean(node, commonArgs)
-
-    // Even though runs into an error during `flutter clean`, runs
-    // `flutter clean` for all packages.
-    const traversal = Traversal.fromDependencyGraph(dependencyGraph, {
-      onVisit: flutterCleanPerEachNode,
-      earlyExit: false,
-    })
-
     try {
-      await traversal.start()
+      // Even though runs into an error during `flutter clean`, runs
+      // `flutter clean` for all packages.
+      await Traversal.parallelTraverseInOrdered(workspace, {
+        context,
+        command: 'flutter',
+        args: ['clean'],
+        earlyExit: false,
+      })
     } catch (error) {
       logger.stderr({ timestamp: true, verbose: true })
-        .push(`Failed to clean the workspace: ${error}`)
+        .label(logLabels.warning)
+        .push(`: Failed to \`flutter clean\`: ${error}`)
         .lineFeed()
     }
   }
