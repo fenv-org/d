@@ -1,14 +1,29 @@
+import { Traversal } from 'concurrency/mod.ts'
 import { Context } from 'context/mod.ts'
-import { GlobalOptions } from 'options/mod.ts'
+import { DError } from 'error/mod.ts'
+import { Workspace } from 'workspace/mod.ts'
 
 export async function runBuildRunnerCommand(
   context: Context,
-  { args, options }: {
+  { args }: {
     args: string[]
-    options: GlobalOptions
   },
 ): Promise<void> {
-  console.log('build_runner_command_runner')
-  console.log('args=', args)
-  console.log('options=', options)
+  const workspace = await Workspace.fromContext(context, {
+    useBootstrapCache: 'always',
+    includeDevDependency: ['build_runner'],
+  })
+
+  try {
+    await Traversal.parallelTraverseInOrdered(workspace, {
+      context,
+      command: 'dart',
+      args: ['run', 'build_runner', ...args],
+      earlyExit: false,
+    })
+  } catch (error) {
+    throw new DError(
+      `Failed to run \`build_runner\` command with result: ${error}`,
+    )
+  }
 }
