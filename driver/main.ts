@@ -129,7 +129,9 @@ async function checkNewerVersion() {
         `New version of "${dCli()}" is available: ` +
         `"${std.semvar.format(latestVersion)}"`,
         `To install the latest version,`,
-        `run \`${dCli()} update\``,
+        `run \`${dCli()} update\`.`,
+        `For more information,`,
+        `see https://github.com/fenv-org/d/releases/latest`,
       ]
       const maxLineLength = messages.reduce(
         (max, line) => Math.max(max, line.length),
