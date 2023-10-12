@@ -310,6 +310,7 @@ async function _onVisit(node: string, {
   const output = await runShellCommand(command, {
     args,
     dartProject,
+    workspacePath: workspace.workspaceDir,
     logger,
   })
   if (!output.success) {

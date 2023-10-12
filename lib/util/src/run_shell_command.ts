@@ -7,7 +7,8 @@ export type ShellCommandOptions =
   & Omit<Deno.CommandOptions, 'cwd'>
   & {
     logger?: Logger
-    dartProject?: DartProject
+    workspacePath: string
+    dartProject: DartProject
     cwd?: string
   }
 
@@ -19,44 +20,46 @@ export type ShellCommandOptions =
  */
 export async function runShellCommand(
   command: string,
-  options?: ShellCommandOptions,
+  options: ShellCommandOptions,
 ): Promise<Deno.CommandStatus> {
   const logger = options?.logger
+  const cwd = options.dartProject
+    ? options.cwd
+      ? std.path.isAbsolute(options.cwd)
+        ? options.cwd
+        : std.path.join(options.dartProject.path, options.cwd)
+      : options.dartProject.path
+    : options.cwd
   let denoCommand: Deno.Command
   if (Deno.build.os === 'windows') {
     denoCommand = new Deno.Command(command, {
       ...options,
       stdout: logger ? 'piped' : undefined,
       stderr: logger ? 'piped' : undefined,
-      cwd: options?.dartProject
-        ? options?.cwd
-          ? std.path.isAbsolute(options.cwd)
-            ? options.cwd
-            : std.path.join(options.dartProject.path, options.cwd)
-          : options.dartProject.path
-        : options?.cwd,
+      cwd,
     })
   } else {
     // Runs the given command with `bash -c` instead of running it directly.
     // This is a workaround of the problem that Deno resolves symlinks to
     // real paths.
-    const cwd = options?.dartProject
-      ? options?.cwd
-        ? std.path.isAbsolute(options.cwd)
-          ? options.cwd
-          : std.path.join(options.dartProject.path, options.cwd)
-        : options.dartProject.path
-      : options?.cwd
     const cdCommand = cwd ? `cd ${escapeForShell(cwd)} && ` : ''
     denoCommand = new Deno.Command('bash', {
       ...options,
       args: [
         '-c',
-        cdCommand + escapeForShell([command, ...options?.args ?? []]),
+        cdCommand +
+        escapeForShell([
+          resolveVariables(command),
+          ...options.args?.map(resolveVariables) ?? [],
+        ]),
       ],
       stdout: logger ? 'piped' : undefined,
       stderr: logger ? 'piped' : undefined,
       cwd: undefined,
+      env: reservedEnvironmentVariables(
+        options.workspacePath,
+        options.dartProject,
+      ),
     })
   }
 
@@ -109,4 +112,50 @@ async function outputStderr(options: {
 function escapeForShell(args: string[] | string): string {
   args = typeof args === 'string' ? [args] : args
   return args.map((arg) => `'${arg.replace(/'/g, '\'\\\'\'')}'`).join(' ')
+}
+
+/**
+ * Sets the following environment variables:
+ *
+ * - `$WORKSPACE_PATH`: The absolute path to the workspace root directory.
+ * - `$PACKAGE_PATH`: The absolute path to the package root directory.
+ * - `$PACKAGE_NAME`: The name of the package.
+ */
+function reservedEnvironmentVariables(
+  workspacePath: string,
+  project: DartProject,
+): {
+  WORKSPACE_PATH: string
+  PACKAGE_PATH: string
+  PACKAGE_NAME: string
+} {
+  const pubspecYaml = std.yaml.parse(
+    Deno.readTextFileSync(project.pubspecFilepath),
+  ) as { name: string }
+  return {
+    WORKSPACE_PATH: workspacePath,
+    PACKAGE_PATH: project.path,
+    PACKAGE_NAME: pubspecYaml.name,
+  }
+}
+
+function resolveVariables(arg: string): string {
+  // The pattern that extracts the name of variable starting with `$`.
+  // For example:
+  // - `$WORKSPACE_PATH` -> `WORKSPACE_PATH`
+  // - `${PACKAGE_PATH}` -> `PACKAGE_PATH`
+  // - `${PACKAGE_PATH}_WORD` -> `PACKAGE_PATH`
+  const variableRegex = /\$({?)(?<variable>[A-Za-z_][A-Za-z0-9_]*)(}?)/g
+  const segments: string[] = []
+  let match: RegExpExecArray | null
+  let cursor = 0
+  while ((match = variableRegex.exec(arg)) !== null) {
+    segments.push(arg.slice(cursor, match.index))
+    const variable = match.groups?.variable!
+    const segment = Deno.env.get(variable) ?? match[0]
+    segments.push(segment)
+    cursor = variableRegex.lastIndex
+  }
+  segments.push(arg.slice(cursor))
+  return segments.join('')
 }
