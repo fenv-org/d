@@ -171,7 +171,10 @@ Deno.test('Bootstrapping', async (t) => {
       throw new Error('Expected to fail')
     } catch (error) {
       assert(error instanceof DError)
-      assert(error.message.includes('Failed to bootstrap with result'))
+      assert(
+        error.message.includes('Failed to `bootstrap` with result'),
+        error.message,
+      )
     }
   })
 
