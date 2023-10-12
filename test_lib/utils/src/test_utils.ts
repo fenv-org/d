@@ -66,3 +66,18 @@ export function bufferToString(buffer: Buffer): string {
   const decoder = new TextDecoder()
   return decoder.decode(buffer.bytes())
 }
+
+export function extractPackageNamesInOrder(buffer: Buffer | string): string[] {
+  const lines = typeof buffer === 'string'
+    ? buffer.split('\n')
+    : bufferToString(buffer).split('\n')
+  const packageNames = new Set(lines.flatMap((line) => {
+    const matchArray = line.match(/^\[([^\]]+?)\]/)
+    if (matchArray) {
+      return matchArray[1]
+    } else {
+      return []
+    }
+  }))
+  return [...packageNames]
+}

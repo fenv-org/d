@@ -1,4 +1,9 @@
-import { assertEquals, Buffer, bufferToString, fail } from 'test/deps.ts'
+import {
+  assertEquals,
+  Buffer,
+  extractPackageNamesInOrder,
+  fail,
+} from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
 Deno.test('pub subcommand should fails if not bootstrapped', async (t) => {
@@ -48,22 +53,8 @@ Deno.test('pub get should succeed if bootstrapped', async (t) => {
       colorSupported: false,
     })
 
-    const actualOutput = bufferToString(stdout)
-    const packageNamesInOrdered = new Set(
-      actualOutput
-        .split('\n')
-        .flatMap((line) => {
-          const matchArray = line.match(/^\[([^]+)\]/)
-          if (matchArray) {
-            return matchArray[1]
-          } else {
-            return []
-          }
-        }),
-    )
-
     assertEquals(
-      [...packageNamesInOrdered],
+      extractPackageNamesInOrder(stdout),
       [
         'fpm_sample_package_a',
         'fpm_sample_package_e',
@@ -85,22 +76,8 @@ Deno.test('pub get should succeed if bootstrapped', async (t) => {
       colorSupported: false,
     })
 
-    const actualOutput = bufferToString(stdout)
-    const packageNamesInOrdered = new Set(
-      actualOutput
-        .split('\n')
-        .flatMap((line) => {
-          const matchArray = line.match(/^\[([^]+)\]/)
-          if (matchArray) {
-            return matchArray[1]
-          } else {
-            return []
-          }
-        }),
-    )
-
     assertEquals(
-      [...packageNamesInOrdered],
+      extractPackageNamesInOrder(stdout),
       [
         'fpm_sample_package_b',
         'fpm_sample_package_c',
