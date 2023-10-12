@@ -35,10 +35,12 @@ This project is under developing actively.
   - [Commands](#commands)
     - [`bootstrap`](#bootstrap)
     - [`pub`](#pub)
+    - [`build_runner`](#build_runner)
     - [`graph`](#graph)
     - [`clean`](#clean)
     - [`update`](#update)
   - [Package filters](#package-filters)
+  - [Pre-defined environment variables](#pre-defined-environment-variables)
 
 ## Supported OS and architectures
 
@@ -272,6 +274,39 @@ $ d pub [--config <PATH-TO-d.yaml>] upgrade
 
 Supports [package filters](#package-filters).
 
+### `build_runner`
+
+`build_runner` is a command to run `dart run build_runner build/run/clean`
+command in every bootstrapped package where has a dev dependency on the
+`build_runner` package.
+
+`br` is an alias of `build_runner`.
+
+- `build_runner build`
+  ```shell
+  $ d build_runner build --delete-conflicting-outputs
+  # or shortly
+  $ d br b -d
+  ```
+
+- `build_runner run`
+  ```shell
+  $ d build_runner run --delete-conflicting-outputs \
+      '$WORKSPACE_PATH'/target.dart -- \
+      [script args...]
+  # or shortly
+  $ d br r -d \
+      '$WORKSPACE_PATH'/target.dart -- \
+      [script args...]
+  ```
+
+- `build_runner clean`
+  ```shell
+  $ d build_runner clean
+  # or shortly
+  $ d br c
+  ```
+
 ### `graph`
 
 `graph` is a command to describe the dependency relationship among linked
@@ -344,6 +379,18 @@ $ d update [--show-list | -l]
     or a relative glob pattern from the package root directory.
   - Can be repeated.
   - Prioritize `--include-has-dir` option.
+
+## Pre-defined environment variables
+
+`d` provides some pre-defined environment variables. These environment variables
+can be used in any command.
+
+- `$WORKSPACE_PATH`: The absolute path of the directory where `d.yaml` file is
+  located.
+- `$PACKAGE_PATH`: The absolute path of the package root where a command is
+  running on at the moment.
+- `$PACKAGE_NAME`: The name of the package where a command is running on at the
+  moment.
 
 <!-- links -->
 
