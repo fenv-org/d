@@ -1,5 +1,6 @@
 import {
   bootstrapCommand,
+  buildRunnerCommand,
   cleanCommand,
   graphCommand,
   pubCommand,
@@ -45,11 +46,12 @@ export function buildCommand() {
     )
     .command('help', new command.HelpCommand().global())
     .command('bootstrap', bootstrapCommand())
-    .command('graph', graphCommand())
+    .command('build_runner', buildRunnerCommand())
     .command('clean', cleanCommand())
+    .command('completions', new cliffy.command.CompletionsCommand())
+    .command('graph', graphCommand())
     .command('pub', pubCommand())
     .command('update', updateCommand())
-    .command('completions', new cliffy.command.CompletionsCommand())
 }
 
 /**
@@ -77,9 +79,14 @@ export async function parseArgs(
   }
 
   const commandName = flags.cmd.getName()
+  const rawArgs =
+    (flags.cmd as unknown as { _parent: { rawArgs: string[] } } | undefined)
+      ?._parent
+      ?.rawArgs
   return {
     cwd,
     name: commandName,
     ...flags,
+    rawArgs: rawArgs ?? [],
   } as unknown as Flags
 }

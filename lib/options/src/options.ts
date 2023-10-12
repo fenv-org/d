@@ -12,6 +12,7 @@ export type Flags =
   & {
     readonly cwd: string
     readonly args: string[]
+    readonly rawArgs: string[]
   }
   & (
     | {
@@ -37,6 +38,10 @@ export type Flags =
     | {
       readonly name: 'update'
       readonly options: UpdateOptions & GlobalOptions
+    }
+    | {
+      readonly name: 'build_runner'
+      readonly options: GlobalOptions
     }
   )
 

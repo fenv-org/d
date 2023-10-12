@@ -3,3 +3,5 @@ output
 
 .DS_Store
 test-sample/.d/
+
+**/GeneratedPluginRegistrant.*

@@ -13,10 +13,9 @@ import { Workspace } from 'workspace/mod.ts'
  */
 export async function writePubspecOverridesYamlFiles(
   workspace: Workspace,
-  dependencyGraph: DependencyGraph,
 ): Promise<void> {
   const transitiveDependenciesTable = makeTransitiveDependenciesTable(
-    dependencyGraph,
+    DependencyGraph.fromDartProjects(workspace.dartProjects),
   )
   await Promise.all(
     workspace.dartProjects.map(async (dartProject) => {

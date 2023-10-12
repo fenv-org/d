@@ -1,5 +1,9 @@
+import { Context } from 'context/mod.ts'
 import { DependencyGraph } from 'dart/mod.ts'
 import { std } from 'deps.ts'
+import { Logger, logLabels } from 'logger/mod.ts'
+import { runShellCommand } from 'util/mod.ts'
+import { Workspace } from 'workspace/mod.ts'
 import { poll, prepare, TraversalState } from './traversal_util.ts'
 
 const { deferred } = std.async
@@ -87,6 +91,44 @@ export class Traversal {
    * When set to 0, the traversal will stop.
    */
   #concurrency: number
+
+  /**
+   * Traverse the given {@link workspace} serially and run `command` with
+   * `args` on each package.
+   */
+  static serialTraverseInOrdered(workspace: Workspace, options: {
+    context: Context
+    command: string
+    args: string[]
+    earlyExit?: boolean
+  }): Promise<void> {
+    return Traversal.parallelTraverseInOrdered(workspace, {
+      ...options,
+      concurrency: 1,
+    })
+  }
+
+  /**
+   * Traverse the given {@link workspace} in parallel and run `command` with
+   * `args` on each package. The maximum parallelism is controlled by
+   * `options.concurrency`, which defaults to 5.
+   */
+  static async parallelTraverseInOrdered(workspace: Workspace, options: {
+    context: Context
+    command: string
+    args: string[]
+    earlyExit?: boolean
+    concurrency?: number
+  }): Promise<void> {
+    const dependencyGraph = DependencyGraph.fromDartProjects(
+      workspace.dartProjects,
+    )
+    const traverse = Traversal.fromDependencyGraph(dependencyGraph, {
+      ...options,
+      onVisit: (node) => _onVisit(node, { ...options, workspace }),
+    })
+    await traverse.start()
+  }
 
   /**
    * Create a traversal from the given dependency {@link graph}.
@@ -224,4 +266,60 @@ export class Traversal {
         }
     }
   }
+}
+
+async function _onVisit(node: string, {
+  context: { logger },
+  workspace,
+  command,
+  args,
+}: {
+  context: { logger: Logger }
+  workspace: Workspace
+  command: string
+  args: string[]
+}): Promise<VisitResult> {
+  const dartProject = workspace.dartProjects.find((project) =>
+    project.name === node
+  )!
+
+  logger.stdout({ timestamp: true })
+    .package(node)
+    .push((s) => s.bold('Running: '))
+    .lineFeed()
+
+  let relativePackageDirectory = std.path.relative(
+    workspace.workspaceDir,
+    dartProject.path,
+  )
+  relativePackageDirectory = relativePackageDirectory === ''
+    ? '.'
+    : relativePackageDirectory
+  logger.stdout({ timestamp: true })
+    .indent()
+    .childArrow()
+    .push((s) => s.cyan.bold(`package directory: ${relativePackageDirectory}`))
+    .lineFeed()
+
+  logger.stdout({ timestamp: true })
+    .indent(2)
+    .childArrow()
+    .command(`${command} ${args.join(' ')}`, { withDollarSign: true })
+    .lineFeed()
+
+  const output = await runShellCommand(command, {
+    args,
+    dartProject,
+    workspacePath: workspace.workspaceDir,
+    logger,
+  })
+  if (!output.success) {
+    logger.stderr()
+      .label(logLabels.error)
+      .package(node)
+      .push((s) => s.red(`Ends with code: ${output.code}`))
+      .lineFeed()
+    return { kind: 'stop', code: output.code }
+  }
+  return { kind: 'continue' }
 }

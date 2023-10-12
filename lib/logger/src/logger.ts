@@ -49,6 +49,7 @@ export interface LogBuilder {
 export type LogLabel = (s: Styles) => string
 export const logLabels = {
   error: (s: Styles) => s.red.bold('ERROR'),
+  warning: (s: Styles) => s.bgRed('WARNING'),
 }
 
 class LoggerV2Impl implements Logger {

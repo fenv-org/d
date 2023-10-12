@@ -1,11 +1,12 @@
 import { loadBootstrapCache } from 'cache/mod.ts'
-import { PackageFilterOptions } from 'command/mod.ts'
+import { DependencyFilterOptions, PackageFilterOptions } from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
 import { DartProject } from 'dart/mod.ts'
 import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
 import { Logger } from 'logger/mod.ts'
 import * as util from 'util/mod.ts'
+import { applyDependencyFilterOptions } from './apply_dependency_filter.ts'
 import { applyPackageFilterOptions } from './apply_package_filter.ts'
 import { loadWorkspaceYaml } from './workspace_yaml.ts'
 
@@ -19,6 +20,7 @@ export type WorkspaceFromContextOptions =
     useBootstrapCache: 'always' | 'never' | 'fallbackToWorkspaceFile'
   }
   & PackageFilterOptions
+  & DependencyFilterOptions
 
 /**
  * A class that represents the workspace managed by `d`.
@@ -61,6 +63,13 @@ export class Workspace {
       .push(workspaceFilepath)
       .lineFeed()
 
+    async function applyCommonFilters(
+      dartProjects: DartProject[],
+    ): Promise<DartProject[]> {
+      return await applyPackageFilterOptions(dartProjects, options)
+        .then((them) => applyDependencyFilterOptions(them, options))
+    }
+
     if (options.useBootstrapCache !== 'never') {
       const workspaceDir = std.path.dirname(workspaceFilepath)
       const cacheLoadResult = await loadBootstrapCache(workspaceDir)
@@ -80,7 +89,7 @@ export class Workspace {
           )
           return new Workspace(
             std.path.resolve(workspaceFilepath),
-            await applyPackageFilterOptions(dartProjects, options),
+            await applyCommonFilters(dartProjects),
           )
         }
 
@@ -96,7 +105,7 @@ export class Workspace {
       .#dartProjectsFromWorkspaceYaml(logger, workspaceFilepath)
     return new Workspace(
       std.path.resolve(workspaceFilepath),
-      await applyPackageFilterOptions(dartProjects, options),
+      await applyCommonFilters(dartProjects),
     )
   }
 

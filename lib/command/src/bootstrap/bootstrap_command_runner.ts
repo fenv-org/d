@@ -3,7 +3,6 @@ import { Traversal } from 'concurrency/mod.ts'
 import { Context } from 'context/mod.ts'
 import { DependencyGraph } from 'dart/mod.ts'
 import { DError } from 'error/mod.ts'
-import { runFlutterPubGet } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
 import { logPackageFilters } from '../common/package_filter_options.ts'
 import { BootstrapOptions } from './bootstrap_command.ts'
@@ -44,23 +43,16 @@ export async function runBootstrapCommand(
     .indent().indent()
     .push('Generating `pubspec_overrides.yaml` files')
     .lineFeed()
-  // Write pubspec_overrides.yaml files before running `flutter pub get`.
-  await writePubspecOverridesYamlFiles(workspace, dependencyGraph)
-
-  // Run `flutter pub get` for each package.
-  // We traverse the dependency graph in topological order.
-  const commonArgs = { context, workspace }
-  const flutterPubGetPerEachNode = (node: string) =>
-    runFlutterPubGet(node, commonArgs)
-  const traversal = Traversal.fromDependencyGraph(dependencyGraph, {
-    concurrency: 1,
-    onVisit: flutterPubGetPerEachNode,
-  })
+  await writePubspecOverridesYamlFiles(workspace)
 
   try {
-    await traversal.start()
+    await Traversal.serialTraverseInOrdered(workspace, {
+      context,
+      command: 'flutter',
+      args: ['pub', 'get'],
+    })
   } catch (error) {
-    throw new DError(`Failed to bootstrap with result: ${error}`)
+    throw new DError(`Failed to \`bootstrap\` with result: ${error}`)
   }
 
   logger.stdout({ timestamp: true })
