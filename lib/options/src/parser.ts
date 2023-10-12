@@ -79,9 +79,14 @@ export async function parseArgs(
   }
 
   const commandName = flags.cmd.getName()
+  const rawArgs =
+    (flags.cmd as unknown as { _parent: { rawArgs: string[] } } | undefined)
+      ?._parent
+      ?.rawArgs
   return {
     cwd,
     name: commandName,
     ...flags,
+    rawArgs: rawArgs ?? [],
   } as unknown as Flags
 }

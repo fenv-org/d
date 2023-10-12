@@ -12,6 +12,7 @@ export type Flags =
   & {
     readonly cwd: string
     readonly args: string[]
+    readonly rawArgs: string[]
   }
   & (
     | {

@@ -22,7 +22,7 @@ export async function runShellCommand(
   command: string,
   options: ShellCommandOptions,
 ): Promise<Deno.CommandStatus> {
-  const logger = options?.logger
+  const logger = options.logger
   const cwd = options.dartProject
     ? options.cwd
       ? std.path.isAbsolute(options.cwd)
@@ -39,27 +39,24 @@ export async function runShellCommand(
       cwd,
     })
   } else {
+    setReservedEnvironmentVariables(
+      options.workspacePath,
+      options.dartProject,
+    )
     // Runs the given command with `bash -c` instead of running it directly.
     // This is a workaround of the problem that Deno resolves symlinks to
     // real paths.
     const cdCommand = cwd ? `cd ${escapeForShell(cwd)} && ` : ''
+    const totalCommand = cdCommand + escapeForShell([
+      resolveVariables(command),
+      ...options.args?.map(resolveVariables) ?? [],
+    ])
     denoCommand = new Deno.Command('bash', {
       ...options,
-      args: [
-        '-c',
-        cdCommand +
-        escapeForShell([
-          resolveVariables(command),
-          ...options.args?.map(resolveVariables) ?? [],
-        ]),
-      ],
+      args: ['-c', totalCommand],
       stdout: logger ? 'piped' : undefined,
       stderr: logger ? 'piped' : undefined,
       cwd: undefined,
-      env: reservedEnvironmentVariables(
-        options.workspacePath,
-        options.dartProject,
-      ),
     })
   }
 
@@ -121,22 +118,13 @@ function escapeForShell(args: string[] | string): string {
  * - `$PACKAGE_PATH`: The absolute path to the package root directory.
  * - `$PACKAGE_NAME`: The name of the package.
  */
-function reservedEnvironmentVariables(
+function setReservedEnvironmentVariables(
   workspacePath: string,
   project: DartProject,
-): {
-  WORKSPACE_PATH: string
-  PACKAGE_PATH: string
-  PACKAGE_NAME: string
-} {
-  const pubspecYaml = std.yaml.parse(
-    Deno.readTextFileSync(project.pubspecFilepath),
-  ) as { name: string }
-  return {
-    WORKSPACE_PATH: workspacePath,
-    PACKAGE_PATH: project.path,
-    PACKAGE_NAME: pubspecYaml.name,
-  }
+) {
+  Deno.env.set('WORKSPACE_PATH', workspacePath)
+  Deno.env.set('PACKAGE_PATH', project.path)
+  Deno.env.set('PACKAGE_NAME', project.name)
 }
 
 function resolveVariables(arg: string): string {
