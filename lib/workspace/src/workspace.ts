@@ -161,7 +161,7 @@ export class Workspace {
       root: pwd,
       extended: true,
       followSymlinks: true,
-      resolveSymlinksToRealPaths: false,
+      canonicalize: false,
     })
     for await (const walkEntry of walkEntries) {
       const dartProject = await DartProject.fromPubspecFilepath(
