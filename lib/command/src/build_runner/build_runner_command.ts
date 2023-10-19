@@ -1,4 +1,8 @@
 import { cliffy } from 'deps.ts'
+import {
+  addEarlyExitOptions,
+  EarlyExitOptions,
+} from '../common/early_exit_options.ts'
 
 const subcommands: { readonly [command: string]: string } = {
   b: 'build',
@@ -21,13 +25,15 @@ function subcommandType(
   return subcommands[value]
 }
 
+export type BuildRunnerOptions = EarlyExitOptions
+
 /**
  * `build_runner` subcommand.
  *
  * `br` is one of the aliases for `build_runner`.
  */
 export function buildRunnerCommand() {
-  return new cliffy.command.Command()
+  const command = new cliffy.command.Command()
     .usage('[OPTIONS] <subcommand> [args...]')
     .alias('br')
     .description(
@@ -37,6 +43,6 @@ export function buildRunnerCommand() {
         `"build/b", "clean/c", "run/r"`,
     )
     .type('subcommand', subcommandType)
-    .stopEarly()
     .arguments('<subcommand:subcommand> [args...:string]')
+  return addEarlyExitOptions(command).stopEarly()
 }

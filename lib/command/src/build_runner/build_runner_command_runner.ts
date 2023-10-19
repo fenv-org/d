@@ -2,12 +2,14 @@ import { Traversal } from 'concurrency/mod.ts'
 import { Context } from 'context/mod.ts'
 import { DError } from 'error/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
+import { BuildRunnerOptions } from './build_runner_command.ts'
 
 export async function runBuildRunnerCommand(
   context: Context,
-  { args, rawArgs }: {
+  { args, rawArgs, options }: {
     args: string[]
     rawArgs: string[]
+    options: BuildRunnerOptions
   },
 ): Promise<void> {
   const workspace = await Workspace.fromContext(context, {
@@ -26,7 +28,7 @@ export async function runBuildRunnerCommand(
       context,
       command: 'dart',
       args: ['run', 'build_runner', ...args],
-      earlyExit: false,
+      earlyExit: options.earlyExit,
     })
   } catch (error) {
     throw new DError(
