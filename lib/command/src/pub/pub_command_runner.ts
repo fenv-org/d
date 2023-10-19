@@ -35,6 +35,7 @@ export async function runPubCommand(
       context,
       command: 'flutter',
       args: ['pub', ...args],
+      earlyExit: options.earlyExit,
     })
   } catch (error) {
     throw new DError(`Failed to run \`pub\` command with result: ${error}`)

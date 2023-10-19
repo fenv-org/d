@@ -1,5 +1,6 @@
 import {
   BootstrapOptions,
+  BuildRunnerOptions,
   CleanOptions,
   PubOptions,
   UpdateOptions,
@@ -41,7 +42,7 @@ export type Flags =
     }
     | {
       readonly name: 'build_runner'
-      readonly options: GlobalOptions
+      readonly options: BuildRunnerOptions & GlobalOptions
     }
   )
 
