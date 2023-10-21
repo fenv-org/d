@@ -3,6 +3,8 @@ import { Context } from 'context/mod.ts'
 import { DError } from 'error/mod.ts'
 import { GlobalOptions } from 'options/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
+import { stripEarlyExitOptions } from '../common/early_exit_options.ts'
+import { stripPackageFilterOptions } from '../common/package_filter_options.ts'
 import { TestOptions } from './test_command.ts'
 
 export async function runTestCommand(
@@ -33,14 +35,16 @@ export async function runTestCommand(
     .push((s) => s.cyan.bold(`workspace directory: ${workspace.workspaceDir}`))
     .lineFeed()
 
-  const argsStartIndex = rawArgs.findIndex((arg) => arg === 'test') + 1
-  const flutterTestArgs = rawArgs.slice(argsStartIndex)
+  // Strips the options that are not supported by `flutter test`.
+  const myRawArgs = stripPackageFilterOptions(stripEarlyExitOptions(rawArgs))
+  const argsStartIndex = myRawArgs.findIndex((arg) => arg === 'test') + 1
+  const flutterTestArgs = myRawArgs.slice(argsStartIndex)
   try {
     await Traversal.parallelTraverseInOrdered(workspace, {
       context,
       command: 'flutter',
       args: ['test', ...flutterTestArgs],
-      earlyExit: false,
+      earlyExit: options.earlyExit,
     })
   } catch (error) {
     throw new DError(`Failed to run \`test\` command with result: ${error}`)
