@@ -44,6 +44,10 @@ export type Flags =
       readonly name: 'build_runner'
       readonly options: BuildRunnerOptions & GlobalOptions
     }
+    | {
+      readonly name: 'test'
+      readonly options: GlobalOptions
+    }
   )
 
 /**

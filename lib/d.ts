@@ -4,6 +4,7 @@ import {
   runCleanCommand,
   runGraphCommand,
   runPubCommand,
+  runTestCommand,
   runUpdateCommand,
 } from 'command/mod.ts'
 import { Context } from 'context/mod.ts'
@@ -66,6 +67,9 @@ function runCommand(
 
     case 'build_runner':
       return runBuildRunnerCommand(context, flags)
+
+    case 'test':
+      return runTestCommand(context, flags)
 
     default:
       return buildCommand().showHelp()

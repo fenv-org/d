@@ -4,6 +4,7 @@ import {
   cleanCommand,
   graphCommand,
   pubCommand,
+  testCommand,
   updateCommand,
 } from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
@@ -51,6 +52,7 @@ export function buildCommand() {
     .command('completions', new cliffy.command.CompletionsCommand())
     .command('graph', graphCommand())
     .command('pub', pubCommand())
+    .command('test', testCommand())
     .command('update', updateCommand())
 }
 

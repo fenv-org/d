@@ -15,7 +15,7 @@ export type PubOptions = PackageFilterOptions & EarlyExitOptions
  */
 export function pubCommand() {
   const command = new cliffy.command.Command()
-    .description('Commands for managing Flutter packages.')
+    .description('Run `flutter pub` in all packages.')
     .usage(`[OPTIONS] <pub-subcommand> [pub-args]`)
     .arguments(`<subcommand> [args...]`)
   return addEarlyExitOptions(addPackageFilterOptions(command)).stopEarly()
