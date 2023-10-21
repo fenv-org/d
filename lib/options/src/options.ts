@@ -66,7 +66,7 @@ export type GlobalOptions = {
 /**
  * Removes global options from the given {@link rawArgs}.
  */
-export function removeGlobalOptions(rawArgs: string[]): string[] {
+export function stripGlobalOptions(rawArgs: string[]): string[] {
   return sanitizeRawArguments(rawArgs, {
     flags: ['--verbose', '-v', '--debug'],
     options: ['--config'],

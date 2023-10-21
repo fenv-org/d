@@ -10,7 +10,7 @@ import {
 import { cliffy } from 'deps.ts'
 import { DENO_VERSION, VERSION_STRING } from 'version/mod.ts'
 import { DirOrGlobType, FileOrGlobType } from './cliffy_types.ts'
-import { Flags, removeGlobalOptions } from './options.ts'
+import { Flags, stripGlobalOptions } from './options.ts'
 
 const { command } = cliffy
 
@@ -89,6 +89,6 @@ export async function parseArgs(
     cwd,
     name: commandName,
     ...flags,
-    rawArgs: removeGlobalOptions(rawArgs ?? []),
+    rawArgs: stripGlobalOptions(rawArgs ?? []),
   } as unknown as Flags
 }

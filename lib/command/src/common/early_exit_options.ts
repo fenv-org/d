@@ -60,7 +60,7 @@ export function addEarlyExitOptions<
 /**
  * Removes early exit options from the given {@link rawArgs}.
  */
-export function removeEarlyExitOptions(rawArgs: string[]): string[] {
+export function stripEarlyExitOptions(rawArgs: string[]): string[] {
   return sanitizeRawArguments(rawArgs, {
     flags: ['--early-exit', '--no-early-exit'],
   })

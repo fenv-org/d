@@ -1,10 +1,10 @@
 import { assertEquals } from 'test/deps.ts'
-import { removeEarlyExitOptions } from './early_exit_options.ts'
+import { stripEarlyExitOptions } from './early_exit_options.ts'
 
-Deno.test('removeEarlyExitOptions', async (t) => {
+Deno.test('stripEarlyExitOptions', async (t) => {
   await t.step('test case1', () => {
     assertEquals(
-      removeEarlyExitOptions(
+      stripEarlyExitOptions(
         '--config test-sample/d.yaml -v test --early-exit -r expanded abc --debug'
           .split(/\s+/),
       ),
@@ -23,7 +23,7 @@ Deno.test('removeEarlyExitOptions', async (t) => {
 
   await t.step('test case2', () => {
     assertEquals(
-      removeEarlyExitOptions(
+      stripEarlyExitOptions(
         '--config=test-sample/d.yaml test --verbose --early-exit -r expanded abc'
           .split(/\s+/),
       ),
