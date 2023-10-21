@@ -2,6 +2,7 @@
 
 import { cliffy } from 'deps.ts'
 import { Logger } from 'logger/mod.ts'
+import { sanitizeRawArguments } from 'util/mod.ts'
 
 /**
  * Additional dependency filters.
@@ -87,6 +88,22 @@ export function addDependencyFilterOptions<
         'dependency.',
       { collect: true },
     )
+}
+
+/**
+ * Removes dependency filter options from the given {@link rawArgs}.
+ */
+export function stripDependencyFilterOptions(rawArgs: string[]): string[] {
+  return sanitizeRawArguments(rawArgs, {
+    options: [
+      '--include-dependency',
+      '--exclude-dependency',
+      '--include-direct-dependency',
+      '--exclude-direct-dependency',
+      '--include-dev-dependency',
+      '--exclude-dev-dependency',
+    ],
+  })
 }
 
 export function logDependencyFilters(

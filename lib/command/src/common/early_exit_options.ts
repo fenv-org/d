@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
 import { cliffy } from 'deps.ts'
+import { sanitizeRawArguments } from 'util/mod.ts'
 
 export type EarlyExitOptions = {
   readonly earlyExit: boolean
@@ -54,4 +55,13 @@ export function addEarlyExitOptions<
       'Execute the command for all packages even though a failure happens on ' +
         'any package',
     )
+}
+
+/**
+ * Removes early exit options from the given {@link rawArgs}.
+ */
+export function stripEarlyExitOptions(rawArgs: string[]): string[] {
+  return sanitizeRawArguments(rawArgs, {
+    flags: ['--early-exit', '--no-early-exit'],
+  })
 }

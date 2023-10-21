@@ -4,12 +4,13 @@ import {
   cleanCommand,
   graphCommand,
   pubCommand,
+  testCommand,
   updateCommand,
 } from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
 import { DENO_VERSION, VERSION_STRING } from 'version/mod.ts'
 import { DirOrGlobType, FileOrGlobType } from './cliffy_types.ts'
-import { Flags } from './options.ts'
+import { Flags, stripGlobalOptions } from './options.ts'
 
 const { command } = cliffy
 
@@ -51,6 +52,7 @@ export function buildCommand() {
     .command('completions', new cliffy.command.CompletionsCommand())
     .command('graph', graphCommand())
     .command('pub', pubCommand())
+    .command('test', testCommand())
     .command('update', updateCommand())
 }
 
@@ -87,6 +89,6 @@ export async function parseArgs(
     cwd,
     name: commandName,
     ...flags,
-    rawArgs: rawArgs ?? [],
+    rawArgs: stripGlobalOptions(rawArgs ?? []),
   } as unknown as Flags
 }
