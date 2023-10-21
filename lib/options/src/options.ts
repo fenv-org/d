@@ -6,6 +6,7 @@ import {
   TestOptions,
   UpdateOptions,
 } from 'command/mod.ts'
+import { sanitizeRawArguments } from 'util/mod.ts'
 
 /**
  * The definition of `d`'s command line arguments.
@@ -60,4 +61,14 @@ export type GlobalOptions = {
   readonly config?: string
   readonly dWorkspace?: string
   readonly dLogTime?: number
+}
+
+/**
+ * Removes global options from the given {@link rawArgs}.
+ */
+export function removeGlobalOptions(rawArgs: string[]): string[] {
+  return sanitizeRawArguments(rawArgs, {
+    flags: ['--verbose', '-v', '--debug'],
+    options: ['--config'],
+  })
 }
