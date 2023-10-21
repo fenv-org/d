@@ -2,6 +2,7 @@ import { Traversal } from 'concurrency/mod.ts'
 import { Context } from 'context/mod.ts'
 import { DError } from 'error/mod.ts'
 import { GlobalOptions } from 'options/mod.ts'
+import { Chain } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
 import { stripEarlyExitOptions } from '../common/early_exit_options.ts'
 import { stripPackageFilterOptions } from '../common/package_filter_options.ts'
@@ -36,7 +37,10 @@ export async function runTestCommand(
     .lineFeed()
 
   // Strips the options that are not supported by `flutter test`.
-  const myRawArgs = stripPackageFilterOptions(stripEarlyExitOptions(rawArgs))
+  const myRawArgs = Chain.of(rawArgs)
+    .map(stripEarlyExitOptions)
+    .map(stripPackageFilterOptions)
+    .value
   const argsStartIndex = myRawArgs.findIndex((arg) => arg === 'test') + 1
   const flutterTestArgs = myRawArgs.slice(argsStartIndex)
   try {
