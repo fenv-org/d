@@ -1,8 +1,17 @@
 import { cliffy } from 'deps.ts'
+import { Chain } from 'util/mod.ts'
+import {
+  addDependencyFilterOptions,
+  DependencyFilterOptions,
+} from '../common/dependency_filter_options.ts'
 import {
   addEarlyExitOptions,
   EarlyExitOptions,
 } from '../common/early_exit_options.ts'
+import {
+  addPackageFilterOptions,
+  PackageFilterOptions,
+} from '../common/package_filter_options.ts'
 
 const subcommands: { readonly [command: string]: string } = {
   b: 'build',
@@ -25,7 +34,10 @@ function subcommandType(
   return subcommands[value]
 }
 
-export type BuildRunnerOptions = EarlyExitOptions
+export type BuildRunnerOptions =
+  & PackageFilterOptions
+  & EarlyExitOptions
+  & DependencyFilterOptions
 
 /**
  * `build_runner` subcommand.
@@ -34,7 +46,6 @@ export type BuildRunnerOptions = EarlyExitOptions
  */
 export function buildRunnerCommand() {
   const command = new cliffy.command.Command()
-    .usage('[OPTIONS] <subcommand> [args...]')
     .alias('br')
     .description(
       'Run `dart run build_runner <subcommand>` in all packages ' +
@@ -43,6 +54,20 @@ export function buildRunnerCommand() {
         `"build/b", "clean/c", "run/r"`,
     )
     .type('subcommand', subcommandType)
+    .usage('[OPTIONS] <subcommand> [args...]')
     .arguments('<subcommand:subcommand> [args...:string]')
-  return addEarlyExitOptions(command).stopEarly()
+    .allowEmpty(true)
+  return Chain.of(command)
+    .map(addEarlyExitOptions)
+    .map(addPackageFilterOptions)
+    .map(addDependencyFilterOptions)
+    .value
+    .stopEarly()
+    .option(
+      '-*, --* [flags]',
+      'Forward all arguments to `dart run build_runner <subcommand>`.',
+      {
+        collect: true,
+      },
+    )
 }
