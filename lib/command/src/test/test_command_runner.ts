@@ -3,11 +3,12 @@ import { Context } from 'context/mod.ts'
 import { DError } from 'error/mod.ts'
 import { GlobalOptions } from 'options/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
+import { TestOptions } from './test_command.ts'
 
 export async function runTestCommand(
   context: Context,
   { options, rawArgs }: {
-    options: GlobalOptions
+    options: TestOptions & GlobalOptions
     rawArgs: string[]
   },
 ): Promise<void> {
@@ -20,7 +21,10 @@ export async function runTestCommand(
   const workspace = await Workspace.fromContext(context, {
     useBootstrapCache: 'always',
     ...options,
-    includeHasFile: ['test/**/*_test.dart'],
+    includeHasFile: [
+      ...(options.includeHasFile ?? []),
+      'test/**/*_test.dart',
+    ],
   })
 
   logger.stdout({ timestamp: true })
