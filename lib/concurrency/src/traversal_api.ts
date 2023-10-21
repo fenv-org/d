@@ -249,9 +249,6 @@ export class Traversal {
       }
 
       case 'stop':
-        console.error(
-          `Stopping the traversal because of node ${node}: ${this.#earlyExit}`,
-        )
         if (this.#earlyExit) {
           this.#concurrency = 0
         } else {
