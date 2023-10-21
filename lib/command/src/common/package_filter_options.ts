@@ -2,6 +2,7 @@
 
 import { cliffy } from 'deps.ts'
 import { Logger } from 'logger/mod.ts'
+import { sanitizeRawArguments } from 'util/mod.ts'
 
 /**
  * Additional package filters.
@@ -75,6 +76,24 @@ export function addPackageFilterOptions<
         'from the package root.',
       { collect: true },
     )
+}
+
+/**
+ * Removes package filter options from the given {@link rawArgs}.
+ */
+export function stripPackageFilterOptions(rawArgs: string[]): string[] {
+  return sanitizeRawArguments(rawArgs, {
+    options: [
+      '--include-has-file',
+      '--if',
+      '--exclude-has-file',
+      '--ef',
+      '--include-has-dir',
+      '--id',
+      '--exclude-has-dir',
+      '--ed',
+    ],
+  })
 }
 
 export function logPackageFilters(logger: Logger, flags: PackageFilterOptions) {
