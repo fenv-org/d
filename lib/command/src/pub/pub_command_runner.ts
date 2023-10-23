@@ -1,14 +1,23 @@
 import { Traversal } from 'concurrency/mod.ts'
 import { Context } from 'context/mod.ts'
 import { DError } from 'error/mod.ts'
+import { Chain } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
-import { logPackageFilters } from '../common/package_filter_options.ts'
+import {
+  logDependencyFilters,
+  stripDependencyFilterOptions,
+} from '../common/dependency_filter_options.ts'
+import { stripEarlyExitOptions } from '../common/early_exit_options.ts'
+import {
+  logPackageFilters,
+  stripPackageFilterOptions,
+} from '../common/package_filter_options.ts'
 import { PubOptions } from './pub_command.ts'
 
 export async function runPubCommand(
   context: Context,
-  { args, options }: {
-    args: string[]
+  { options, rawArgs }: {
+    rawArgs: string[]
     options: PubOptions
   },
 ): Promise<void> {
@@ -28,13 +37,21 @@ export async function runPubCommand(
     .childArrow()
     .push((s) => s.cyan.bold(`workspace directory: ${workspace.workspaceDir}`))
     .lineFeed()
-  logPackageFilters(logger, options)
 
+  logPackageFilters(logger, options)
+  logDependencyFilters(logger, options)
+
+  // Strips the options that are not supported by `flutter test`.
+  const myRawArgs = Chain.of(rawArgs)
+    .map(stripEarlyExitOptions)
+    .map(stripPackageFilterOptions)
+    .map(stripDependencyFilterOptions)
+    .value
   try {
     await Traversal.serialTraverseInOrdered(workspace, {
       context,
       command: 'flutter',
-      args: ['pub', ...args],
+      args: ['pub', ...myRawArgs.slice(1)],
       earlyExit: options.earlyExit,
     })
   } catch (error) {
