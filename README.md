@@ -34,12 +34,20 @@ This project is under developing actively.
     - [Run `d bootstrap`](#run-d-bootstrap)
   - [Commands](#commands)
     - [`bootstrap`](#bootstrap)
+      - [Usage examples](#usage-examples)
     - [`pub`](#pub)
+      - [Usage examples](#usage-examples-1)
     - [`build_runner`](#build_runner)
+      - [Usage examples](#usage-examples-2)
+    - [`test`](#test)
+      - [Usage examples](#usage-examples-3)
     - [`graph`](#graph)
+      - [Usage examples](#usage-examples-4)
     - [`clean`](#clean)
     - [`update`](#update)
-  - [Package filters](#package-filters)
+  - [Common filters](#common-filters)
+    - [Package filters](#package-filters)
+    - [Dependency filters](#dependency-filters)
   - [Pre-defined environment variables](#pre-defined-environment-variables)
 
 ## Supported OS and architectures
@@ -253,13 +261,15 @@ up `.d/` and `pubspec_overrides.yaml` to `.gitignore` file.
 `bootstrap`ping, `d` can run various commands for each linked packages
 considering their dependency relationship.
 
+`bootstrap` supports [package filters](#package-filters).
+
+#### Usage examples
+
 ```shell
 $ d bootstrap [--config <PATH-TO-d.yaml>]
 # or
 $ d bs [--config <PATH-TO-d.yaml>]
 ```
-
-Supports [package filters](#package-filters).
 
 ### `pub`
 
@@ -267,20 +277,26 @@ Supports [package filters](#package-filters).
 bootstrapped packages. You can run any arbitrary `flutter pub`'s subcommand with
 this command.
 
+`pub` supports [package filters](#package-filters) and
+[dependency filters](#dependency-filters).
+
+#### Usage examples
+
 ```shell
 $ d pub [--config <PATH-TO-d.yaml>] get
 $ d pub [--config <PATH-TO-d.yaml>] upgrade
 ```
 
-Supports [package filters](#package-filters).
-
 ### `build_runner`
 
 `build_runner` is a command to run `dart run build_runner build/run/clean`
 command in every bootstrapped package where has a dev dependency on the
-`build_runner` package.
+`build_runner` package. `br` is an alias of `build_runner`.
 
-`br` is an alias of `build_runner`.
+`build_runner` supports [package filters](#package-filters) and
+[dependency filters](#dependency-filters).
+
+#### Usage examples
 
 - `build_runner build`
   ```shell
@@ -307,10 +323,29 @@ command in every bootstrapped package where has a dev dependency on the
   $ d br c
   ```
 
+### `test`
+
+`test` is a command to run `flutter test [args...]` command in every
+bootstrapped package that has any file matching `test/**/*_test.dart`.
+
+`test` supports [package filters](#package-filters) and
+[dependency filters](#dependency-filters).
+
+#### Usage examples
+
+```shell
+$ d test --no-early-exit \
+    --reporter expanded \
+    --file-reporter \
+    json:'$WORKSPACE_PATH'/reports/tests_'$PACKAGE_NAME'.json
+```
+
 ### `graph`
 
 `graph` is a command to describe the dependency relationship among linked
 packages. `graph` command can be executed even if not `bootstrap`ped yet.
+
+#### Usage examples
 
 ```shell
 $ d graph
@@ -351,7 +386,9 @@ $ d update vX.Y.Z
 $ d update [--show-list | -l]
 ```
 
-## Package filters
+## Common filters
+
+### Package filters
 
 - `--include-has-file <fileOrGlob>`:
   - `--if` is an alias.
@@ -379,6 +416,31 @@ $ d update [--show-list | -l]
     or a relative glob pattern from the package root directory.
   - Can be repeated.
   - Prioritize `--include-has-dir` option.
+
+### Dependency filters
+
+- `--include-dependency`:
+  - Includes only packages where have a dependency on the given package.
+  - Can be repeated.
+- `--exclude-dependency`:
+  - Excludes packages where have a dependency on the given package.
+  - Can be repeated.
+  - Prioritize `--include-dependency` option.
+- `--include-direct-dependency`:
+  - Includes only packages where have a "direct" dependency on the given
+    package.
+  - Can be repeated.
+- `--exclude-direct-dependency`:
+  - Excludes packages where have a "direct" dependency on the given package.
+  - Can be repeated.
+  - Prioritize `--include-direct-dependency` option.
+- `--include-dev-dependency`:
+  - Includes only packages where have a "dev" dependency on the given package.
+  - Can be repeated.
+- `--exclude-dev-dependency`:
+  - Excludes packages where have a "dev" dependency on the given package.
+  - Can be repeated.
+  - Prioritize `--include-dev-dependency` option.
 
 ## Pre-defined environment variables
 
