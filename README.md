@@ -55,13 +55,13 @@ This project is under developing actively.
 ### MacOS
 
 - x86_64
-- arm64: Thanks to
-  [LukeChannings/deno-arm64](https://github.com/LukeChannings/deno-arm64)
+- arm64
 
 ### Linux
 
 - x86_64
-- arm64
+- arm64: Thanks to
+  [LukeChannings/deno-arm64](https://github.com/LukeChannings/deno-arm64)
 
 ## How to install
 

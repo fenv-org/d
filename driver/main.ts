@@ -51,6 +51,7 @@ async function run(
 
     const colors = std.fmt.colors
     console.error(colors.brightRed(colors.bold('ERROR:')), error.message)
+    Deno.exit(1)
   }
 }
 
