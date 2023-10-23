@@ -4,6 +4,7 @@ import { DError } from 'error/mod.ts'
 import { GlobalOptions } from 'options/mod.ts'
 import { Chain } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
+import { stripDependencyFilterOptions } from '../common/dependency_filter_options.ts'
 import { stripEarlyExitOptions } from '../common/early_exit_options.ts'
 import { stripPackageFilterOptions } from '../common/package_filter_options.ts'
 import { TestOptions } from './test_command.ts'
@@ -40,6 +41,7 @@ export async function runTestCommand(
   const myRawArgs = Chain.of(rawArgs)
     .map(stripEarlyExitOptions)
     .map(stripPackageFilterOptions)
+    .map(stripDependencyFilterOptions)
     .value
   const argsStartIndex = myRawArgs.findIndex((arg) => arg === 'test') + 1
   const flutterTestArgs = myRawArgs.slice(argsStartIndex)

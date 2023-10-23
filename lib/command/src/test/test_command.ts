@@ -1,5 +1,7 @@
 import { PackageFilterOptions } from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
+import { Chain } from 'util/mod.ts'
+import { addDependencyFilterOptions } from '../common/dependency_filter_options.ts'
 import {
   addEarlyExitOptions,
   EarlyExitOptions,
@@ -14,10 +16,20 @@ export type TestOptions = PackageFilterOptions & EarlyExitOptions
 export function testCommand() {
   const command = new cliffy.command.Command()
     .description('Commands for managing Flutter packages.')
+    .usage('[OPTIONS] [args...]')
     .arguments(`[args...]`)
     .allowEmpty(true)
-  return addEarlyExitOptions(addPackageFilterOptions(command)).stopEarly()
-    .option('-*, --* [flags]', 'Forward all arguments to `flutter test`.', {
-      collect: true,
-    })
+  return Chain.of(command)
+    .map(addEarlyExitOptions)
+    .map(addPackageFilterOptions)
+    .map(addDependencyFilterOptions)
+    .value
+    .stopEarly()
+    .option(
+      '-*, --* [flags]',
+      'Forward all arguments to `flutter test`.',
+      {
+        collect: true,
+      },
+    )
 }
