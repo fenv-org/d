@@ -148,41 +148,6 @@ Deno.test('Bootstrapping', async (t) => {
     )
   })
 
-  // await t.step('Should fail to bootstrap because of `pack-c`', async () => {
-  //   await removeGarbages()
-  //   const promise = dMain([
-  //     'bootstrap',
-  //     '--include-has-file',
-  //     'pubspec.yaml',
-  //     '--exclude-has-file',
-  //     '**/skip-this',
-  //     '--include-has-dir',
-  //     'ios',
-  //     '--exclude-has-dir',
-  //     '**/non-existent-dir',
-  //     '--verbose',
-  //     '--debug',
-  //   ], {
-  //     cwd: 'test-sample',
-  //     stdout: Deno.stdout,
-  //     stderr: Deno.stderr,
-  //     colorSupported: true,
-  //   })
-
-  //   try {
-  //     await promise
-  //     throw new Error('Expected to fail')
-  //   } catch (error) {
-  //     assert(error instanceof DError)
-  //     assert(
-  //       error.message.includes('Failed to `bootstrap` with result'),
-  //       error.message,
-  //     )
-  //   }
-  // })
-
-  // await removeGarbages()
-
   await Deno.remove(testSampleDir, { recursive: true })
 })
 
@@ -221,32 +186,6 @@ Deno.test('Bootstrapping should fail because of `pack-c`', async (t) => {
     }
   })
 })
-
-// async function removeGarbages() {
-//   const promises: Promise<void>[] = []
-//   for (
-//     const walkEntry of std.fs.expandGlobSync('**/pubspec_overrides.yaml', {
-//       root: 'test-sample',
-//       extended: true,
-//       followSymlinks: true,
-//     })
-//   ) {
-//     promises.push(Deno.remove(walkEntry.path, { recursive: true }))
-//   }
-//   for (
-//     const walkEntry of std.fs.expandGlobSync('**/pubspec.lock', {
-//       root: 'test-sample',
-//       extended: true,
-//       followSymlinks: true,
-//     })
-//   ) {
-//     promises.push(Deno.remove(walkEntry.path, { recursive: true }))
-//   }
-//   if (std.fs.existsSync('test-sample/.d')) {
-//     promises.push(Deno.remove('test-sample/.d', { recursive: true }))
-//   }
-//   await Promise.all(promises)
-// }
 
 function readYaml(...paths: string[]): Record<string, unknown> {
   const filepath = std.path.join(...paths)
