@@ -64,7 +64,7 @@ jobs:
           cache-key: flutter
 
       - name: Run tests
-        run: deno test --allow-all
+        run: deno test --allow-all --parallel
 
       - name: Bundle `main.ts`
         if: ${{ matrix.os == 'ubuntu-latest' }}
