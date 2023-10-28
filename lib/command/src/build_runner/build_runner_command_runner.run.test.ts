@@ -18,7 +18,7 @@ Deno.test('Run `d br run`', async (t) => {
     colorSupported: true,
   })
 
-  await t.step('Run `d br run`', async () => {
+  await t.step('execution', async () => {
     const stdout = new Buffer()
     const stderr = new Buffer()
     await dMain([
