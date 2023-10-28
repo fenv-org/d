@@ -40,11 +40,16 @@ export function buildAbsPath(...paths: string[]): string {
   return std.path.join(Deno.cwd(), ...paths)
 }
 
-export function assertFileExists(path: string): void {
-  assert(std.fs.existsSync(path, { isFile: true }), `File not found: ${path}`)
+export function assertFileExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
+  assert(
+    std.fs.existsSync(path, { isFile: true }),
+    `File not found: ${path}`,
+  )
 }
 
-export function assertFileNotExists(path: string): void {
+export function assertFileNotExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
   assert(!std.fs.existsSync(path, { isFile: true }), `File found: ${path}`)
 }
 
