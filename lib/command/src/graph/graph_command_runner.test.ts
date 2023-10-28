@@ -2,20 +2,21 @@ import { std } from 'deps.ts'
 import {
   assertEquals,
   Buffer,
-  buildAbsPath,
   buildStringLinesFromBuffer,
+  copyTestSample,
 } from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
-Deno.test('Show graph', async (t) => {
+Deno.test('d graph: call graphCommand()', async (t) => {
   // setup
   Deno.env.set('D_LOG_TIME', '0')
+  const testSampleDir = await copyTestSample()
 
-  await t.step('call graphCommand()', async () => {
+  await t.step('execution', async () => {
     const stdout = new Buffer()
     const stderr = new Buffer()
     await dMain(['graph'], {
-      cwd: 'test-sample/packages/pack-a',
+      cwd: std.path.resolve(testSampleDir, 'packages/pack-a'),
       stdout,
       stderr,
       colorSupported: false,
@@ -26,9 +27,7 @@ Deno.test('Show graph', async (t) => {
     assertEquals(
       stdoutLines,
       [
-        `Analyzed dependency graph: the base directory path is \`${
-          buildAbsPath('test-sample')
-        }\``,
+        `Analyzed dependency graph: the base directory path is \`${testSampleDir}\``,
         `┌──────────────────────┬─────────────────────┬──────────────────────┬──────────────────────┐`,
         `│ name                 │ path                │ dependencies         │ dependents           │`,
         `├──────────────────────┼─────────────────────┼──────────────────────┼──────────────────────┤`,
@@ -59,12 +58,21 @@ Deno.test('Show graph', async (t) => {
     assertEquals(stderr.empty(), true)
   })
 
-  await t.step('call graphCommand() with `D_WORKSPACE`', async () => {
+  // teardown
+  Deno.env.delete('D_LOG_TIME')
+  await Deno.remove(testSampleDir, { recursive: true })
+})
+
+Deno.test('d graph: call graphCommand() with `D_WORKSPACE`', async (t) => {
+  Deno.env.set('D_LOG_TIME', '0')
+  const testSampleDir = await copyTestSample()
+
+  await t.step('execution', async () => {
     const stdout = new Buffer()
     const stderr = new Buffer()
     Deno.env.set('D_WORKSPACE', '../..')
     await dMain(['graph'], {
-      cwd: 'test-sample/packages/pack-a',
+      cwd: std.path.resolve(testSampleDir, 'packages/pack-a'),
       stdout,
       stderr,
       colorSupported: false,
@@ -75,9 +83,7 @@ Deno.test('Show graph', async (t) => {
     assertEquals(
       stdoutLines,
       [
-        `Analyzed dependency graph: the base directory path is \`${
-          buildAbsPath('test-sample')
-        }\``,
+        `Analyzed dependency graph: the base directory path is \`${testSampleDir}\``,
         `┌──────────────────────┬─────────────────────┬──────────────────────┬──────────────────────┐`,
         `│ name                 │ path                │ dependencies         │ dependents           │`,
         `├──────────────────────┼─────────────────────┼──────────────────────┼──────────────────────┤`,
@@ -106,9 +112,10 @@ Deno.test('Show graph', async (t) => {
       ],
     )
     assertEquals(stderr.empty(), true)
-    Deno.env.delete('D_WORKSPACE')
   })
 
   // tear down
+  Deno.env.delete('D_WORKSPACE')
   Deno.env.delete('D_LOG_TIME')
+  await Deno.remove(testSampleDir, { recursive: true })
 })
