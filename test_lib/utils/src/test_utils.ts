@@ -53,14 +53,16 @@ export function assertFileNotExists(...paths: string[]): void {
   assert(!std.fs.existsSync(path, { isFile: true }), `File found: ${path}`)
 }
 
-export function assertDirectoryExists(path: string): void {
+export function assertDirectoryExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
   assert(
     std.fs.existsSync(path, { isDirectory: true }),
     `Directory not found: ${path}`,
   )
 }
 
-export function assertDirectoryNotExists(path: string): void {
+export function assertDirectoryNotExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
   assert(
     !std.fs.existsSync(path, { isDirectory: true }),
     `Directory found: ${path}`,
@@ -85,4 +87,10 @@ export function extractPackageNamesInOrder(buffer: Buffer | string): string[] {
     }
   }))
   return [...packageNames]
+}
+
+export async function copyTestSample(): Promise<string> {
+  const tempDir = await Deno.makeTempDir()
+  await std.fs.copy('test-sample', tempDir, { overwrite: true })
+  return tempDir
 }

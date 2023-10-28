@@ -5,14 +5,9 @@ import {
   assertEquals,
   assertFileExists,
   assertFileNotExists,
+  copyTestSample,
 } from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
-
-async function copyTestSample(): Promise<string> {
-  const tempDir = await Deno.makeTempDir()
-  await std.fs.copy('test-sample', tempDir, { overwrite: true })
-  return tempDir
-}
 
 Deno.test('Bootstrapping', async (t) => {
   const testSampleDir = await copyTestSample()
