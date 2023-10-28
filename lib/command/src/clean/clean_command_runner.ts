@@ -29,11 +29,6 @@ export async function runCleanCommand(
     .push((s) => s.cyan.bold(`workspace directory: ${workspace.workspaceDir}`))
     .lineFeed()
 
-  logger.stdout({ timestamp: true, verbose: true })
-    .push(`Removing bootstrap cache`)
-    .lineFeed()
-  await removeBootstrapCache(workspace.workspaceDir)
-
   if (options.flutter) {
     try {
       // Even though runs into an error during `flutter clean`, runs
@@ -66,6 +61,11 @@ export async function runCleanCommand(
       await Deno.remove(dartProject.pubspecOverridesFilepath)
     }
   }
+
+  logger.stdout({ timestamp: true, verbose: true })
+    .push(`Removing bootstrap cache`)
+    .lineFeed()
+  await removeBootstrapCache(workspace.workspaceDir)
 
   logger.stdout({ timestamp: true })
     .push('Successfully cleaned the workspace')

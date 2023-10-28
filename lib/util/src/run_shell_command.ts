@@ -84,7 +84,6 @@ async function writeScriptFile(
     cwd?: string
   },
 ) {
-  const escape = (s: string) => `'${s.replace(/'/g, '\'\\\'\'')}'`
   await Deno.writeTextFile(
     filepath,
     [
@@ -92,7 +91,7 @@ async function writeScriptFile(
       'set -e',
       'set -o pipefail',
       cwd ? `cd ${escapeForShell(cwd)}` : '',
-      [command, ...(args ?? []).map(escape)].join(' '),
+      [command, ...(args ?? [])].join(' '),
     ].join('\n'),
   )
 }
