@@ -40,22 +40,29 @@ export function buildAbsPath(...paths: string[]): string {
   return std.path.join(Deno.cwd(), ...paths)
 }
 
-export function assertFileExists(path: string): void {
-  assert(std.fs.existsSync(path, { isFile: true }), `File not found: ${path}`)
+export function assertFileExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
+  assert(
+    std.fs.existsSync(path, { isFile: true }),
+    `File not found: ${path}`,
+  )
 }
 
-export function assertFileNotExists(path: string): void {
+export function assertFileNotExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
   assert(!std.fs.existsSync(path, { isFile: true }), `File found: ${path}`)
 }
 
-export function assertDirectoryExists(path: string): void {
+export function assertDirectoryExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
   assert(
     std.fs.existsSync(path, { isDirectory: true }),
     `Directory not found: ${path}`,
   )
 }
 
-export function assertDirectoryNotExists(path: string): void {
+export function assertDirectoryNotExists(...paths: string[]): void {
+  const path = std.path.join(...paths)
   assert(
     !std.fs.existsSync(path, { isDirectory: true }),
     `Directory found: ${path}`,
@@ -80,4 +87,10 @@ export function extractPackageNamesInOrder(buffer: Buffer | string): string[] {
     }
   }))
   return [...packageNames]
+}
+
+export async function copyTestSample(): Promise<string> {
+  const tempDir = Deno.makeTempDirSync({ prefix: 'test-sample' })
+  await std.fs.copy('test-sample', tempDir, { overwrite: true })
+  return tempDir
 }

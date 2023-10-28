@@ -108,7 +108,7 @@ jobs:
           commit_message: "Bump up: `flutter`"
 
       - name: Run tests
-        run: deno test --allow-all --coverage=cov_profile
+        run: deno test --allow-all --coverage=cov_profile --parallel
 
       - name: Make coverage report
         if: ${{ matrix.os == 'ubuntu-latest' }}

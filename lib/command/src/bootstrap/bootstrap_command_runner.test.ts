@@ -5,13 +5,15 @@ import {
   assertEquals,
   assertFileExists,
   assertFileNotExists,
+  copyTestSample,
 } from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
 Deno.test('Bootstrapping', async (t) => {
+  const testSampleDir = await copyTestSample()
+
   // Run bootstrap
   await t.step('Run bootstrap', async () => {
-    await removeGarbages()
     await dMain([
       'bootstrap',
       '--include-has-file',
@@ -25,21 +27,21 @@ Deno.test('Bootstrapping', async (t) => {
       '--verbose',
       '--debug',
     ], {
-      cwd: 'test-sample',
+      cwd: testSampleDir,
       stdout: Deno.stdout,
       stderr: Deno.stderr,
       colorSupported: true,
     })
 
-    assertFileExists('test-sample/app/pubspec.lock')
-    assertFileExists('test-sample/app/packages/pack-e/pubspec.lock')
-    assertFileExists('test-sample/packages/pack-a/pubspec.lock')
-    assertFileExists('test-sample/packages/pack-b/pubspec.lock')
-    assertFileExists('test-sample/packages/pack-c/pubspec.lock')
-    assertFileExists('test-sample/packages/pack-d/pubspec.lock')
+    assertFileExists(testSampleDir, 'app/pubspec.lock')
+    assertFileExists(testSampleDir, 'app/packages/pack-e/pubspec.lock')
+    assertFileExists(testSampleDir, 'packages/pack-a/pubspec.lock')
+    assertFileExists(testSampleDir, 'packages/pack-b/pubspec.lock')
+    assertFileExists(testSampleDir, 'packages/pack-c/pubspec.lock')
+    assertFileExists(testSampleDir, 'packages/pack-d/pubspec.lock')
 
     assertEquals(
-      readYaml('test-sample/app/pubspec_overrides.yaml'),
+      readYaml(testSampleDir, 'app/pubspec_overrides.yaml'),
       {
         dependency_overrides: {
           fpm_sample_package_a: {
@@ -61,11 +63,12 @@ Deno.test('Bootstrapping', async (t) => {
       },
     )
     assertFileNotExists(
-      'test-sample/app/packages/pack-e/pubspec_overrides.yaml',
+      testSampleDir,
+      'app/packages/pack-e/pubspec_overrides.yaml',
     )
-    assertFileNotExists('test-sample/packages/pack-a/pubspec_overrides.yaml')
+    assertFileNotExists(testSampleDir, 'packages/pack-a/pubspec_overrides.yaml')
     assertEquals(
-      readYaml('test-sample/packages/pack-b/pubspec_overrides.yaml'),
+      readYaml(testSampleDir, 'packages/pack-b/pubspec_overrides.yaml'),
       {
         dependency_overrides: {
           fpm_sample_package_a: {
@@ -75,7 +78,7 @@ Deno.test('Bootstrapping', async (t) => {
       },
     )
     assertEquals(
-      readYaml('test-sample/packages/pack-c/pubspec_overrides.yaml'),
+      readYaml(testSampleDir, 'packages/pack-c/pubspec_overrides.yaml'),
       {
         dependency_overrides: {
           fpm_sample_package_a: {
@@ -85,7 +88,7 @@ Deno.test('Bootstrapping', async (t) => {
       },
     )
     assertEquals(
-      readYaml('test-sample/packages/pack-d/pubspec_overrides.yaml'),
+      readYaml(testSampleDir, 'packages/pack-d/pubspec_overrides.yaml'),
       {
         dependency_overrides: {
           collection: '^1.18.0',
@@ -103,9 +106,9 @@ Deno.test('Bootstrapping', async (t) => {
     )
 
     assertEquals(
-      readYaml('test-sample/.d/bootstrap.yaml'),
+      readYaml(testSampleDir, '.d/bootstrap.yaml'),
       {
-        workspaceFilepath: std.path.resolve('test-sample', 'd.yaml'),
+        workspaceFilepath: std.path.resolve(testSampleDir, 'd.yaml'),
         packages: {
           fpm_sample_app: {
             pubspecRelativePath: 'app/pubspec.yaml',
@@ -145,8 +148,13 @@ Deno.test('Bootstrapping', async (t) => {
     )
   })
 
-  await t.step('Should fail to bootstrap because of `pack-c`', async () => {
-    await removeGarbages()
+  await Deno.remove(testSampleDir, { recursive: true })
+})
+
+Deno.test('Bootstrapping should fail because of `pack-c`', async (t) => {
+  const testSampleDir = await copyTestSample()
+
+  await t.step('execution', async () => {
     const promise = dMain([
       'bootstrap',
       '--include-has-file',
@@ -160,7 +168,7 @@ Deno.test('Bootstrapping', async (t) => {
       '--verbose',
       '--debug',
     ], {
-      cwd: 'test-sample',
+      cwd: testSampleDir,
       stdout: Deno.stdout,
       stderr: Deno.stderr,
       colorSupported: true,
@@ -177,37 +185,10 @@ Deno.test('Bootstrapping', async (t) => {
       )
     }
   })
-
-  await removeGarbages()
 })
 
-async function removeGarbages() {
-  const promises: Promise<void>[] = []
-  for (
-    const walkEntry of std.fs.expandGlobSync('**/pubspec_overrides.yaml', {
-      root: 'test-sample',
-      extended: true,
-      followSymlinks: true,
-    })
-  ) {
-    promises.push(Deno.remove(walkEntry.path, { recursive: true }))
-  }
-  for (
-    const walkEntry of std.fs.expandGlobSync('**/pubspec.lock', {
-      root: 'test-sample',
-      extended: true,
-      followSymlinks: true,
-    })
-  ) {
-    promises.push(Deno.remove(walkEntry.path, { recursive: true }))
-  }
-  if (std.fs.existsSync('test-sample/.d')) {
-    promises.push(Deno.remove('test-sample/.d', { recursive: true }))
-  }
-  await Promise.all(promises)
-}
-
-function readYaml(filepath: string): Record<string, unknown> {
+function readYaml(...paths: string[]): Record<string, unknown> {
+  const filepath = std.path.join(...paths)
   return std.yaml.parse(Deno.readTextFileSync(filepath)) as unknown as Record<
     string,
     unknown

@@ -1,15 +1,18 @@
 import {
   assertEquals,
   Buffer,
+  copyTestSample,
   extractPackageNamesInOrder,
   fail,
 } from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
-Deno.test('pub subcommand should fails if not bootstrapped', async (t) => {
+Deno.test('`d pub get` should fails if not bootstrapped', async (t) => {
   // set-up: clean-up
+  const testSampleDir = await copyTestSample()
+
   await dMain(['clean'], {
-    cwd: 'test-sample',
+    cwd: testSampleDir,
     stdout: Deno.stdout,
     stderr: Deno.stderr,
     colorSupported: true,
@@ -20,7 +23,7 @@ Deno.test('pub subcommand should fails if not bootstrapped', async (t) => {
     const stderr = new Buffer()
     try {
       await dMain(['pub', 'get'], {
-        cwd: 'test-sample',
+        cwd: testSampleDir,
         stdout,
         stderr,
         colorSupported: false,
@@ -30,24 +33,26 @@ Deno.test('pub subcommand should fails if not bootstrapped', async (t) => {
       assertEquals(e.message, 'Need to bootstrap the workspace')
     }
   })
+
+  // teardown
+  await Deno.remove(testSampleDir, { recursive: true })
 })
 
-Deno.test('pub get should succeed if bootstrapped', async (t) => {
+Deno.test('`d pub get` should succeed if bootstrapped', async (t) => {
   // set-up: bootstrap
-  const stdout = new Buffer()
-  const stderr = new Buffer()
+  const testSampleDir = await copyTestSample()
   await dMain(['bootstrap'], {
-    cwd: 'test-sample',
-    stdout,
-    stderr,
+    cwd: testSampleDir,
+    stdout: Deno.stdout,
+    stderr: Deno.stderr,
     colorSupported: false,
   })
 
-  stdout.reset()
-  stderr.reset()
-  await t.step('pub get', async () => {
+  await t.step('execution', async () => {
+    const stdout = new Buffer()
+    const stderr = new Buffer()
     await dMain(['pub', 'get'], {
-      cwd: 'test-sample',
+      cwd: testSampleDir,
       stdout,
       stderr,
       colorSupported: false,
@@ -66,11 +71,25 @@ Deno.test('pub get should succeed if bootstrapped', async (t) => {
     )
   })
 
-  stdout.reset()
-  stderr.reset()
+  // teardown
+  await Deno.remove(testSampleDir, { recursive: true })
+})
+
+Deno.test('`d pub --include-has-dir get` should succeed if bootstrapped', async (t) => {
+  // set-up: bootstrap
+  const testSampleDir = await copyTestSample()
+  await dMain(['bootstrap'], {
+    cwd: testSampleDir,
+    stdout: Deno.stdout,
+    stderr: Deno.stderr,
+    colorSupported: false,
+  })
+
   await t.step('pub --include-has-dir get', async () => {
+    const stdout = new Buffer()
+    const stderr = new Buffer()
     await dMain(['pub', '--id', 'ios', 'get'], {
-      cwd: 'test-sample',
+      cwd: testSampleDir,
       stdout,
       stderr,
       colorSupported: false,
@@ -88,11 +107,6 @@ Deno.test('pub get should succeed if bootstrapped', async (t) => {
     )
   })
 
-  // set-up: clean-up
-  await dMain(['clean'], {
-    cwd: 'test-sample',
-    stdout: stdout,
-    stderr: stderr,
-    colorSupported: false,
-  })
+  // teardown
+  await Deno.remove(testSampleDir, { recursive: true })
 })
