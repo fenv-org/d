@@ -71,6 +71,14 @@ function runCommand(
     case 'test':
       return runTestCommand(context, flags)
 
+    case 'run':
+      console.log('run')
+      console.log('  options', flags.options)
+      console.log('  args', flags.args)
+      console.log('  rawArgs', flags.rawArgs)
+      console.log('  literal', flags.literal)
+      return
+
     default:
       return buildCommand().showHelp()
   }

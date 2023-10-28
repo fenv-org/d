@@ -4,6 +4,7 @@ import {
   cleanCommand,
   graphCommand,
   pubCommand,
+  runCommand,
   testCommand,
   updateCommand,
 } from 'command/mod.ts'
@@ -49,9 +50,9 @@ export function buildCommand() {
     .command('bootstrap', bootstrapCommand())
     .command('build_runner', buildRunnerCommand())
     .command('clean', cleanCommand())
-    .command('completions', new cliffy.command.CompletionsCommand())
     .command('graph', graphCommand())
     .command('pub', pubCommand())
+    .command('run', runCommand())
     .command('test', testCommand())
     .command('update', updateCommand())
 }
