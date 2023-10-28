@@ -4,6 +4,7 @@ import {
   runCleanCommand,
   runGraphCommand,
   runPubCommand,
+  runRunCommand,
   runTestCommand,
   runUpdateCommand,
 } from 'command/mod.ts'
@@ -77,7 +78,7 @@ function runCommand(
       console.log('  args', flags.args)
       console.log('  rawArgs', flags.rawArgs)
       console.log('  literal', flags.literal)
-      return
+      return runRunCommand(context, flags)
 
     default:
       return buildCommand().showHelp()
