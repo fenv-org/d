@@ -46,7 +46,7 @@ export async function runRunCommand(
   const args = literal.slice(1)
 
   try {
-    await Traversal.serialTraverseInOrdered(workspace, {
+    await Traversal.parallelTraverseInOrdered(workspace, {
       context,
       command,
       args,
