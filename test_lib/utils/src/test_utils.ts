@@ -1,4 +1,4 @@
-import { assert, Buffer, std } from 'test/deps.ts'
+import { assert, assertEquals, Buffer, std } from 'test/deps.ts'
 import { LINE_FEED } from 'util/mod.ts'
 
 export async function writeTextFile(path: string, text: string): Promise<void> {
@@ -66,6 +66,15 @@ export function assertDirectoryNotExists(...paths: string[]): void {
   assert(
     !std.fs.existsSync(path, { isDirectory: true }),
     `Directory found: ${path}`,
+  )
+}
+
+export function assertFileContains(path: string, text: string): void {
+  assertFileExists(path)
+  assertEquals(
+    Deno.readTextFileSync(path),
+    text,
+    'File content mismatch: ' + path,
   )
 }
 

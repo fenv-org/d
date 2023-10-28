@@ -24,7 +24,7 @@ export type RunOptions =
 export function runCommand() {
   const command = new cliffy.command.Command()
     .description('Run any arbitrary command in all packages.')
-    .usage('[OPTIONS] -- <command> [args...]')
+    .usage('[OPTIONS] -- \'<command>\'')
   return Chain.of(command)
     .map(addEarlyExitOptions)
     .map(addPackageFilterOptions)

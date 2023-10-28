@@ -20,7 +20,12 @@ export async function runRunCommand(
     .lineFeed()
 
   if (literal.length === 0) {
-    throw new DError('No command specified. `d run` requires a command to run.')
+    throw new DError('No command specified: `d run` requires a command to run.')
+  } else if (literal.length > 1) {
+    throw new DError(
+      'Two many commands specified: ' +
+        '`d run` only supports one command at a time.',
+    )
   }
 
   const workspace = await Workspace.fromContext(context, {
