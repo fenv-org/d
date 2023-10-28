@@ -57,9 +57,6 @@ function runCommand(
     case 'clean':
       return runCleanCommand(context, flags)
 
-    case 'completions':
-      return
-
     case 'pub':
       return runPubCommand(context, flags)
 
@@ -73,11 +70,6 @@ function runCommand(
       return runTestCommand(context, flags)
 
     case 'run':
-      console.log('run')
-      console.log('  options', flags.options)
-      console.log('  args', flags.args)
-      console.log('  rawArgs', flags.rawArgs)
-      console.log('  literal', flags.literal)
       return runRunCommand(context, flags)
 
     default:

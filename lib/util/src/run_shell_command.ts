@@ -30,52 +30,71 @@ export async function runShellCommand(
         : std.path.join(options.dartProject.path, options.cwd)
       : options.dartProject.path
     : options.cwd
-  let denoCommand: Deno.Command
-  if (Deno.build.os === 'windows') {
-    denoCommand = new Deno.Command(command, {
+  const tempScriptFile = await makeTempScriptFile(options)
+  try {
+    await writeScriptFile(tempScriptFile, { ...options, command, cwd })
+
+    const denoCommand = new Deno.Command('bash', {
       ...options,
+      args: [tempScriptFile],
       stdout: logger ? 'piped' : undefined,
       stderr: logger ? 'piped' : undefined,
-      cwd,
-    })
-  } else {
-    setReservedEnvironmentVariables(
-      options.workspacePath,
-      options.dartProject,
-    )
-    // Runs the given command with `bash -c` instead of running it directly.
-    // This is a workaround of the problem that Deno resolves symlinks to
-    // real paths.
-    const cdCommand = cwd ? `cd ${escapeForShell(cwd)} && ` : ''
-    const totalCommand = cdCommand + escapeForShell([
-      resolveVariables(command),
-      ...options.args?.map(resolveVariables) ?? [],
-    ])
-    denoCommand = new Deno.Command('bash', {
-      ...options,
-      args: ['-c', totalCommand],
-      stdout: logger ? 'piped' : undefined,
-      stderr: logger ? 'piped' : undefined,
+      env: overrideEnvironmentVariables(options),
       cwd: undefined,
     })
-  }
 
-  const child = denoCommand.spawn()
-  if (logger && options.dartProject) {
-    await Promise.all([
-      outputStdout({
-        logger,
-        packageName: options.dartProject.name,
-        stdout: child.stdout,
-      }),
-      outputStderr({
-        logger,
-        packageName: options.dartProject.name,
-        stderr: child.stderr,
-      }),
-    ])
+    const child = denoCommand.spawn()
+    if (logger && options.dartProject) {
+      await Promise.all([
+        outputStdout({
+          logger,
+          packageName: options.dartProject.name,
+          stdout: child.stdout,
+        }),
+        outputStderr({
+          logger,
+          packageName: options.dartProject.name,
+          stderr: child.stderr,
+        }),
+      ])
+    }
+    return await child.status
+  } finally {
+    await Deno.remove(tempScriptFile)
   }
-  return await child.status
+}
+
+async function makeTempScriptFile(
+  { workspacePath }: { workspacePath: string },
+) {
+  const tempDir = std.path.resolve(workspacePath, '.d', 'temp')
+  await std.fs.ensureDir(tempDir)
+  return await Deno.makeTempFile({
+    dir: tempDir,
+    prefix: 'script_',
+    suffix: '.sh',
+  })
+}
+
+async function writeScriptFile(
+  filepath: string,
+  { command, args, cwd }: {
+    command: string
+    args?: string[]
+    cwd?: string
+  },
+) {
+  const escape = (s: string) => `'${s.replace(/'/g, '\'\\\'\'')}'`
+  await Deno.writeTextFile(
+    filepath,
+    [
+      '#!/usr/bin/env bash',
+      'set -e',
+      'set -o pipefail',
+      cwd ? `cd ${escapeForShell(cwd)}` : '',
+      [command, ...(args ?? []).map(escape)].join(' '),
+    ].join('\n'),
+  )
 }
 
 async function outputStdout(options: {
@@ -117,33 +136,19 @@ function escapeForShell(args: string[] | string): string {
  * - `$WORKSPACE_PATH`: The absolute path to the workspace root directory.
  * - `$PACKAGE_PATH`: The absolute path to the package root directory.
  * - `$PACKAGE_NAME`: The name of the package.
+ * - `$PWD`: The absolute path to the package root directory.
  */
-function setReservedEnvironmentVariables(
-  workspacePath: string,
-  project: DartProject,
-) {
-  Deno.env.set('WORKSPACE_PATH', workspacePath)
-  Deno.env.set('PACKAGE_PATH', project.path)
-  Deno.env.set('PACKAGE_NAME', project.name)
-}
-
-function resolveVariables(arg: string): string {
-  // The pattern that extracts the name of variable starting with `$`.
-  // For example:
-  // - `$WORKSPACE_PATH` -> `WORKSPACE_PATH`
-  // - `${PACKAGE_PATH}` -> `PACKAGE_PATH`
-  // - `${PACKAGE_PATH}_WORD` -> `PACKAGE_PATH`
-  const variableRegex = /\$({?)(?<variable>[A-Za-z_][A-Za-z0-9_]*)(}?)/g
-  const segments: string[] = []
-  let match: RegExpExecArray | null
-  let cursor = 0
-  while ((match = variableRegex.exec(arg)) !== null) {
-    segments.push(arg.slice(cursor, match.index))
-    const variable = match.groups?.variable!
-    const segment = Deno.env.get(variable) ?? match[0]
-    segments.push(segment)
-    cursor = variableRegex.lastIndex
+function overrideEnvironmentVariables({
+  workspacePath,
+  dartProject,
+}: {
+  workspacePath: string
+  dartProject: DartProject
+}): Record<string, string> {
+  return {
+    WORKSPACE_PATH: workspacePath,
+    PACKAGE_PATH: dartProject.path,
+    PACKAGE_NAME: dartProject.name,
+    PWD: dartProject.path,
   }
-  segments.push(arg.slice(cursor))
-  return segments.join('')
 }
