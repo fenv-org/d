@@ -90,7 +90,7 @@ export function extractPackageNamesInOrder(buffer: Buffer | string): string[] {
 }
 
 export async function copyTestSample(): Promise<string> {
-  const tempDir = await Deno.makeTempDir({ prefix: 'test-sample' })
+  const tempDir = Deno.makeTempDirSync({ prefix: 'test-sample' })
   await std.fs.copy('test-sample', tempDir, { overwrite: true })
   return tempDir
 }
