@@ -22,7 +22,7 @@ Deno.test('Run `d clean`', async (t) => {
     colorSupported: true,
   })
 
-  await t.step('Run `d clean`', async () => {
+  await t.step('execution', async () => {
     await dMain([
       'clean',
       '--config',
@@ -74,7 +74,7 @@ Deno.test('Run `d clean --flutter`', async (t) => {
     colorSupported: true,
   })
 
-  await t.step('Run `d clean --flutter`', async () => {
+  await t.step('execution', async () => {
     await dMain([
       'clean',
       '--config',

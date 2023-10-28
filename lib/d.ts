@@ -4,6 +4,7 @@ import {
   runCleanCommand,
   runGraphCommand,
   runPubCommand,
+  runRunCommand,
   runTestCommand,
   runUpdateCommand,
 } from 'command/mod.ts'
@@ -56,9 +57,6 @@ function runCommand(
     case 'clean':
       return runCleanCommand(context, flags)
 
-    case 'completions':
-      return
-
     case 'pub':
       return runPubCommand(context, flags)
 
@@ -70,6 +68,9 @@ function runCommand(
 
     case 'test':
       return runTestCommand(context, flags)
+
+    case 'run':
+      return runRunCommand(context, flags)
 
     default:
       return buildCommand().showHelp()

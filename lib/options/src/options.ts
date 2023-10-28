@@ -3,6 +3,7 @@ import {
   BuildRunnerOptions,
   CleanOptions,
   PubOptions,
+  RunOptions,
   TestOptions,
   UpdateOptions,
 } from 'command/mod.ts'
@@ -16,6 +17,7 @@ export type Flags =
     readonly cwd: string
     readonly args: string[]
     readonly rawArgs: string[]
+    readonly literal: string[]
   }
   & (
     | {
@@ -49,6 +51,10 @@ export type Flags =
     | {
       readonly name: 'test'
       readonly options: TestOptions & GlobalOptions
+    }
+    | {
+      readonly name: 'run'
+      readonly options: RunOptions & GlobalOptions
     }
   )
 
