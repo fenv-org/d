@@ -1,6 +1,6 @@
 {
   "imports": {
-    "https://deno.land/std/": "https://deno.land/std@0.204.0/",
+    "https://deno.land/std/": "https://deno.land/std@0.205.0/",
     "deps.ts": "./lib/deps/deps.ts",
     "cache/mod.ts": "./lib/cache/mod.ts",
     "command/mod.ts": "./lib/command/mod.ts",
