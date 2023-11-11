@@ -2,6 +2,7 @@ import {
   runBootstrapCommand,
   runBuildRunnerCommand,
   runCleanCommand,
+  runFuncCommand,
   runGraphCommand,
   runPubCommand,
   runRunCommand,
@@ -71,6 +72,9 @@ function runCommand(
 
     case 'run':
       return runRunCommand(context, flags)
+
+    case 'func':
+      return runFuncCommand(context, flags)
 
     default:
       return buildCommand().showHelp()

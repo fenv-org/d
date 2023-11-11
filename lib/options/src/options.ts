@@ -2,6 +2,7 @@ import {
   BootstrapOptions,
   BuildRunnerOptions,
   CleanOptions,
+  FuncOptions,
   PubOptions,
   RunOptions,
   TestOptions,
@@ -33,10 +34,6 @@ export type Flags =
       readonly options: CleanOptions & GlobalOptions
     }
     | {
-      readonly name: 'completions'
-      readonly options: GlobalOptions
-    }
-    | {
       readonly name: 'pub'
       readonly options: PubOptions & GlobalOptions
     }
@@ -55,6 +52,10 @@ export type Flags =
     | {
       readonly name: 'run'
       readonly options: RunOptions & GlobalOptions
+    }
+    | {
+      readonly name: 'func'
+      readonly options: FuncOptions & GlobalOptions
     }
   )
 
