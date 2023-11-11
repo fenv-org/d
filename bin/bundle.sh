@@ -5,10 +5,12 @@
 
 set -eox pipefail
 
+std_prefix=$(cat importMap.json | jq '.imports["https://deno.land/std/"]' -r)
+
 echo "
 import { bundle } from 'https://deno.land/x/emit@0.29.0/mod.ts'
-import * as fs from 'https://deno.land/std@0.203.0/fs/mod.ts'
-import * as path from 'https://deno.land/std@0.203.0/path/mod.ts'
+import * as fs from '${std_prefix}fs/mod.ts'
+import * as path from '${std_prefix}path/mod.ts'
 
 const _path = '$1'.startsWith('http')
   ? '$1'
