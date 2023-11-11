@@ -9,3 +9,20 @@ packages:
     - app/packages/**
   exclude:
     - "*example*"
+
+functions:
+  echo/{abcd}/{efgh}:
+    description: flutter pub get
+    exec: |
+      set -x
+      echo "abcd=$abcd"
+      echo "efgh=$efgh"
+      echo "package_name=$PACKAGE_NAME"
+    options:
+      earlyExit: true
+      includeHasFile:
+        - pubspec.yaml
+      excludeHasFile:
+        - pubspec_overrides.yaml
+      includeDependency:
+        - flutter
