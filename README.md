@@ -39,10 +39,12 @@ This project is under developing actively.
       - [Usage examples](#usage-examples-1)
     - [`build_runner`](#build_runner)
       - [Usage examples](#usage-examples-2)
-    - [`test`](#test)
+    - [`run`](#run)
       - [Usage examples](#usage-examples-3)
-    - [`graph`](#graph)
+    - [`test`](#test)
       - [Usage examples](#usage-examples-4)
+    - [`graph`](#graph)
+      - [Usage examples](#usage-examples-5)
     - [`clean`](#clean)
     - [`update`](#update)
   - [Common filters](#common-filters)
@@ -322,6 +324,38 @@ command in every bootstrapped package where has a dev dependency on the
   # or shortly
   $ d br c
   ```
+
+### `run`
+
+`run` is a command to run any arbitrary command in every bootstrapped package.
+`run` supports [package filters](#package-filters) and
+[dependency filters](#dependency-filters).
+
+#### Usage examples
+
+```shell
+$ d run -- 'pwd'
+```
+
+```shell
+$ d run --no-early-exit \
+    --id "ios" \
+    --if "ios/Podfile" \
+    -- \
+    'cd ios
+    pod install || pod install --repo-update'
+```
+
+```shell
+$ d run \
+    -- \
+    '
+    set -x
+    echo $WORKSPACE_PATH
+    echo $PACKAGE_PATH
+    echo $PACKAGE_NAME
+    '
+```
 
 ### `test`
 

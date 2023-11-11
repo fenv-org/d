@@ -43,13 +43,16 @@ export async function runRunCommand(
   logDependencyFilters(logger, options)
 
   const command = literal[0]
-  const args = literal.slice(1)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .join('; ')
 
   try {
     await Traversal.parallelTraverseInOrdered(workspace, {
       context,
       command,
-      args,
+      args: [],
       earlyExit: options.earlyExit,
     })
   } catch (error) {
