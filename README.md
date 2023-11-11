@@ -47,7 +47,8 @@ This project is under developing actively.
       - [Usage examples](#usage-examples-5)
     - [`clean`](#clean)
     - [`update`](#update)
-  - [Common filters](#common-filters)
+  - [Common options](#common-options)
+    - [Early exit](#early-exit)
     - [Package filters](#package-filters)
     - [Dependency filters](#dependency-filters)
   - [Pre-defined environment variables](#pre-defined-environment-variables)
@@ -420,61 +421,67 @@ $ d update vX.Y.Z
 $ d update [--show-list | -l]
 ```
 
-## Common filters
+## Common options
+
+### Early exit
+
+- `[--early-exit]`:
+  - Exit as soon as possible when any failure happens on any package.
+  - By default, enabled.
+- `[--no-early-exit]`:
+  - Unlikely `--early-exit`, execute the given command in all packages even
+    though runs into any kind of failure in a package.
 
 ### Package filters
 
-- `--include-has-file <fileOrGlob>`:
-  - `--if` is an alias.
+- `[--include-has-file|--if] <fileOrGlob>`:
   - Includes only packages where have any file that specifies the given pattern.
     The pattern can be a relative file path from the package root directory or a
     relative glob pattern from the package root directory.
   - Can be repeated.
-- `--exclude-has-file <fileOrGlob>`:
-  - `--ef` is an alias.
+  - Prioritize `--exclude-has-file` option.
+- `[--exclude-has-file|--ef] <fileOrGlob>`:
   - Excludes packages where have any file that specifies the given pattern. The
     pattern can be a relative file path from the package root directory or a
     relative glob pattern from the package root directory.
   - Can be repeated.
-  - Prioritize `--include-has-file` option.
-- `--include-has-dir <dirOrGlob>`:
+- `[--include-has-dir|--id] <dirOrGlob>`:
   - `--id` is an alias.
   - Includes only packages where have any directory that specifies the given
     pattern. The pattern can be a relative directory path from the package root
     directory or a relative glob pattern from the package root directory.
   - Can be repeated.
-- `--exclude-has-dir <dirOrGlob>`:
-  - `--ed` is an alias.
+  - Prioritize `--exclude-has-dir` option.
+- `[--exclude-has-dir|--ed] <dirOrGlob>`:
   - Excludes packages where have any directory that specifies the given pattern.
     The pattern can be a relative directory path from the package root directory
     or a relative glob pattern from the package root directory.
   - Can be repeated.
-  - Prioritize `--include-has-dir` option.
 
 ### Dependency filters
 
 - `--include-dependency`:
   - Includes only packages where have a dependency on the given package.
   - Can be repeated.
+  - Prioritize `--exclude-dependency` option.
 - `--exclude-dependency`:
   - Excludes packages where have a dependency on the given package.
   - Can be repeated.
-  - Prioritize `--include-dependency` option.
 - `--include-direct-dependency`:
   - Includes only packages where have a "direct" dependency on the given
     package.
   - Can be repeated.
+  - Prioritize `--exclude-direct-dependency` option.
 - `--exclude-direct-dependency`:
   - Excludes packages where have a "direct" dependency on the given package.
   - Can be repeated.
-  - Prioritize `--include-direct-dependency` option.
 - `--include-dev-dependency`:
   - Includes only packages where have a "dev" dependency on the given package.
   - Can be repeated.
+  - Prioritize `--exclude-dev-dependency` option.
 - `--exclude-dev-dependency`:
   - Excludes packages where have a "dev" dependency on the given package.
   - Can be repeated.
-  - Prioritize `--include-dev-dependency` option.
 
 ## Pre-defined environment variables
 
