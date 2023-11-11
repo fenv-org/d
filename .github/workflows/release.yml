@@ -67,12 +67,12 @@ jobs:
         run: deno task testAll
 
       - name: Bundle `main.ts`
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'macos-latest' }}
         run: deno task build
 
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'macos-latest' }}
         with:
           files: |
             build/main.js
