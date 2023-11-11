@@ -74,7 +74,7 @@ jobs:
 
       - name: Deno fmt
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: deno fmt --ignore='test-sample/**'
+        run: deno task formatAll
 
       - name: Commit changes
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -84,11 +84,11 @@ jobs:
 
       - name: Deno lint
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: deno lint lib/**/*.ts driver/*.ts
+        run: deno task lintAll
 
       - name: Deno check
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: deno check lib/**/*.ts driver/*.ts
+        run: deno task checkAll
 
       - name: Set up Flutter
         uses: flutter-actions/setup-flutter@v2
@@ -108,16 +108,11 @@ jobs:
           commit_message: "Bump up: `flutter`"
 
       - name: Run tests
-        run: deno test --allow-all --coverage=cov_profile --parallel
+        run: deno task testAllWithCoverage
 
       - name: Make coverage report
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          deno coverage \
-            --lcov \
-            --output=cov_profile.lcov \
-            --exclude='test_lib\/.*' \
-            cov_profile
+        run: deno task coverageReport
 
       - name: "Upload coverage report"
         if: ${{ matrix.os == 'ubuntu-latest' }}
