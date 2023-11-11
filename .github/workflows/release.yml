@@ -64,14 +64,11 @@ jobs:
           cache-key: flutter
 
       - name: Run tests
-        run: deno test --allow-all --parallel
+        run: deno task testAll
 
       - name: Bundle `main.ts`
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          bin/bundle.sh \
-            driver/main.ts \
-            build/main.js
+        run: deno task build
 
       - name: Release
         uses: softprops/action-gh-release@v1

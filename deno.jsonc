@@ -8,5 +8,14 @@
     "include": ["lib/**/*_test.ts", "lib/**/*.test.ts"]
   },
   "lock": false,
-  "importMap": "importMap.json"
+  "importMap": "importMap.json",
+  "tasks": {
+    "testAll": "deno test --allow-all --parallel",
+    "testAllWithCoverage": "deno test --allow-all --parallel  --coverage=cov_profile",
+    "coverageReport": "deno coverage --lcov --output=cov_profile.lcov --exclude='test_lib/.*' cov_profile",
+    "formatAll": "deno fmt --ignore='test-sample/**'",
+    "lintAll": "deno lint lib/**/*.ts driver/*.ts",
+    "checkAll": "deno check lib/**/*.ts driver/*.ts",
+    "build": "bin/bundle.sh driver/main.ts build/main.js"
+  }
 }
