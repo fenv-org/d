@@ -8,6 +8,7 @@ export * from './src/clean/clean_command_runner.ts'
 export {
   type DependencyFilterOptions,
 } from './src/common/dependency_filter_options.ts'
+export { type EarlyExitOptions } from './src/common/early_exit_options.ts'
 export {
   type PackageFilterOptions,
 } from './src/common/package_filter_options.ts'

@@ -5,7 +5,8 @@ import { FuncOptions } from './func_command.ts'
 
 export async function runFuncCommand(
   context: Context,
-  { options, literal }: {
+  { args, options, literal }: {
+    args: string[]
     options: FuncOptions & GlobalOptions
     literal: string[]
   },
@@ -21,6 +22,9 @@ export async function runFuncCommand(
     ...options,
   })
 
+  console.log('args=', args)
   console.log('options=', options)
   console.log('literal=', literal)
+
+  console.log(await workspace.findFunction(args[0]))
 }
