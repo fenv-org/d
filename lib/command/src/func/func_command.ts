@@ -19,6 +19,7 @@ export type FuncOptions =
 export function funcCommand() {
   const command = new cliffy.command.Command()
     .description('Execute the pre-defined function')
+    .alias('f')
     .arguments('<function:string>')
     .usage('[OPTIONS] <function> -- [args...]')
   return Chain.of(command)
