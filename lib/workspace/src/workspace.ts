@@ -73,10 +73,10 @@ export class Workspace {
         functionSpec.options ?? {},
       )
       return {
-        workspace: {
-          ...this,
-          dartProjects: filteredDartProjects,
-        },
+        workspace: new Workspace(
+          this.workspaceFilepath,
+          filteredDartProjects,
+        ),
         function: {
           ...functionSpec,
           functionName: definedFuncName,
@@ -280,5 +280,5 @@ function functionNameToRegexp(functionName: string): RegExp {
     }
   }
   pattern += functionName.substring(cursor)
-  return new RegExp(pattern)
+  return new RegExp(`^${pattern}$`)
 }
