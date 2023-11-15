@@ -11,8 +11,8 @@ packages:
     - "*example*"
 
 functions:
-  echo/{abcd}/{efgh}:
-    description: flutter pub get
+  echo:{abcd}:{efgh}:
+    description: echo strings
     exec: |
       set -x
       echo "abcd=$abcd"
@@ -26,3 +26,17 @@ functions:
         - pubspec_overrides.yaml
       includeDependency:
         - flutter
+
+  br:
+    description: build_runner
+    exec: dart run build_runner build -d
+    options:
+      earlyExit: true
+      includeDevDependency:
+        - build_runner
+
+  get:
+    description: flutter pub get
+    exec: flutter pub get
+    options:
+      earlyExit: true
