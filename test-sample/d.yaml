@@ -14,12 +14,12 @@ functions:
   echo:{abcd}:{efgh}:
     description: echo strings
     exec: |
-      set -x
       echo "abcd=$abcd"
       echo "efgh=$efgh"
+      echo '$1='$1
+      echo '$2='$2
       echo "package_name=$PACKAGE_NAME"
     options:
-      earlyExit: true
       includeHasFile:
         - pubspec.yaml
       excludeHasFile:
@@ -27,16 +27,37 @@ functions:
       includeDependency:
         - flutter
 
+  echo2:{abcd}:{efgh}:
+    description: echo strings
+    exec: |
+      set -u
+      echo "abcd=$abcd"
+      echo "efgh=$efgh"
+      echo '$1='$1
+      echo '$2='$2
+      echo "package_name=$PACKAGE_NAME"
+    options:
+      earlyExit: false
+
+  echo3:{abcd}:{efgh}:
+    description: echo strings
+    exec: |
+      set -u
+      echo "abcd=$abcd"
+      echo "efgh=$efgh"
+      echo '$1='$1
+      echo '$2='$2
+      echo "package_name=$PACKAGE_NAME"
+    options:
+      earlyExit: true
+
   br:
     description: build_runner
     exec: dart run build_runner build -d
     options:
-      earlyExit: true
       includeDevDependency:
         - build_runner
 
   get:
     description: flutter pub get
     exec: flutter pub get
-    options:
-      earlyExit: true
