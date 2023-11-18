@@ -1,39 +1,28 @@
 import {
   assertFileContains,
   assertFileNotExists,
-  copyTestSample,
+  runDMain,
   std,
+  testBootstrap,
 } from 'test/deps.ts'
-import { dMain } from '../../../d.ts'
 
 Deno.test('Run `d run`: success', async (t) => {
   // setup: bootstrap
-  const testSampleDir = await copyTestSample()
-
-  await dMain(['bootstrap'], {
-    cwd: testSampleDir,
-    stdout: Deno.stdout,
-    stderr: Deno.stderr,
-    colorSupported: true,
-  })
+  const testSampleDir = await testBootstrap()
 
   await t.step('execution', async () => {
-    await dMain([
+    await runDMain(
+      testSampleDir,
       'run',
       '--include-dev-dependency',
       'build_runner',
       '--',
       '( echo "PWD=$PWD" && ' +
-      'echo "WORKSPACE_PATH=$WORKSPACE_PATH" && ' +
-      'echo "PACKAGE_NAME=$PACKAGE_NAME" && ' +
-      'echo "PACKAGE_PATH=$PACKAGE_PATH" && ' +
-      'pwd ) > sample_output.txt',
-    ], {
-      cwd: testSampleDir,
-      stdout: Deno.stdout,
-      stderr: Deno.stderr,
-      colorSupported: true,
-    })
+        'echo "WORKSPACE_PATH=$WORKSPACE_PATH" && ' +
+        'echo "PACKAGE_NAME=$PACKAGE_NAME" && ' +
+        'echo "PACKAGE_PATH=$PACKAGE_PATH" && ' +
+        'pwd ) > sample_output.txt',
+    )
 
     // verification
     assertFileContains(

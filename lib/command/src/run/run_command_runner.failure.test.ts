@@ -1,28 +1,12 @@
-import { assertEquals, copyTestSample, fail } from 'test/deps.ts'
-import { dMain } from '../../../d.ts'
+import { assertEquals, fail, runDMain, testBootstrap } from 'test/deps.ts'
 
 Deno.test('Run `d run`: unsuccessful', async (t) => {
   // setup: bootstrap
-  const testSampleDir = await copyTestSample()
-
-  await dMain(['bootstrap'], {
-    cwd: testSampleDir,
-    stdout: Deno.stdout,
-    stderr: Deno.stderr,
-    colorSupported: true,
-  })
+  const testSampleDir = await testBootstrap()
 
   await t.step('no command specified', async () => {
     try {
-      await dMain([
-        'run',
-        '--',
-      ], {
-        cwd: testSampleDir,
-        stdout: Deno.stdout,
-        stderr: Deno.stderr,
-        colorSupported: true,
-      })
+      await runDMain(testSampleDir, 'run', '--')
       fail('Expected to throw an error')
     } catch (error) {
       assertEquals(
@@ -34,17 +18,7 @@ Deno.test('Run `d run`: unsuccessful', async (t) => {
 
   await t.step('too many commands specified', async () => {
     try {
-      await dMain([
-        'run',
-        '--',
-        'hello',
-        'world',
-      ], {
-        cwd: testSampleDir,
-        stdout: Deno.stdout,
-        stderr: Deno.stderr,
-        colorSupported: true,
-      })
+      await runDMain(testSampleDir, 'run', '--', 'hello', 'world')
       fail('Expected to throw an error')
     } catch (error) {
       assertEquals(

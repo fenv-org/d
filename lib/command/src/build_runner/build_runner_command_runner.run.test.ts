@@ -1,27 +1,18 @@
 import { std } from 'deps.ts'
 import {
   assertEquals,
-  Buffer,
-  copyTestSample,
   extractPackageNamesInOrder,
+  runDMain,
+  testBootstrap,
 } from 'test/deps.ts'
-import { dMain } from '../../../d.ts'
 
 Deno.test('Run `d br run`', async (t) => {
   // setup: bootstrap
-  const testSampleDir = await copyTestSample()
-
-  await dMain(['bootstrap'], {
-    cwd: testSampleDir,
-    stdout: Deno.stdout,
-    stderr: Deno.stderr,
-    colorSupported: true,
-  })
+  const testSampleDir = await testBootstrap()
 
   await t.step('execution', async () => {
-    const stdout = new Buffer()
-    const stderr = new Buffer()
-    await dMain([
+    const { stdout } = await runDMain(
+      testSampleDir,
       'br',
       'r',
       '--delete-conflicting-outputs',
@@ -29,12 +20,7 @@ Deno.test('Run `d br run`', async (t) => {
       '--',
       '$PACKAGE_NAME',
       std.path.join('$PACKAGE_PATH', 'sample_output.txt'),
-    ], {
-      cwd: testSampleDir,
-      stdout: stdout,
-      stderr: stderr,
-      colorSupported: false,
-    })
+    )
     assertEquals(
       Deno.readTextFileSync(
         std.path.join(testSampleDir, 'app/sample_output.txt'),

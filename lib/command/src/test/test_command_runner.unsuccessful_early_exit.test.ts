@@ -1,22 +1,15 @@
 import {
   assertEquals,
   Buffer,
-  copyTestSample,
   extractPackageNamesInOrder,
   fail,
+  testBootstrap,
 } from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
 Deno.test('d test: unsuccessful execution with early exit', async (t) => {
   // setup: bootstrap
-  const testSampleDir = await copyTestSample()
-
-  await dMain(['bootstrap'], {
-    cwd: testSampleDir,
-    stdout: Deno.stdout,
-    stderr: Deno.stderr,
-    colorSupported: true,
-  })
+  const testSampleDir = await testBootstrap()
 
   await t.step('execution', async () => {
     const stdout = new Buffer()
