@@ -89,16 +89,16 @@ export function loadWorkspaceYaml(filepath: string): WorkspaceYamlSchema {
     }
   }
   if ('functions' in yaml && typeof yaml.functions === 'object') {
-    const functions = yaml.functions ?? {}
+    const functions = yaml.functions!
     for (const [functionName, functionSpec] of Object.entries(functions)) {
-      if (!('exec' in functionSpec)) {
-        throw new DError(
-          `\`functions.${functionName}\` does not have \`exec\` property.`,
-        )
-      }
       if (!/^[a-zA-Z0-9_/{}.:]+$/.test(functionName)) {
         throw new DError(
           `\`functions.${functionName}\` contains any disallowed characters: allowed characters are "a-zA-Z0-9_/{}.:"`,
+        )
+      }
+      if (!('exec' in functionSpec)) {
+        throw new DError(
+          `\`functions.${functionName}\` does not have \`exec\` property.`,
         )
       }
     }

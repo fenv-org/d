@@ -116,7 +116,7 @@ export async function testBootstrap(): Promise<string> {
   return testSampleDir
 }
 
-export async function runDMain(
+export function runDMain(
   testSampleDir: string,
   ...args: string[]
 ): Promise<{
@@ -125,14 +125,27 @@ export async function runDMain(
 }> {
   const stdout = new Buffer()
   const stderr = new Buffer()
-  await dMain(args, {
+  return runDMain2(testSampleDir, { args, stdout, stderr })
+}
+
+export async function runDMain2(
+  testSampleDir: string,
+  options: {
+    args: string[]
+    stdout?: Buffer
+    stderr?: Buffer
+  },
+): Promise<{
+  stdout: Buffer
+  stderr: Buffer
+}> {
+  const stdout = options.stdout ?? new Buffer()
+  const stderr = options.stderr ?? new Buffer()
+  await dMain(options.args, {
     cwd: testSampleDir,
     stdout,
     stderr,
     colorSupported: false,
   })
-  return {
-    stderr,
-    stdout,
-  }
+  return { stderr, stdout }
 }

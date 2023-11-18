@@ -7,7 +7,7 @@ import { ByteStreams } from './io.ts'
 export type ShellCommandOptions =
   & Omit<Deno.CommandOptions, 'cwd'>
   & {
-    logger?: Logger
+    logger: Logger
     workspacePath: string
     dartProject: DartProject
     cwd?: string
@@ -24,7 +24,7 @@ export async function runShellCommand(
   options: ShellCommandOptions,
 ): Promise<Deno.CommandStatus> {
   const logger = options.logger
-  const cwd = getRealCwd(options)
+  const cwd = options.dartProject.path
   const tempScriptFile = await makeTempScriptFile(options)
   try {
     await writeScriptFile(tempScriptFile, { ...options, command, cwd })
@@ -32,8 +32,8 @@ export async function runShellCommand(
     const denoCommand = new Deno.Command('bash', {
       ...options,
       args: [tempScriptFile],
-      stdout: logger ? 'piped' : undefined,
-      stderr: logger ? 'piped' : undefined,
+      stdout: 'piped',
+      stderr: 'piped',
       env: overrideEnvironmentVariables(options),
       cwd: undefined,
     })
@@ -154,23 +154,10 @@ export type RunFunctionOptions =
     args: string[]
   }
   & {
-    logger?: Logger
+    logger: Logger
     workspacePath: string
     dartProject: DartProject
   }
-
-function getRealCwd({ dartProject, cwd }: {
-  dartProject: DartProject
-  cwd?: string
-}) {
-  if (!cwd) {
-    return dartProject.path
-  }
-  if (std.path.isAbsolute(cwd)) {
-    return cwd
-  }
-  return std.path.join(dartProject.path, cwd)
-}
 
 /**
  * Runs a pre-defined script `options.exec`.
@@ -179,15 +166,15 @@ export async function runFunction(
   options: RunFunctionOptions,
 ): Promise<Deno.CommandStatus> {
   const logger = options.logger
-  const cwd = getRealCwd(options)
+  const cwd = options.dartProject.path
   const tempScriptFile = await makeTempScriptFile(options)
   try {
     await writeScriptFile(tempScriptFile, { command: options.exec, cwd })
 
     const denoCommand = new Deno.Command('bash', {
       args: [tempScriptFile, ...options.args],
-      stdout: logger ? 'piped' : undefined,
-      stderr: logger ? 'piped' : undefined,
+      stdout: 'piped',
+      stderr: 'piped',
       env: {
         ...overrideEnvironmentVariables(options),
         ...options.pathParams,
