@@ -2,7 +2,7 @@ import { Context } from 'context/mod.ts'
 import { DependencyGraph } from 'dart/mod.ts'
 import { std } from 'deps.ts'
 import { Logger, logLabels } from 'logger/mod.ts'
-import { runShellCommand } from 'util/mod.ts'
+import { runFunction, runShellCommand } from 'util/mod.ts'
 import { Workspace } from 'workspace/mod.ts'
 import { poll, prepare, TraversalState } from './traversal_util.ts'
 
@@ -60,6 +60,21 @@ export type TraversalOptions = {
 }
 
 /**
+ * A specification to run.
+ */
+export type ExecutionSpec =
+  | {
+    command: string
+    args: string[]
+  }
+  | {
+    functionName: string
+    exec: string
+    pathParams: Record<string, string>
+    args: string[]
+  }
+
+/**
  * A asynchronous worker that traverses a graph in the bottom-to-top order.
  */
 export class Traversal {
@@ -96,12 +111,15 @@ export class Traversal {
    * Traverse the given {@link workspace} serially and run `command` with
    * `args` on each package.
    */
-  static serialTraverseInOrdered(workspace: Workspace, options: {
-    context: Context
-    command: string
-    args: string[]
-    earlyExit?: boolean
-  }): Promise<void> {
+  static serialTraverseInOrdered(
+    workspace: Workspace,
+    options:
+      & {
+        context: Context
+        earlyExit?: boolean
+      }
+      & ExecutionSpec,
+  ): Promise<void> {
     return Traversal.parallelTraverseInOrdered(workspace, {
       ...options,
       concurrency: 1,
@@ -113,13 +131,16 @@ export class Traversal {
    * `args` on each package. The maximum parallelism is controlled by
    * `options.concurrency`, which defaults to 5.
    */
-  static async parallelTraverseInOrdered(workspace: Workspace, options: {
-    context: Context
-    command: string
-    args: string[]
-    earlyExit?: boolean
-    concurrency?: number
-  }): Promise<void> {
+  static async parallelTraverseInOrdered(
+    workspace: Workspace,
+    options:
+      & {
+        context: Context
+        earlyExit?: boolean
+        concurrency?: number
+      }
+      & ExecutionSpec,
+  ): Promise<void> {
     const dependencyGraph = DependencyGraph.fromDartProjects(
       workspace.dartProjects,
     )
@@ -265,17 +286,16 @@ export class Traversal {
   }
 }
 
-async function _onVisit(node: string, {
-  context: { logger },
-  workspace,
-  command,
-  args,
-}: {
-  context: { logger: Logger }
-  workspace: Workspace
-  command: string
-  args: string[]
-}): Promise<VisitResult> {
+async function _onVisit(
+  node: string,
+  options:
+    & {
+      context: { logger: Logger }
+      workspace: Workspace
+    }
+    & ExecutionSpec,
+): Promise<VisitResult> {
+  const { workspace, context: { logger } } = options
   const dartProject = workspace.dartProjects.find((project) =>
     project.name === node
   )!
@@ -298,18 +318,39 @@ async function _onVisit(node: string, {
     .push((s) => s.cyan.bold(`package directory: ${relativePackageDirectory}`))
     .lineFeed()
 
-  logger.stdout({ timestamp: true })
-    .indent(2)
-    .childArrow()
-    .command(`${command} ${args.join(' ')}`, { withDollarSign: true })
-    .lineFeed()
+  let output: Deno.CommandStatus
+  if ('functionName' in options) {
+    const { functionName, args } = options
+    const command = args.length > 0
+      ? `${functionName} -- ${args.join(' ')}`
+      : functionName
+    logger.stdout({ timestamp: true })
+      .indent(2)
+      .childArrow()
+      .command(command)
+      .lineFeed()
 
-  const output = await runShellCommand(command, {
-    args,
-    dartProject,
-    workspacePath: workspace.workspaceDir,
-    logger,
-  })
+    output = await runFunction({
+      ...options,
+      dartProject,
+      workspacePath: workspace.workspaceDir,
+      logger,
+    })
+  } else {
+    const { command, args } = options
+    logger.stdout({ timestamp: true })
+      .indent(2)
+      .childArrow()
+      .command(`${command} ${args.join(' ')}`, { withDollarSign: true })
+      .lineFeed()
+
+    output = await runShellCommand(command, {
+      args,
+      dartProject,
+      workspacePath: workspace.workspaceDir,
+      logger,
+    })
+  }
   if (!output.success) {
     logger.stderr()
       .label(logLabels.error)

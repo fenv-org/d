@@ -27,6 +27,7 @@ jobs:
 
     permissions:
       contents: write
+      checks: write
 
     steps:
       - name: Set up repository

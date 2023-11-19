@@ -1,9 +1,10 @@
 import {
   assertEquals,
-  Buffer,
   copyTestSample,
   extractPackageNamesInOrder,
   fail,
+  runDMain,
+  testBootstrap,
 } from 'test/deps.ts'
 import { dMain } from '../../../d.ts'
 
@@ -19,15 +20,8 @@ Deno.test('`d pub get` should fails if not bootstrapped', async (t) => {
   })
 
   await t.step('should fail', async () => {
-    const stdout = new Buffer()
-    const stderr = new Buffer()
     try {
-      await dMain(['pub', 'get'], {
-        cwd: testSampleDir,
-        stdout,
-        stderr,
-        colorSupported: false,
-      })
+      await runDMain(testSampleDir, 'pub', 'get')
       fail('should throw a DError')
     } catch (e) {
       assertEquals(e.message, 'Need to bootstrap the workspace')
@@ -40,23 +34,10 @@ Deno.test('`d pub get` should fails if not bootstrapped', async (t) => {
 
 Deno.test('`d pub get` should succeed if bootstrapped', async (t) => {
   // set-up: bootstrap
-  const testSampleDir = await copyTestSample()
-  await dMain(['bootstrap'], {
-    cwd: testSampleDir,
-    stdout: Deno.stdout,
-    stderr: Deno.stderr,
-    colorSupported: false,
-  })
+  const testSampleDir = await testBootstrap()
 
   await t.step('execution', async () => {
-    const stdout = new Buffer()
-    const stderr = new Buffer()
-    await dMain(['pub', 'get'], {
-      cwd: testSampleDir,
-      stdout,
-      stderr,
-      colorSupported: false,
-    })
+    const { stdout } = await runDMain(testSampleDir, 'pub', 'get')
 
     assertEquals(
       extractPackageNamesInOrder(stdout),
@@ -77,23 +58,16 @@ Deno.test('`d pub get` should succeed if bootstrapped', async (t) => {
 
 Deno.test('`d pub --include-has-dir get` should succeed if bootstrapped', async (t) => {
   // set-up: bootstrap
-  const testSampleDir = await copyTestSample()
-  await dMain(['bootstrap'], {
-    cwd: testSampleDir,
-    stdout: Deno.stdout,
-    stderr: Deno.stderr,
-    colorSupported: false,
-  })
+  const testSampleDir = await testBootstrap()
 
   await t.step('pub --include-has-dir get', async () => {
-    const stdout = new Buffer()
-    const stderr = new Buffer()
-    await dMain(['pub', '--id', 'ios', 'get'], {
-      cwd: testSampleDir,
-      stdout,
-      stderr,
-      colorSupported: false,
-    })
+    const { stdout } = await runDMain(
+      testSampleDir,
+      'pub',
+      '--id',
+      'ios',
+      'get',
+    )
 
     assertEquals(
       extractPackageNamesInOrder(stdout),

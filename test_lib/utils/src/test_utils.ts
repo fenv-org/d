@@ -1,5 +1,6 @@
 import { assert, assertEquals, Buffer, std } from 'test/deps.ts'
 import { LINE_FEED } from 'util/mod.ts'
+import { dMain } from '../../../lib/d.ts'
 
 export async function writeTextFile(path: string, text: string): Promise<void> {
   await std.fs.ensureDir(std.path.dirname(path))
@@ -102,4 +103,49 @@ export async function copyTestSample(): Promise<string> {
   const tempDir = Deno.makeTempDirSync({ prefix: 'test-sample' })
   await std.fs.copy('test-sample', tempDir, { overwrite: true })
   return tempDir
+}
+
+export async function testBootstrap(): Promise<string> {
+  const testSampleDir = await copyTestSample()
+  await dMain(['bootstrap'], {
+    cwd: testSampleDir,
+    stdout: new Buffer(),
+    stderr: new Buffer(),
+    colorSupported: false,
+  })
+  return testSampleDir
+}
+
+export function runDMain(
+  testSampleDir: string,
+  ...args: string[]
+): Promise<{
+  stdout: Buffer
+  stderr: Buffer
+}> {
+  const stdout = new Buffer()
+  const stderr = new Buffer()
+  return runDMain2(testSampleDir, { args, stdout, stderr })
+}
+
+export async function runDMain2(
+  testSampleDir: string,
+  options: {
+    args: string[]
+    stdout?: Buffer
+    stderr?: Buffer
+  },
+): Promise<{
+  stdout: Buffer
+  stderr: Buffer
+}> {
+  const stdout = options.stdout ?? new Buffer()
+  const stderr = options.stderr ?? new Buffer()
+  await dMain(options.args, {
+    cwd: testSampleDir,
+    stdout,
+    stderr,
+    colorSupported: false,
+  })
+  return { stderr, stdout }
 }

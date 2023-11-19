@@ -1,9 +1,166 @@
 import { Context } from 'context/mod.ts'
 import { std } from 'deps.ts'
-import { assert, assertEquals, fail, touch, writeYamlFile } from 'test/deps.ts'
+import {
+  assert,
+  assertEquals,
+  assertIsError,
+  fail,
+  touch,
+  writeYamlFile,
+} from 'test/deps.ts'
 import { Workspace } from './workspace.ts'
 
 const { join } = std.path
+
+Deno.test('No `exec` in function specification', async (t) => {
+  // setup
+  const root = await Deno.makeTempDir({ prefix: 'test-' })
+  await writeYamlFile(
+    join(root, 'd.yaml'),
+    {
+      version: 'v0',
+      name: 'test_app',
+      packages: {
+        include: [
+          'app',
+        ],
+      },
+      functions: {
+        'my_function': {},
+      },
+    },
+  )
+  await writeYamlFile(
+    join(root, 'app/pubspec.yaml'),
+    { name: 'test_app' },
+  )
+
+  await t.step('execute', async () => {
+    const context = Context.fromFlags({
+      cwd: root,
+      stdout: Deno.stdout,
+      stderr: Deno.stderr,
+      options: {
+        verbose: true,
+        debug: true,
+      },
+    })
+
+    try {
+      await Workspace.fromContext(context, {
+        useBootstrapCache: 'never',
+      })
+      fail('Cannot be reached here')
+    } catch (e) {
+      assertIsError(
+        e,
+        undefined,
+        undefined,
+        '`functions.my_function` does not have `exec` property.',
+      )
+    }
+  })
+})
+
+Deno.test('No specification in function specification', async (t) => {
+  // setup
+  const root = await Deno.makeTempDir({ prefix: 'test-' })
+  await writeYamlFile(
+    join(root, 'd.yaml'),
+    {
+      version: 'v0',
+      name: 'test_app',
+      packages: {
+        include: [
+          'app',
+        ],
+      },
+      functions: {
+        'my_function': null,
+      },
+    },
+  )
+  await writeYamlFile(
+    join(root, 'app/pubspec.yaml'),
+    { name: 'test_app' },
+  )
+
+  await t.step('execute', async () => {
+    const context = Context.fromFlags({
+      cwd: root,
+      stdout: Deno.stdout,
+      stderr: Deno.stderr,
+      options: {
+        verbose: true,
+        debug: true,
+      },
+    })
+
+    try {
+      await Workspace.fromContext(context, {
+        useBootstrapCache: 'never',
+      })
+      fail('Cannot be reached here')
+    } catch (e) {
+      assertIsError(
+        e,
+        undefined,
+        undefined,
+        '`functions.my_function` does not have `exec` property.',
+      )
+    }
+  })
+})
+
+Deno.test('Not allowed character in function name', async (t) => {
+  // setup
+  const root = await Deno.makeTempDir({ prefix: 'test-' })
+  await writeYamlFile(
+    join(root, 'd.yaml'),
+    {
+      version: 'v0',
+      name: 'test_app',
+      packages: {
+        include: [
+          'app',
+        ],
+      },
+      functions: {
+        'my-function': null,
+      },
+    },
+  )
+  await writeYamlFile(
+    join(root, 'app/pubspec.yaml'),
+    { name: 'test_app' },
+  )
+
+  await t.step('execute', async () => {
+    const context = Context.fromFlags({
+      cwd: root,
+      stdout: Deno.stdout,
+      stderr: Deno.stderr,
+      options: {
+        verbose: true,
+        debug: true,
+      },
+    })
+
+    try {
+      await Workspace.fromContext(context, {
+        useBootstrapCache: 'never',
+      })
+      fail('Cannot be reached here')
+    } catch (e) {
+      assertIsError(
+        e,
+        undefined,
+        undefined,
+        '`functions.my-function` contains any disallowed characters: allowed characters are "a-zA-Z0-9_/{}.:',
+      )
+    }
+  })
+})
 
 Deno.test('When there is no bootstrap cache', async (t) => {
   // setup

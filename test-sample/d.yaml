@@ -9,3 +9,53 @@ packages:
     - app/packages/**
   exclude:
     - "*example*"
+
+functions:
+  echo:{abcd}:{efgh}:
+    description: echo strings
+    exec: |
+      echo "abcd=$abcd"
+      echo "efgh=$efgh"
+      echo '$1='$1
+      echo '$2='$2
+      echo "package_name=$PACKAGE_NAME"
+    options:
+      includeHasFile:
+        - pubspec.yaml
+      excludeHasFile:
+        - pubspec_overrides.yaml
+      includeDependency:
+        - flutter
+
+  echo2:{abcd}:{efgh}:
+    description: echo strings
+    exec: |
+      set -u
+      echo "abcd=$abcd"
+      echo "efgh=$efgh"
+      echo '$1='$1
+      echo '$2='$2
+      echo "package_name=$PACKAGE_NAME"
+    options:
+      earlyExit: false
+
+  echo3:{abcd}:{efgh}:
+    description: echo strings
+    exec: |
+      set -u
+      echo "abcd=$abcd"
+      echo "efgh=$efgh"
+      echo '$1='$1
+      echo '$2='$2
+      echo "package_name=$PACKAGE_NAME"
+
+  br:
+    description: build_runner
+    exec: dart run build_runner build -d
+    options:
+      includeDevDependency:
+        - build_runner
+
+  get:
+    description: flutter pub get
+    exec: flutter pub get

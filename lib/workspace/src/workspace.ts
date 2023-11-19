@@ -8,7 +8,7 @@ import { Logger } from 'logger/mod.ts'
 import * as util from 'util/mod.ts'
 import { applyDependencyFilterOptions } from './apply_dependency_filter.ts'
 import { applyPackageFilterOptions } from './apply_package_filter.ts'
-import { loadWorkspaceYaml } from './workspace_yaml.ts'
+import { FunctionSpec, loadWorkspaceYaml } from './workspace_yaml.ts'
 
 const { exists, expandGlob } = std.fs
 const { join, dirname, globToRegExp, joinGlobs } = std.path
@@ -48,6 +48,46 @@ export class Workspace {
   }
 
   /**
+   * Finds a pre-defined function in `d.yaml` that matches the given
+   * {@link functionName}.
+   */
+  async findFunction(
+    functionName: string,
+  ): Promise<
+    {
+      workspace: Workspace
+      function: {
+        functionName: string
+        pathParams: Record<string, string>
+      } & FunctionSpec
+    } | undefined
+  > {
+    const functions = loadWorkspaceYaml(this.workspaceFilepath).functions
+    for (const [definedFuncName, functionSpec] of Object.entries(functions)) {
+      const match = functionName.match(functionNameToRegexp(definedFuncName))
+      if (!match) {
+        continue
+      }
+      const filteredDartProjects = await applyCommonFilters(
+        this.dartProjects,
+        functionSpec.options ?? {},
+      )
+      return {
+        workspace: new Workspace(
+          this.workspaceFilepath,
+          filteredDartProjects,
+        ),
+        function: {
+          ...functionSpec,
+          functionName: definedFuncName,
+          pathParams: { ...match.groups },
+        },
+      }
+    }
+    return undefined
+  }
+
+  /**
    * Constructs a new {@link Workspace} instance from the given {@link Context}.
    */
   static async fromContext(
@@ -62,13 +102,6 @@ export class Workspace {
       .push('Found workspace file: ')
       .push(workspaceFilepath)
       .lineFeed()
-
-    async function applyCommonFilters(
-      dartProjects: DartProject[],
-    ): Promise<DartProject[]> {
-      return await applyPackageFilterOptions(dartProjects, options)
-        .then((them) => applyDependencyFilterOptions(them, options))
-    }
 
     if (options.useBootstrapCache !== 'never') {
       const workspaceDir = std.path.dirname(workspaceFilepath)
@@ -89,7 +122,7 @@ export class Workspace {
           )
           return new Workspace(
             std.path.resolve(workspaceFilepath),
-            await applyCommonFilters(dartProjects),
+            await applyCommonFilters(dartProjects, options),
           )
         }
 
@@ -105,7 +138,7 @@ export class Workspace {
       .#dartProjectsFromWorkspaceYaml(logger, workspaceFilepath)
     return new Workspace(
       std.path.resolve(workspaceFilepath),
-      await applyCommonFilters(dartProjects),
+      await applyCommonFilters(dartProjects, options),
     )
   }
 
@@ -225,4 +258,27 @@ export class Workspace {
         .map(util.collectAsArray),
     )).flat()
   }
+}
+
+async function applyCommonFilters(
+  dartProjects: DartProject[],
+  options: PackageFilterOptions & DependencyFilterOptions,
+): Promise<DartProject[]> {
+  return await applyPackageFilterOptions(dartProjects, options)
+    .then((them) => applyDependencyFilterOptions(them, options))
+}
+
+function functionNameToRegexp(functionName: string): RegExp {
+  const variableRegexp = /{(?<variable>[a-zA-A_][[a-zA-A0-9_]+)}/g
+  let pattern = ''
+  let cursor = 0
+  for (const match of functionName.matchAll(variableRegexp)) {
+    if (match.index) {
+      pattern += functionName.substring(cursor, match.index)
+      pattern += `(?<${match.groups!['variable']}>.+)`
+      cursor = match.index + match[0].length
+    }
+  }
+  pattern += functionName.substring(cursor)
+  return new RegExp(`^${pattern}$`)
 }

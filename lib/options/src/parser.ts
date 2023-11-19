@@ -2,6 +2,7 @@ import {
   bootstrapCommand,
   buildRunnerCommand,
   cleanCommand,
+  funcCommand,
   graphCommand,
   pubCommand,
   runCommand,
@@ -50,6 +51,7 @@ export function buildCommand() {
     .command('bootstrap', bootstrapCommand())
     .command('build_runner', buildRunnerCommand())
     .command('clean', cleanCommand())
+    .command('func', funcCommand())
     .command('graph', graphCommand())
     .command('pub', pubCommand())
     .command('run', runCommand())
@@ -65,22 +67,6 @@ export async function parseArgs(
   args: string[],
 ): Promise<Flags> {
   const flags = await buildCommand().parse(args)
-
-  // Check whether `flags.cmd` is any of `BashCompletionsCommand`,
-  // `FishCompletionsCommand`, `ZshCompletionsCommand` or not.
-  if (
-    flags.cmd instanceof cliffy.command.BashCompletionsCommand ||
-    flags.cmd instanceof cliffy.command.FishCompletionsCommand ||
-    flags.cmd instanceof cliffy.command.ZshCompletionsCommand
-  ) {
-    return {
-      cwd,
-      name: 'completions',
-      args: [],
-      options: flags.options,
-    } as unknown as Flags
-  }
-
   const commandName = flags.cmd.getName()
   const rawArgs =
     (flags.cmd as unknown as { _parent: { rawArgs: string[] } } | undefined)

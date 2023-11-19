@@ -8,9 +8,12 @@ export * from './src/clean/clean_command_runner.ts'
 export {
   type DependencyFilterOptions,
 } from './src/common/dependency_filter_options.ts'
+export { type EarlyExitOptions } from './src/common/early_exit_options.ts'
 export {
   type PackageFilterOptions,
 } from './src/common/package_filter_options.ts'
+export * from './src/func/func_command.ts'
+export * from './src/func/func_command_runner.ts'
 export * from './src/graph/graph_command.ts'
 export * from './src/graph/graph_command_runner.ts'
 export * from './src/pub/pub_command.ts'

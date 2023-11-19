@@ -1,3 +1,8 @@
+import {
+  DependencyFilterOptions,
+  EarlyExitOptions,
+  PackageFilterOptions,
+} from 'command/mod.ts'
 import { std } from 'deps.ts'
 import { DError } from 'error/mod.ts'
 import { version } from 'version/mod.ts'
@@ -12,6 +17,17 @@ export interface WorkspaceYamlSchema {
     include: string | string[]
     exclude?: string | string[]
   }
+  functions: {
+    [functionName: string]: FunctionSpec
+  }
+}
+
+export type FunctionSpec = {
+  description?: string
+  exec: string
+  options?: Partial<
+    EarlyExitOptions & PackageFilterOptions & DependencyFilterOptions
+  >
 }
 
 /**
@@ -72,9 +88,27 @@ export function loadWorkspaceYaml(filepath: string): WorkspaceYamlSchema {
       )
     }
   }
+  if ('functions' in yaml && typeof yaml.functions === 'object') {
+    const functions = yaml.functions!
+    for (const [functionName, functionSpec] of Object.entries(functions)) {
+      if (!/^[a-zA-Z0-9_/{}.:]+$/.test(functionName)) {
+        throw new DError(
+          `\`functions.${functionName}\` contains any disallowed characters: allowed characters are "a-zA-Z0-9_/{}.:"`,
+        )
+      }
+      if (!('exec' in functionSpec)) {
+        throw new DError(
+          `\`functions.${functionName}\` does not have \`exec\` property.`,
+        )
+      }
+    }
+  }
   return {
     version: yaml.version,
     name: yaml.name,
     packages: yaml.packages as WorkspaceYamlSchema['packages'],
+    functions: yaml.functions
+      ? yaml.functions as WorkspaceYamlSchema['functions']
+      : {},
   }
 }

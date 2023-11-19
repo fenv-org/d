@@ -1,12 +1,13 @@
 import { DartProject } from 'dart/mod.ts'
 import { std } from 'deps.ts'
 import { Logger } from 'logger/mod.ts'
+import { FunctionSpec } from 'workspace/mod.ts'
 import { ByteStreams } from './io.ts'
 
 export type ShellCommandOptions =
   & Omit<Deno.CommandOptions, 'cwd'>
   & {
-    logger?: Logger
+    logger: Logger
     workspacePath: string
     dartProject: DartProject
     cwd?: string
@@ -23,13 +24,7 @@ export async function runShellCommand(
   options: ShellCommandOptions,
 ): Promise<Deno.CommandStatus> {
   const logger = options.logger
-  const cwd = options.dartProject
-    ? options.cwd
-      ? std.path.isAbsolute(options.cwd)
-        ? options.cwd
-        : std.path.join(options.dartProject.path, options.cwd)
-      : options.dartProject.path
-    : options.cwd
+  const cwd = options.dartProject.path
   const tempScriptFile = await makeTempScriptFile(options)
   try {
     await writeScriptFile(tempScriptFile, { ...options, command, cwd })
@@ -37,8 +32,8 @@ export async function runShellCommand(
     const denoCommand = new Deno.Command('bash', {
       ...options,
       args: [tempScriptFile],
-      stdout: logger ? 'piped' : undefined,
-      stderr: logger ? 'piped' : undefined,
+      stdout: 'piped',
+      stderr: 'piped',
       env: overrideEnvironmentVariables(options),
       cwd: undefined,
     })
@@ -149,5 +144,61 @@ function overrideEnvironmentVariables({
     PACKAGE_PATH: dartProject.path,
     PACKAGE_NAME: dartProject.name,
     PWD: dartProject.path,
+  }
+}
+
+export type RunFunctionOptions =
+  & FunctionSpec
+  & {
+    pathParams: Record<string, string>
+    args: string[]
+  }
+  & {
+    logger: Logger
+    workspacePath: string
+    dartProject: DartProject
+  }
+
+/**
+ * Runs a pre-defined script `options.exec`.
+ */
+export async function runFunction(
+  options: RunFunctionOptions,
+): Promise<Deno.CommandStatus> {
+  const logger = options.logger
+  const cwd = options.dartProject.path
+  const tempScriptFile = await makeTempScriptFile(options)
+  try {
+    await writeScriptFile(tempScriptFile, { command: options.exec, cwd })
+
+    const denoCommand = new Deno.Command('bash', {
+      args: [tempScriptFile, ...options.args],
+      stdout: 'piped',
+      stderr: 'piped',
+      env: {
+        ...overrideEnvironmentVariables(options),
+        ...options.pathParams,
+      },
+      cwd: undefined,
+    })
+
+    const child = denoCommand.spawn()
+    if (logger && options.dartProject) {
+      await Promise.all([
+        outputStdout({
+          logger,
+          packageName: options.dartProject.name,
+          stdout: child.stdout,
+        }),
+        outputStderr({
+          logger,
+          packageName: options.dartProject.name,
+          stderr: child.stderr,
+        }),
+      ])
+    }
+    return await child.status
+  } finally {
+    await Deno.remove(tempScriptFile)
   }
 }

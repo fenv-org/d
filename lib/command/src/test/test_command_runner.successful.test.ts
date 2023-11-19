@@ -1,31 +1,22 @@
 import {
   assertEquals,
-  Buffer,
-  copyTestSample,
   extractPackageNamesInOrder,
+  runDMain,
+  testBootstrap,
 } from 'test/deps.ts'
-import { dMain } from '../../../d.ts'
 
 Deno.test('d test: successful execution', async (t) => {
   // setup: bootstrap
-  const testSampleDir = await copyTestSample()
-
-  await dMain(['bootstrap'], {
-    cwd: testSampleDir,
-    stdout: Deno.stdout,
-    stderr: Deno.stderr,
-    colorSupported: true,
-  })
+  const testSampleDir = await testBootstrap()
 
   await t.step('execution', async () => {
-    const stdout = new Buffer()
-    const stderr = new Buffer()
-    await dMain(['test', '--no-early-exit', '--reporter', 'expanded'], {
-      cwd: testSampleDir,
-      stdout: stdout,
-      stderr: stderr,
-      colorSupported: false,
-    })
+    const { stdout } = await runDMain(
+      testSampleDir,
+      'test',
+      '--no-early-exit',
+      '--reporter',
+      'expanded',
+    )
     assertEquals(
       extractPackageNamesInOrder(stdout),
       [
