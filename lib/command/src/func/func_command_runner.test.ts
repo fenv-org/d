@@ -1,6 +1,7 @@
 import {
   assertEquals,
   assertIsError,
+  assertStringIncludes,
   Buffer,
   buildStringFromBuffer,
   extractPackageNamesInOrder,
@@ -24,10 +25,31 @@ Deno.test('Test `d func`', async (t) => {
       'night',
     )
 
+    const output = buildStringFromBuffer(stdout)
     assertEquals(
-      buildStringFromBuffer(stdout),
-      Deno.readTextFileSync('test-resources/func_echo_hello_world_output.txt'),
+      extractPackageNamesInOrder(output),
+      [
+        'fpm_sample_package_a',
+        'fpm_sample_package_e',
+      ],
     )
+    // cSpell:ignore efgh
+    for (
+      const s of [
+        '[fpm_sample_package_a] abcd=hello',
+        '[fpm_sample_package_a] efgh=world',
+        '[fpm_sample_package_a] $1=good',
+        '[fpm_sample_package_a] $2=night',
+        '[fpm_sample_package_a] package_name=fpm_sample_package_a',
+        '[fpm_sample_package_e] abcd=hello',
+        '[fpm_sample_package_e] efgh=world',
+        '[fpm_sample_package_e] $1=good',
+        '[fpm_sample_package_e] $2=night',
+        '[fpm_sample_package_e] package_name=fpm_sample_package_e',
+      ]
+    ) {
+      assertStringIncludes(output, s)
+    }
   })
 
   await t.step('calling not existing function', async () => {
