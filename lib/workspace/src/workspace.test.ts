@@ -18,7 +18,7 @@ Deno.test('No `exec` in function specification', async (t) => {
   await writeYamlFile(
     join(root, 'd.yaml'),
     {
-      version: 'v0',
+      version: 'v1',
       name: 'test_app',
       packages: {
         include: [
@@ -68,7 +68,7 @@ Deno.test('No specification in function specification', async (t) => {
   await writeYamlFile(
     join(root, 'd.yaml'),
     {
-      version: 'v0',
+      version: 'v1',
       name: 'test_app',
       packages: {
         include: [
@@ -118,7 +118,7 @@ Deno.test('Not allowed character in function name', async (t) => {
   await writeYamlFile(
     join(root, 'd.yaml'),
     {
-      version: 'v0',
+      version: 'v1',
       name: 'test_app',
       packages: {
         include: [
@@ -442,7 +442,7 @@ Deno.test('Fail to build `Workspace` because of incompatible version', async (t)
   await writeYamlFile(
     join(root, 'd.yaml'),
     {
-      version: 'v1',
+      version: 'v2',
       name: 'test_app',
       packages: {
         include: [
