@@ -1,1 +1,1 @@
-export const DENO_VERSION = '1.38.2'
+export const DENO_VERSION = '1.38.3'
