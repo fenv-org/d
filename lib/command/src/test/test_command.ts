@@ -1,14 +1,23 @@
-import { PackageFilterOptions } from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
 import { Chain } from 'util/mod.ts'
+import {
+  addConcurrencyOptions,
+  ConcurrencyOptions,
+} from '../common/concurrency_options.ts'
 import { addDependencyFilterOptions } from '../common/dependency_filter_options.ts'
 import {
   addEarlyExitOptions,
   EarlyExitOptions,
 } from '../common/early_exit_options.ts'
-import { addPackageFilterOptions } from '../common/package_filter_options.ts'
+import {
+  addPackageFilterOptions,
+  PackageFilterOptions,
+} from '../common/package_filter_options.ts'
 
-export type TestOptions = PackageFilterOptions & EarlyExitOptions
+export type TestOptions =
+  & PackageFilterOptions
+  & EarlyExitOptions
+  & ConcurrencyOptions
 
 /**
  * `test` subcommand.
@@ -23,6 +32,7 @@ export function testCommand() {
     .map(addEarlyExitOptions)
     .map(addPackageFilterOptions)
     .map(addDependencyFilterOptions)
+    .map(addConcurrencyOptions)
     .value
     .stopEarly()
     .option(

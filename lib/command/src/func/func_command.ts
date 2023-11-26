@@ -1,6 +1,10 @@
 import { cliffy } from 'deps.ts'
 import { Chain } from 'util/mod.ts'
 import {
+  addConcurrencyOptions,
+  ConcurrencyOptions,
+} from '../common/concurrency_options.ts'
+import {
   addDependencyFilterOptions,
   DependencyFilterOptions,
 } from '../common/dependency_filter_options.ts'
@@ -12,6 +16,7 @@ import {
 export type FuncOptions =
   & PackageFilterOptions
   & DependencyFilterOptions
+  & ConcurrencyOptions
 
 /**
  * `func` subcommand.
@@ -25,5 +30,6 @@ export function funcCommand() {
   return Chain.of(command)
     .map(addPackageFilterOptions)
     .map(addDependencyFilterOptions)
+    .map(addConcurrencyOptions)
     .value
 }

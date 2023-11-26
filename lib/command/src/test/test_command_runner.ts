@@ -51,6 +51,7 @@ export async function runTestCommand(
       command: 'flutter',
       args: ['test', ...flutterTestArgs],
       earlyExit: options.earlyExit,
+      concurrency: options.concurrency,
     })
   } catch (error) {
     throw new DError(`Failed to run \`test\` command with result: ${error}`)

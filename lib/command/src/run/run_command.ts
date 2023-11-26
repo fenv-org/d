@@ -1,6 +1,10 @@
 import { cliffy } from 'deps.ts'
 import { Chain } from 'util/mod.ts'
 import {
+  addConcurrencyOptions,
+  ConcurrencyOptions,
+} from '../common/concurrency_options.ts'
+import {
   addDependencyFilterOptions,
   DependencyFilterOptions,
 } from '../common/dependency_filter_options.ts'
@@ -17,6 +21,7 @@ export type RunOptions =
   & PackageFilterOptions
   & DependencyFilterOptions
   & EarlyExitOptions
+  & ConcurrencyOptions
 
 /**
  * `run` subcommand.
@@ -29,5 +34,6 @@ export function runCommand() {
     .map(addEarlyExitOptions)
     .map(addPackageFilterOptions)
     .map(addDependencyFilterOptions)
+    .map(addConcurrencyOptions)
     .value
 }
