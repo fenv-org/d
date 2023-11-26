@@ -32,6 +32,7 @@ This project is under developing actively.
     - [Make `d.yaml`](#make-dyaml)
     - [Specify dependencies in `pubspec.yaml`](#specify-dependencies-in-pubspecyaml)
     - [Run `d bootstrap`](#run-d-bootstrap)
+    - [How to define functions in `d.yaml`](#how-to-define-functions-in-dyaml)
   - [Commands](#commands)
     - [`bootstrap`](#bootstrap)
       - [Usage examples](#usage-examples)
@@ -41,6 +42,7 @@ This project is under developing actively.
       - [Usage examples](#usage-examples-2)
     - [`run`](#run)
       - [Usage examples](#usage-examples-3)
+    - [`func`](#func)
     - [`test`](#test)
       - [Usage examples](#usage-examples-4)
     - [`graph`](#graph)
@@ -49,6 +51,7 @@ This project is under developing actively.
     - [`update`](#update)
   - [Common options](#common-options)
     - [Early exit](#early-exit)
+    - [Concurrency](#concurrency)
     - [Package filters](#package-filters)
     - [Dependency filters](#dependency-filters)
   - [Pre-defined environment variables](#pre-defined-environment-variables)
@@ -256,6 +259,78 @@ Then, `d` will generate `.d` directory on the workspace root and
 `pubspec_overrides.yaml` files on some directories. Hence, we recommend to list
 up `.d/` and `pubspec_overrides.yaml` to `.gitignore` file.
 
+### How to define functions in `d.yaml`
+
+`d` supports to define functions in `d.yaml` and execute them with `d func`
+command.
+
+```yaml
+version: v0
+name: ...
+packages: ...
+
+functions:
+  <function_name>:
+    description: "Describe what this function is" # Optional
+    exec: "Write bash scripts here" # Mandatory
+    options: # Optional
+      earlyExit: true/false # Defaults to `true`.
+      concurrency: positive integer # Defaults to `5`.
+      # Package filters
+      includeHasFile: string array
+      excludeHasFile: string array
+      includeHasDir: string array
+      excludeHasDir: string array
+      # Dependency filters
+      includeDependency: string array
+      excludeDependency: string array
+      includeDirectDependency: string array
+      excludeDirectDependency: string array
+      includeDevDependency: string array
+      excludeDevDependency: string array
+```
+
+The function in `d` supports patterns and arguments as well.
+
+```yaml
+functions:
+  echo:{abcd}:{efgh}:
+    description: echo strings
+    exec: |
+      echo "abcd=$abcd"
+      echo "efgh=$efgh"
+      echo '$1='$1
+      echo '$2='$2
+      echo "package_name=$PACKAGE_NAME"
+    options:
+      includeHasFile:
+        - pubspec.yaml
+      excludeHasFile:
+        - pubspec_overrides.yaml
+      includeDependency:
+        - flutter
+```
+
+For example, assuming we have the above sample function, we can run
+`d func echo:hello:world -- good night`. In that case, `$abcd` and `$efgh` will
+be replaced with `hello` and `world` respectively. And, `$1` and `$2` will be
+replaced with `good` and `night` respectively.
+
+This feature will enable to write the following function:
+
+```yaml
+functions:
+  build:{platform}:{phase}:{flavor}:
+    exec: flutter build $platform --$phase --flavor=$flavor $@
+    options:
+      includeDependency:
+        - flutter
+```
+
+```shell
+$ d func build:ipa:release:store -- --no-codesign
+```
+
 ## Commands
 
 ### `bootstrap`
@@ -358,6 +433,16 @@ $ d run \
     '
 ```
 
+### `func`
+
+`func` is a command that run a pre-defined function in `d.yaml`. `func` supports
+[package filters](#package-filters) and
+[dependency filters](#dependency-filters).
+
+Refer to the
+[How to define functions in `d.yaml`](#how-to-define-functions-in-dyaml) section
+for more information.
+
 ### `test`
 
 `test` is a command to run `flutter test [args...]` command in every
@@ -431,6 +516,11 @@ $ d update [--show-list | -l]
 - `[--no-early-exit]`:
   - Unlikely `--early-exit`, execute the given command in all packages even
     though runs into any kind of failure in a package.
+
+### Concurrency
+
+- `[-c|--concurrency] <parallelism>`:
+  - Specifies the maximum parallelism. Defaults to _5_.
 
 ### Package filters
 

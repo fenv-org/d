@@ -39,6 +39,8 @@ export async function runFuncCommand(
         functionName: functionName,
         args: literal,
         earlyExit: findResult.function.options?.earlyExit,
+        concurrency: options.concurrency ??
+          findResult.function.options?.concurrency,
       },
     )
   } catch (error) {

@@ -54,6 +54,7 @@ export async function runRunCommand(
       command,
       args: [],
       earlyExit: options.earlyExit,
+      concurrency: options.concurrency,
     })
   } catch (error) {
     throw new DError(

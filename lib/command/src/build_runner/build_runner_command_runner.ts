@@ -60,6 +60,7 @@ export async function runBuildRunnerCommand(
       command: 'dart',
       args: ['run', 'build_runner', subcommand, ...subcommandArgs],
       earlyExit: options.earlyExit,
+      concurrency: options.concurrency,
     })
   } catch (error) {
     throw new DError(

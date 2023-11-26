@@ -1,4 +1,5 @@
 import {
+  ConcurrencyOptions,
   DependencyFilterOptions,
   EarlyExitOptions,
   PackageFilterOptions,
@@ -26,7 +27,10 @@ export type FunctionSpec = {
   description?: string
   exec: string
   options?: Partial<
-    EarlyExitOptions & PackageFilterOptions & DependencyFilterOptions
+    & EarlyExitOptions
+    & PackageFilterOptions
+    & DependencyFilterOptions
+    & ConcurrencyOptions
   >
 }
 

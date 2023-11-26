@@ -11,7 +11,11 @@ import {
 } from 'command/mod.ts'
 import { cliffy } from 'deps.ts'
 import { DENO_VERSION, VERSION_STRING } from 'version/mod.ts'
-import { DirOrGlobType, FileOrGlobType } from './cliffy_types.ts'
+import {
+  DirOrGlobType,
+  FileOrGlobType,
+  ParallelismType,
+} from './cliffy_types.ts'
 import { Flags, stripGlobalOptions } from './options.ts'
 
 const { command } = cliffy
@@ -27,6 +31,7 @@ export function buildCommand() {
     )
     .globalType('fileOrGlob', new FileOrGlobType())
     .globalType('dirOrGlob', new DirOrGlobType())
+    .globalType('parallelism', new ParallelismType())
     .globalEnv(
       'D_WORKSPACE=<workspace:file>',
       'The path to the `d.yaml` file or the directory containing it. ' +
