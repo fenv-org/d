@@ -171,7 +171,7 @@ the repository.
 If you place `d.yaml` under `app`, the `d.yaml` should look like:
 
 ```yaml
-version: v0
+version: v1
 
 name: "Workspace name here"
 
@@ -187,7 +187,7 @@ Or if you place `d.yaml` file under `workspace`, the `d.yaml` should look like,
 instead:
 
 ```yaml
-version: v0
+version: v1
 
 name: "Workspace name here"
 
@@ -265,7 +265,7 @@ up `.d/` and `pubspec_overrides.yaml` to `.gitignore` file.
 command.
 
 ```yaml
-version: v0
+version: v1
 name: ...
 packages: ...
 

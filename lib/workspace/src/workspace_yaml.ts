@@ -55,7 +55,7 @@ export function loadWorkspaceYaml(filepath: string): WorkspaceYamlSchema {
   const yamlVersion: number = parseInt(
     /^v(?<ver>\d+)$/.exec(yaml.version)!.groups!['ver'],
   )
-  if (yamlVersion !== version.major) {
+  if (yamlVersion > version.major) {
     throw new DError(
       `Not compatible version: ` +
         `\`v${yamlVersion}\` in the yaml file: ` +
