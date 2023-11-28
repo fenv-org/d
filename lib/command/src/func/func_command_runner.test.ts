@@ -65,7 +65,7 @@ Deno.test('Test `d func`', async (t) => {
     const stdout = new Buffer()
     try {
       await runDMain2(testSampleDir, {
-        args: ['func', 'echo2:hello:world'],
+        args: ['func', 'echo2:hello:world', '-c', '5'],
         stdout,
       })
       fail('Cannot be reached here')
