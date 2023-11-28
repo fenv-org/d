@@ -49,7 +49,6 @@ export function addConcurrencyOptions<
   return command.option(
     '-c, --concurrency <parallelism:parallelism>',
     'How many packages the command can be ran in at the same time by maximum. ' +
-      'One indicates the serial execution.',
-    { default: 5 },
+      'One indicates the serial execution. Default is 5.',
   )
 }

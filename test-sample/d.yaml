@@ -26,6 +26,7 @@ functions:
         - pubspec_overrides.yaml
       includeDependency:
         - flutter
+      concurrency: 1
 
   echo2:{abcd}:{efgh}:
     description: echo strings
@@ -38,6 +39,7 @@ functions:
       echo "package_name=$PACKAGE_NAME"
     options:
       earlyExit: false
+      concurrency: 1
 
   echo3:{abcd}:{efgh}:
     description: echo strings
